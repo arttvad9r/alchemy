@@ -4,10 +4,10 @@ object AlchemyCatalog {
     val baseElementIds: Set<String> = setOf("fire", "water", "earth", "air")
 
     val elements: List<ElementDefinition> = listOf(
-        element("fire", "Огонь", ElementGroup.NATURE),
-        element("water", "Вода", ElementGroup.NATURE),
-        element("earth", "Земля", ElementGroup.NATURE),
-        element("air", "Воздух", ElementGroup.NATURE),
+        element("fire", "Огонь", ElementGroup.NATURE, 0xFFE4572EL),
+        element("water", "Вода", ElementGroup.NATURE, 0xFF3185FBL),
+        element("earth", "Земля", ElementGroup.NATURE, 0xFF8A5A44L),
+        element("air", "Воздух", ElementGroup.NATURE, 0xFF6FA8D6L),
         element("steam", "Пар", ElementGroup.NATURE),
         element("lava", "Лава", ElementGroup.NATURE),
         element("energy", "Энергия", ElementGroup.NATURE),
@@ -147,5 +147,5 @@ object AlchemyCatalog {
             ) { "Recipes may only reference catalog elements" }
         }
 
-    private fun element(id: String, name: String, group: ElementGroup): ElementDefinition = ElementDefinition(id = id, name = name, group = group, color = group.color)
+    private fun element(id: String, name: String, group: ElementGroup, color: Long = group.color): ElementDefinition = ElementDefinition(id = id, name = name, group = group, color = color)
 }

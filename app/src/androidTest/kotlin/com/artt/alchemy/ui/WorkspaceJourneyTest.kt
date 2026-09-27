@@ -33,6 +33,16 @@ class WorkspaceJourneyTest {
     }
 
     @Test
+    fun dropping_a_palette_element_on_an_ingredient_combines_it_immediately() {
+        composeRule.onNodeWithTag("palette_fire").dragIntoWorkspace(0.5f)
+        composeRule.onNodeWithTag("palette_water").dragIntoWorkspace(0.5f)
+
+        composeRule
+            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Пар"))
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun tappingPaletteItemDoesNotAddItToWorkspace() {
         composeRule.onNodeWithTag("palette_fire").performTouchInput {
             val center = Offset(width / 2f, height / 2f)

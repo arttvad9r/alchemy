@@ -41,7 +41,13 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                 }
             ) { padding ->
                 when (state.selectedTab) {
-                    AppTab.HOME -> HomeScreen(state, viewModel::onWorkspaceEvent, Modifier.padding(padding))
+                    AppTab.HOME -> HomeScreen(
+                        state = state,
+                        onEvent = viewModel::onWorkspaceEvent,
+                        onDismissNewElement = viewModel::dismissNewElement,
+                        onFeedbackHandled = viewModel::consumeCombinationFeedback,
+                        modifier = Modifier.padding(padding)
+                    )
                     AppTab.ELEMENTS -> ElementsScreen(state.progress, Modifier.padding(padding))
                     AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
                     AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))

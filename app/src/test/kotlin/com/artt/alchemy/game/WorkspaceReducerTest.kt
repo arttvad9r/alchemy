@@ -40,11 +40,37 @@ class WorkspaceReducerTest {
             nextInstanceId = 4
         )
 
-        val result = reduce(state, WorkspaceEvent.ResolveOverlap(2, 0.4f, 0.5f), engine)
+        val result = reduce(state, WorkspaceEvent.ResolveOverlap(2, 0.35f, 0.35f), engine)
 
-        assertEquals(listOf(WorkspaceItem(3, "earth", 0.8f, 0.8f), WorkspaceItem(4, "steam", 0.4f, 0.5f)), result.workspace.items)
+        assertEquals(listOf(WorkspaceItem(3, "earth", 0.8f, 0.8f), WorkspaceItem(4, "steam", 0.35f, 0.35f)), result.workspace.items)
         assertEquals(5, result.workspace.nextInstanceId)
         assertEquals(Combination("fire", "water", "steam"), result.combination)
+        assertEquals(true, result.attemptedMix)
+    }
+
+    @Test
+    fun spawning_onto_an_ingredient_resolves_the_recipe_without_leaving_an_overlap() {
+        val state = WorkspaceState(items = listOf(WorkspaceItem(1, "fire", 0.5f, 0.5f)), nextInstanceId = 2)
+
+        val result = reduce(state, WorkspaceEvent.Spawn("water", 0.5f, 0.5f), engine)
+
+        assertEquals(listOf(WorkspaceItem(3, "steam", 0.5f, 0.5f)), result.workspace.items)
+        assertEquals(Combination("fire", "water", "steam"), result.combination)
+        assertEquals(true, result.attemptedMix)
+    }
+
+    @Test
+    fun nearby_but_non_overlapping_items_do_not_combine_or_count_as_an_attempt() {
+        val state = WorkspaceState(
+            items = listOf(WorkspaceItem(1, "fire", 0.3f, 0.3f), WorkspaceItem(2, "water", 0.45f, 0.3f)),
+            nextInstanceId = 3
+        )
+
+        val result = reduce(state, WorkspaceEvent.ResolveOverlap(2, 0.45f, 0.3f), engine)
+
+        assertEquals(state, result.workspace)
+        assertNull(result.combination)
+        assertEquals(false, result.attemptedMix)
     }
 
     @Test

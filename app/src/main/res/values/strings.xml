@@ -5,6 +5,7 @@
     <string name="clear_workspace">Очистить</string>
     <string name="workspace_hint">Перетащите элементы сюда</string>
     <string name="palette_title">Открытые элементы</string>
+    <string name="palette_hint">Зажмите элемент и перетащите его на поле</string>
     <string name="tab_home">Дом</string>
     <string name="tab_elements">Элементы</string>
     <string name="tab_recipes">Рецепты</string>
@@ -16,10 +17,24 @@
     <string name="tab_achievements_short">★</string>
     <string name="tab_settings_short">Н</string>
     <string name="locked_element">Не открыт</string>
+    <string name="element_search">Поиск открытых элементов</string>
+    <string name="recipe_filter">Фильтр по элементу</string>
+    <string name="group_all">Все</string>
+    <string name="group_nature">Природа</string>
+    <string name="group_material">Материалы</string>
+    <string name="group_life">Жизнь</string>
+    <string name="group_civilization">Цивилизация</string>
+    <string name="group_cosmos">Космос</string>
     <string name="no_known_recipes">Нет открытых рецептов</string>
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>
     <string name="achievement_experiments">Эксперименты</string>
+    <string name="achievement_nature">Исследователь природы</string>
+    <string name="achievement_material">Мастер материалов</string>
+    <string name="achievement_life">Знаток жизни</string>
+    <string name="achievement_civilization">Строитель цивилизации</string>
+    <string name="achievement_cosmos">Покоритель космоса</string>
+    <string name="achievement_completed">Получено</string>
     <string name="settings">Настройки</string>
     <string name="sound">Звук</string>
     <string name="vibration">Вибрация</string>
@@ -30,4 +45,7 @@
     <string name="reset_confirmation_message">Откроются только четыре базовых элемента. Это действие нельзя отменить.</string>
     <string name="reset_confirm">Сбросить</string>
     <string name="cancel">Отмена</string>
+    <string name="ok">Понятно</string>
+    <string name="new_element_title">Новый элемент</string>
+    <string name="new_element_message">Открыт элемент: %1$s</string>
 </resources>

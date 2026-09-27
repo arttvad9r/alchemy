@@ -1,7 +1,10 @@
 package com.artt.alchemy.ui.home
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,36 +44,30 @@ fun WorkspaceCanvas(
             .semantics { contentDescription = currentItems.joinToString { AlchemyCatalog.elementsById.getValue(it.elementId).name } }
             .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) }
             .pointerInput(Unit) {
-                var activeItemId: Long? = null
-                var lastPosition = Offset.Zero
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val item = currentItems
+                        .minByOrNull { candidate -> distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) }
+                        ?.takeIf { candidate ->
+                            distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
+                        }
+                        ?: return@awaitEachGesture
+                    var lastPosition = down.position
+                    val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
+                        change.consume()
+                        lastPosition = change.position
+                        currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                    } ?: return@awaitEachGesture
 
-                detectDragGestures(
-                    onDragStart = { position ->
-                        activeItemId = currentItems
-                            .minByOrNull { item -> distanceSquared(item, position, size.width.toFloat(), size.height.toFloat()) }
-                            ?.takeIf { item ->
-                                distanceSquared(item, position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
-                            }
-                            ?.instanceId
-                        lastPosition = position
-                    },
-                    onDrag = { change, _ ->
-                        activeItemId?.let { id ->
-                            change.consume()
-                            lastPosition = change.position
-                            currentOnMove(id, normalize(lastPosition, size.width, size.height))
-                        }
-                    },
-                    onDragEnd = {
-                        activeItemId?.let { id ->
-                            val position = normalize(lastPosition, size.width, size.height)
-                            currentOnMove(id, position)
-                            if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(id, position)
-                        }
-                        activeItemId = null
-                    },
-                    onDragCancel = { activeItemId = null }
-                )
+                    drag(dragStart.id) { change ->
+                        change.consume()
+                        lastPosition = change.position
+                        currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                    }
+                    val position = normalize(lastPosition, size.width, size.height)
+                    currentOnMove(item.instanceId, position)
+                    if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
+                }
             }
     ) {
         currentItems.forEach { item ->

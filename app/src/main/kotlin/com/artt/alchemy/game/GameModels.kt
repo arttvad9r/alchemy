@@ -43,7 +43,8 @@ data class Combination(
 
 data class WorkspaceResult(
     val workspace: WorkspaceState,
-    val combination: Combination? = null
+    val combination: Combination? = null,
+    val attemptedMix: Boolean = false
 )
 
 sealed interface WorkspaceEvent {

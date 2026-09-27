@@ -34,11 +34,11 @@ class NavigationTest {
     }
 
     @Test
-    fun basePaletteUsesTwoRows() {
+    fun basePaletteUsesOneCompactRow() {
         val fireBounds = composeRule.onNodeWithTag("palette_fire").fetchSemanticsNode().boundsInRoot
         val earthBounds = composeRule.onNodeWithTag("palette_earth").fetchSemanticsNode().boundsInRoot
 
-        assertTrue(earthBounds.top > fireBounds.top)
+        assertTrue(earthBounds.top == fireBounds.top)
     }
 
     @Test

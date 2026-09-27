@@ -1,13 +1,17 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.lazy.items as lazyRowItems
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,20 +25,50 @@ import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
+import com.artt.alchemy.game.ElementGroup
 
 @Composable
 fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
-    val entries = AlchemyCatalog.elements.filter {
-        query.isBlank() || (it.id in progress.unlockedIds && it.name.contains(query, ignoreCase = true))
+    var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
+    val entries = AlchemyCatalog.elements.filter { element ->
+        (selectedGroup == null || element.group == selectedGroup) &&
+            (query.isBlank() || (element.id in progress.unlockedIds && element.name.contains(query, ignoreCase = true)))
     }
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = modifier.fillMaxSize().testTag("screen_elements"),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp)
+        contentPadding = PaddingValues(12.dp)
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            BasicTextField(value = query, onValueChange = { query = it }, modifier = Modifier.testTag("elements_search"))
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                label = { Text(stringResource(R.string.element_search)) },
+                singleLine = true,
+                modifier = Modifier.testTag("elements_search")
+            )
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+                item {
+                    FilterChip(
+                        selected = selectedGroup == null,
+                        onClick = { selectedGroup = null },
+                        label = { Text(stringResource(R.string.group_all)) },
+                        modifier = Modifier.testTag("elements_group_all")
+                    )
+                }
+                lazyRowItems(ElementGroup.entries) { group ->
+                    FilterChip(
+                        selected = selectedGroup == group,
+                        onClick = { selectedGroup = group },
+                        label = { Text(stringResource(group.labelRes)) },
+                        modifier = Modifier.padding(start = 8.dp).testTag("elements_group_${group.name.lowercase()}")
+                    )
+                }
+            }
         }
         items(entries, key = { it.id }) { element ->
             Card(
@@ -50,3 +84,12 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
         }
     }
 }
+
+private val ElementGroup.labelRes: Int
+    get() = when (this) {
+        ElementGroup.NATURE -> R.string.group_nature
+        ElementGroup.MATERIAL -> R.string.group_material
+        ElementGroup.LIFE -> R.string.group_life
+        ElementGroup.CIVILIZATION -> R.string.group_civilization
+        ElementGroup.COSMOS -> R.string.group_cosmos
+    }

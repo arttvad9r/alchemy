@@ -1,11 +1,15 @@
 package com.artt.alchemy.game
 
-private const val OVERLAP_DISTANCE_SQUARED = 0.0625f
+private const val OVERLAP_DISTANCE_SQUARED = 0.02f
 
 fun reduce(state: WorkspaceState, event: WorkspaceEvent, engine: AlchemyEngine): WorkspaceResult = when (event) {
     is WorkspaceEvent.Spawn -> {
         val item = WorkspaceItem(state.nextInstanceId, event.elementId, event.xFraction, event.yFraction)
-        WorkspaceResult(state.copy(items = state.items + item, nextInstanceId = state.nextInstanceId + 1))
+        resolveOverlap(
+            state.copy(items = state.items + item, nextInstanceId = state.nextInstanceId + 1),
+            WorkspaceEvent.ResolveOverlap(item.instanceId, event.xFraction, event.yFraction),
+            engine
+        )
     }
 
     is WorkspaceEvent.Move -> {
@@ -31,7 +35,7 @@ private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveO
         item.instanceId != dragged.instanceId &&
             squaredDistance(item.xFraction, item.yFraction, event.xFraction, event.yFraction) <= OVERLAP_DISTANCE_SQUARED
     } ?: return WorkspaceResult(state)
-    val resultId = engine.combine(dragged.elementId, target.elementId) ?: return WorkspaceResult(state)
+    val resultId = engine.combine(dragged.elementId, target.elementId) ?: return WorkspaceResult(state, attemptedMix = true)
     val result = WorkspaceItem(state.nextInstanceId, resultId, event.xFraction, event.yFraction)
 
     return WorkspaceResult(
@@ -39,7 +43,8 @@ private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveO
             items = state.items.filterNot { it.instanceId == dragged.instanceId || it.instanceId == target.instanceId } + result,
             nextInstanceId = state.nextInstanceId + 1
         ),
-        combination = Combination(target.elementId, dragged.elementId, resultId)
+        combination = Combination(target.elementId, dragged.elementId, resultId),
+        attemptedMix = true
     )
 }
 

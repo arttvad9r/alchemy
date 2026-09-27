@@ -28,6 +28,7 @@ data class AlchemyUiState(
     val workspace: WorkspaceState = WorkspaceState(),
     val selectedTab: AppTab = AppTab.HOME,
     val newlyUnlockedId: String? = null,
+    val feedbackEventId: Long = 0,
     val isResetConfirmationVisible: Boolean = false
 )
 
@@ -40,15 +41,28 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun onWorkspaceEvent(event: WorkspaceEvent) {
         val result = reduce(state.workspace, event, engine)
-        val progress = if (event is WorkspaceEvent.ResolveOverlap) state.progress.recordAttempt(result.combination) else state.progress
+        val progress = if (result.attemptedMix) state.progress.recordAttempt(result.combination) else state.progress
         val newlyUnlockedId = result.combination?.resultId?.takeUnless(state.progress.unlockedIds::contains)
 
         if (progress != state.progress) store.save(progress)
-        state = state.copy(progress = progress, workspace = result.workspace, newlyUnlockedId = newlyUnlockedId)
+        state = state.copy(
+            progress = progress,
+            workspace = result.workspace,
+            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
+            feedbackEventId = if (result.combination != null) state.feedbackEventId + 1 else state.feedbackEventId
+        )
     }
 
     fun selectTab(tab: AppTab) {
-        state = state.copy(selectedTab = tab, newlyUnlockedId = null)
+        state = state.copy(selectedTab = tab)
+    }
+
+    fun dismissNewElement() {
+        state = state.copy(newlyUnlockedId = null)
+    }
+
+    fun consumeCombinationFeedback() {
+        state = state.copy(feedbackEventId = 0)
     }
 
     fun requestReset() {

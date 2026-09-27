@@ -1,5 +1,7 @@
 package com.artt.alchemy.ui.home
 
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -9,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -18,11 +21,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,10 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -50,16 +58,35 @@ import com.artt.alchemy.ui.components.PrimitiveElement
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    state: AlchemyUiState,
+    onEvent: (WorkspaceEvent) -> Unit,
+    onDismissNewElement: () -> Unit,
+    onFeedbackHandled: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val unlocked = AlchemyCatalog.elements.filter { it.id in state.progress.unlockedIds }
     var workspaceBounds by remember { mutableStateOf<Rect?>(null) }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var dragPosition by remember { mutableStateOf<Offset?>(null) }
     val previewHalfSize = with(androidx.compose.ui.platform.LocalDensity.current) { 36.dp.roundToPx() }
+    val hapticFeedback = LocalHapticFeedback.current
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 40) }
 
-    Box(modifier = modifier.onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+    DisposableEffect(toneGenerator) {
+        onDispose(toneGenerator::release)
+    }
+    LaunchedEffect(state.feedbackEventId) {
+        if (state.feedbackEventId != 0L) {
+            if (state.progress.vibrationEnabled) hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            if (state.progress.soundEnabled) toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 100)
+            onFeedbackHandled()
+        }
+    }
+
+    Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
                 Spacer(modifier = Modifier.weight(1f))
@@ -77,7 +104,7 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp)
+                    .weight(1f)
                     .testTag("home_workspace")
             ) {
                 WorkspaceCanvas(
@@ -88,22 +115,23 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
                     modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.palette_hint), style = MaterialTheme.typography.bodySmall)
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(5),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(vertical = 12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(128.dp)
+                    .height(152.dp)
                     .testTag("palette_grid")
             ) {
                 items(unlocked, key = { it.id }) { element ->
                     DraggablePaletteElement(
                         element = element,
-                        modifier = Modifier.width(72.dp).testTag("palette_${element.id}"),
+                        modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
                         onDragPosition = { position ->
                             draggedElement = position?.let { element }
                             dragPosition = position
@@ -145,6 +173,17 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
                     .testTag("drag_preview")
             )
         }
+    }
+
+    state.newlyUnlockedId?.let { elementId ->
+        AlertDialog(
+            onDismissRequest = onDismissNewElement,
+            title = { Text(stringResource(R.string.new_element_title)) },
+            text = { Text(stringResource(R.string.new_element_message, AlchemyCatalog.elementsById.getValue(elementId).name)) },
+            confirmButton = {
+                TextButton(onClick = onDismissNewElement) { Text(stringResource(R.string.ok)) }
+            }
+        )
     }
 }
 
