@@ -11,3 +11,4 @@ local.properties
 # Hermes Android local runtime/evidence
 .android-engineering/runtime/
 .android-engineering/evidence/
+.worktrees/
