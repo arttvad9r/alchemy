@@ -4,7 +4,7 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -148,6 +148,9 @@ fun HomeScreen(
                                         )
                                     )
                                 }
+                        },
+                        onTap = {
+                            onEvent(WorkspaceEvent.Spawn(element.id, 0.5f, 0.5f))
                         }
                     )
                 }
@@ -192,7 +195,8 @@ private fun DraggablePaletteElement(
     element: ElementDefinition,
     modifier: Modifier,
     onDragPosition: (Offset?) -> Unit,
-    onDrop: (Offset) -> Unit
+    onDrop: (Offset) -> Unit,
+    onTap: () -> Unit
 ) {
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val currentOnDragPosition by rememberUpdatedState(onDragPosition)
@@ -200,11 +204,10 @@ private fun DraggablePaletteElement(
 
     PrimitiveElement(
         element = element,
-        modifier = modifier
-            .onGloballyPositioned { coordinates = it }
+        modifier = modifier.onGloballyPositioned { coordinates = it }
             .pointerInput(element.id) {
                 var lastPosition: Offset? = null
-                detectDragGesturesAfterLongPress(
+                detectDragGestures(
                     onDragStart = { position ->
                         lastPosition = coordinates?.localToRoot(position)
                         currentOnDragPosition(lastPosition)
@@ -224,6 +227,7 @@ private fun DraggablePaletteElement(
                         currentOnDragPosition(null)
                     }
                 )
-            }
+            },
+        onClick = onTap
     )
 }

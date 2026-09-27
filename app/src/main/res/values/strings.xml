@@ -5,7 +5,7 @@
     <string name="clear_workspace">Очистить</string>
     <string name="workspace_hint">Перетащите элементы сюда</string>
     <string name="palette_title">Открытые элементы</string>
-    <string name="palette_hint">Зажмите элемент и перетащите его на поле</string>
+    <string name="palette_hint">Нажмите, чтобы добавить, или сразу перетащите на поле</string>
     <string name="tab_home">Дом</string>
     <string name="tab_elements">Элементы</string>
     <string name="tab_recipes">Рецепты</string>
@@ -39,7 +39,7 @@
     <string name="sound">Звук</string>
     <string name="vibration">Вибрация</string>
     <string name="help">Как играть</string>
-    <string name="help_text">Зажмите открытый элемент и перетащите его на рабочую область. Наложите один на другой, чтобы получить результат. Неверная пара останется без изменений. Перетащите элемент за границу рабочей области, чтобы удалить его с поля.</string>
+    <string name="help_text">Нажмите открытый элемент, чтобы добавить его в центр рабочей области, или сразу перетащите его на поле. Наложите элементы один на другой, чтобы получить результат. Неверная пара останется без изменений. Перетащите элемент за границу рабочей области, чтобы удалить его с поля.</string>
     <string name="reset_progress">Сбросить прогресс</string>
     <string name="reset_confirmation_title">Сбросить прогресс?</string>
     <string name="reset_confirmation_message">Откроются только четыре базовых элемента. Это действие нельзя отменить.</string>
