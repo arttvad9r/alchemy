@@ -1,6 +1,7 @@
 package com.artt.alchemy.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,12 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.artt.alchemy.game.ElementDefinition
 
 @Composable
-fun PrimitiveElement(element: ElementDefinition, modifier: Modifier = Modifier) {
+fun PrimitiveElement(element: ElementDefinition, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier
             .semantics { contentDescription = element.name }
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .clip(CircleShape)
             .background(Color(element.color))
             .padding(horizontal = 16.dp, vertical = 12.dp)

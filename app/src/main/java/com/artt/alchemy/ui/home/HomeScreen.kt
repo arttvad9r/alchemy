@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,9 +54,12 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
                 .height(300.dp)
                 .testTag("home_workspace")
         ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant)) {
-                Text(text = stringResource(R.string.workspace_hint), style = MaterialTheme.typography.bodyLarge)
-            }
+            WorkspaceCanvas(
+                items = state.workspace.items,
+                onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
+                onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
@@ -68,7 +70,16 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
                 .horizontalScroll(rememberScrollState())
                 .padding(vertical = 12.dp)
         ) {
-            unlocked.forEach { element -> PrimitiveElement(element, Modifier.width(112.dp)) }
+            unlocked.forEach { element ->
+                PrimitiveElement(
+                    element = element,
+                    modifier = Modifier.width(112.dp).testTag("palette_${element.id}"),
+                    onClick = {
+                        val xFraction = if (state.workspace.items.size % 2 == 0) 0.32f else 0.68f
+                        onEvent(WorkspaceEvent.Spawn(element.id, xFraction, 0.5f))
+                    }
+                )
+            }
         }
     }
 }
