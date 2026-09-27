@@ -22,3 +22,38 @@ data class Recipe(
 )
 
 fun recipeKey(firstId: String, secondId: String): String = listOf(firstId, secondId).sorted().joinToString(separator = "|")
+
+data class WorkspaceItem(
+    val instanceId: Long,
+    val elementId: String,
+    val xFraction: Float,
+    val yFraction: Float
+)
+
+data class WorkspaceState(
+    val items: List<WorkspaceItem> = emptyList(),
+    val nextInstanceId: Long = 1
+)
+
+data class Combination(
+    val firstId: String,
+    val secondId: String,
+    val resultId: String
+)
+
+data class WorkspaceResult(
+    val workspace: WorkspaceState,
+    val combination: Combination? = null
+)
+
+sealed interface WorkspaceEvent {
+    data class Spawn(val elementId: String, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
+
+    data class Move(val instanceId: Long, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
+
+    data class Remove(val instanceId: Long) : WorkspaceEvent
+
+    data object Clear : WorkspaceEvent
+
+    data class ResolveOverlap(val draggedInstanceId: Long, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
+}
