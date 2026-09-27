@@ -20,4 +20,14 @@
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>
     <string name="achievement_experiments">Эксперименты</string>
+    <string name="settings">Настройки</string>
+    <string name="sound">Звук</string>
+    <string name="vibration">Вибрация</string>
+    <string name="help">Как играть</string>
+    <string name="help_text">Перетаскивайте открытые элементы на рабочую область. Наложите один на другой, чтобы получить результат. Неверная пара останется без изменений. Перетащите элемент за границу рабочей области, чтобы удалить его с поля.</string>
+    <string name="reset_progress">Сбросить прогресс</string>
+    <string name="reset_confirmation_title">Сбросить прогресс?</string>
+    <string name="reset_confirmation_message">Откроются только четыре базовых элемента. Это действие нельзя отменить.</string>
+    <string name="reset_confirm">Сбросить</string>
+    <string name="cancel">Отмена</string>
 </resources>

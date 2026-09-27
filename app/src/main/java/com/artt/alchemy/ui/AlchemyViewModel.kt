@@ -27,7 +27,8 @@ data class AlchemyUiState(
     val progress: PlayerProgress,
     val workspace: WorkspaceState = WorkspaceState(),
     val selectedTab: AppTab = AppTab.HOME,
-    val newlyUnlockedId: String? = null
+    val newlyUnlockedId: String? = null,
+    val isResetConfirmationVisible: Boolean = false
 )
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
@@ -50,9 +51,17 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         state = state.copy(selectedTab = tab, newlyUnlockedId = null)
     }
 
+    fun requestReset() {
+        state = state.copy(isResetConfirmationVisible = true)
+    }
+
+    fun dismissReset() {
+        state = state.copy(isResetConfirmationVisible = false)
+    }
+
     fun confirmReset() {
         store.clear()
-        state = AlchemyUiState(progress = initialPlayerProgress())
+        state = AlchemyUiState(progress = initialPlayerProgress(), selectedTab = AppTab.SETTINGS)
     }
 
     fun setSoundEnabled(enabled: Boolean) {

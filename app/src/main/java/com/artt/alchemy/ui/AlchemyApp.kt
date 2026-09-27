@@ -1,6 +1,5 @@
 package com.artt.alchemy.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -10,7 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -20,6 +18,7 @@ import com.artt.alchemy.ui.achievements.AchievementsScreen
 import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
+import com.artt.alchemy.ui.settings.SettingsScreen
 
 @Composable
 fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
@@ -46,17 +45,18 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                     AppTab.ELEMENTS -> ElementsScreen(state.progress, Modifier.padding(padding))
                     AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
                     AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
-                    AppTab.SETTINGS -> PlaceholderScreen(state.selectedTab, Modifier.padding(padding))
+                    AppTab.SETTINGS -> SettingsScreen(
+                        state = state,
+                        onSoundChanged = viewModel::setSoundEnabled,
+                        onVibrationChanged = viewModel::setVibrationEnabled,
+                        onRequestReset = viewModel::requestReset,
+                        onConfirmReset = viewModel::confirmReset,
+                        onDismissReset = viewModel::dismissReset,
+                        modifier = Modifier.padding(padding)
+                    )
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(tab: AppTab, modifier: Modifier = Modifier) {
-    Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize().testTag("screen_${tab.name.lowercase()}")) {
-        Text(text = stringResource(tab.labelRes), style = MaterialTheme.typography.headlineMedium)
     }
 }
 
