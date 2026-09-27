@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Алхимия</string>
+    <string name="progress">%1$d / %2$d</string>
+    <string name="workspace_title">Рабочая область</string>
+    <string name="clear_workspace">Очистить</string>
+    <string name="workspace_hint">Перетащите элементы сюда</string>
+    <string name="palette_title">Открытые элементы</string>
+    <string name="tab_home">Дом</string>
+    <string name="tab_elements">Элементы</string>
+    <string name="tab_recipes">Рецепты</string>
+    <string name="tab_achievements">Достижения</string>
+    <string name="tab_settings">Настройки</string>
+    <string name="tab_home_short">Д</string>
+    <string name="tab_elements_short">Э</string>
+    <string name="tab_recipes_short">Р</string>
+    <string name="tab_achievements_short">Д</string>
+    <string name="tab_settings_short">Н</string>
 </resources>
