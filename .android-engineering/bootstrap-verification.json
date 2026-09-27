@@ -1,0 +1,12 @@
+{
+  "duration_seconds": 1.017,
+  "engineering_standard": "android-engineering-v1",
+  "log_path": ".android-engineering/runtime/bootstrap-qualityCheck.log",
+  "log_sha256": "dc47541fd462a4da92a527a911faf344213297c664c77d588aede38e3386dd75",
+  "policy": "android-bootstrap-verification-v1",
+  "quality_gate": "./gradlew qualityCheck",
+  "returncode": 0,
+  "status": "PASS",
+  "testability_policy": "stable-semantics-v1",
+  "version": 1
+}

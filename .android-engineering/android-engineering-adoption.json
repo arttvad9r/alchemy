@@ -1,0 +1,7 @@
+{
+  "engineering_standard": "android-engineering-v1",
+  "project_root": ".",
+  "quality_gate": "./gradlew qualityCheck",
+  "testability_policy": "stable-semantics-v1",
+  "version": 1
+}

@@ -1,0 +1,31 @@
+config:
+  validation: true
+complexity:
+  active: true
+  CyclomaticComplexMethod:
+    active: true
+    allowedComplexity: 20
+  LongMethod:
+    active: true
+    ignoreAnnotated: ["Composable"]
+  LargeClass:
+    active: true
+  TooManyFunctions:
+    active: false
+empty-blocks:
+  active: true
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: "_|(ignore|expected).*"
+style:
+  active: true
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    active: false
+naming:
+  active: true
+  FunctionNaming:
+    active: false

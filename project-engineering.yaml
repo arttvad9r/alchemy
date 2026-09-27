@@ -1,0 +1,8 @@
+engineering_standard: android-engineering-v1
+quality_gate: ./gradlew qualityCheck
+quality_fix: ./gradlew formatCode
+standard_source: android-engineering/standards/android-engineering/v1
+testability_policy: stable-semantics-v1
+bootstrap_verification: .android-engineering/bootstrap-verification.json
+local_runtime_dir: .android-engineering/runtime
+# deviations: []

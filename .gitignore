@@ -1,0 +1,13 @@
+# Gradle and Android Studio local state
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+
+# Module build outputs
+**/build/
+
+# Hermes Android local runtime/evidence
+.android-engineering/runtime/
+.android-engineering/evidence/
