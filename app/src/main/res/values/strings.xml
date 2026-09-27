@@ -15,4 +15,9 @@
     <string name="tab_recipes_short">Р</string>
     <string name="tab_achievements_short">Д</string>
     <string name="tab_settings_short">Н</string>
+    <string name="locked_element">Не открыт</string>
+    <string name="no_known_recipes">Нет открытых рецептов</string>
+    <string name="achievement_first_unlocks">Первые открытия</string>
+    <string name="achievement_mixes">Удачные сочетания</string>
+    <string name="achievement_experiments">Эксперименты</string>
 </resources>

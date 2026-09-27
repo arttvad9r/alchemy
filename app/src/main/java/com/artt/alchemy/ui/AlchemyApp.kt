@@ -16,7 +16,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.achievements.AchievementsScreen
+import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
+import com.artt.alchemy.ui.recipes.RecipesScreen
 
 @Composable
 fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
@@ -40,7 +43,10 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
             ) { padding ->
                 when (state.selectedTab) {
                     AppTab.HOME -> HomeScreen(state, viewModel::onWorkspaceEvent, Modifier.padding(padding))
-                    else -> PlaceholderScreen(state.selectedTab, Modifier.padding(padding))
+                    AppTab.ELEMENTS -> ElementsScreen(state.progress, Modifier.padding(padding))
+                    AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
+                    AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
+                    AppTab.SETTINGS -> PlaceholderScreen(state.selectedTab, Modifier.padding(padding))
                 }
             }
         }
