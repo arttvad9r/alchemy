@@ -28,7 +28,7 @@ fun PrimitiveElement(element: ElementDefinition, modifier: Modifier = Modifier, 
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .clip(CircleShape)
             .background(Color(element.color))
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 8.dp, vertical = 12.dp)
     ) {
         Text(text = element.name, color = Color.White, style = MaterialTheme.typography.labelLarge)
     }

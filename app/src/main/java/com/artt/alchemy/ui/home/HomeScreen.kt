@@ -73,7 +73,7 @@ fun HomeScreen(state: AlchemyUiState, onEvent: (WorkspaceEvent) -> Unit, modifie
             unlocked.forEach { element ->
                 PrimitiveElement(
                     element = element,
-                    modifier = Modifier.width(112.dp).testTag("palette_${element.id}"),
+                    modifier = Modifier.width(72.dp).testTag("palette_${element.id}"),
                     onClick = {
                         val xFraction = if (state.workspace.items.size % 2 == 0) 0.32f else 0.68f
                         onEvent(WorkspaceEvent.Spawn(element.id, xFraction, 0.5f))

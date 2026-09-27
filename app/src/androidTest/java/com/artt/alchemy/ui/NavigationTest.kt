@@ -1,5 +1,6 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -17,6 +18,13 @@ class NavigationTest {
         listOf("elements", "recipes", "achievements", "settings").forEach { tab ->
             composeRule.onNodeWithTag("nav_$tab").performClick()
             composeRule.onNodeWithTag("screen_$tab").assertExists()
+        }
+    }
+
+    @Test
+    fun all_base_elements_are_visible_in_palette() {
+        listOf("fire", "water", "earth", "air").forEach { id ->
+            composeRule.onNodeWithTag("palette_$id").assertIsDisplayed()
         }
     }
 

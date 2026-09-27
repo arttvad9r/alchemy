@@ -13,7 +13,7 @@
     <string name="tab_home_short">Д</string>
     <string name="tab_elements_short">Э</string>
     <string name="tab_recipes_short">Р</string>
-    <string name="tab_achievements_short">Д</string>
+    <string name="tab_achievements_short">★</string>
     <string name="tab_settings_short">Н</string>
     <string name="locked_element">Не открыт</string>
     <string name="no_known_recipes">Нет открытых рецептов</string>

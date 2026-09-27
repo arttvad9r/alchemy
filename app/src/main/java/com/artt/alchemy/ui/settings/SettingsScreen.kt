@@ -36,6 +36,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .testTag("screen_settings")
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
