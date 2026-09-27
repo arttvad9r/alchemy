@@ -26,4 +26,24 @@ class WorkspaceJourneyTest {
         }
         composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Пар")).assertIsDisplayed()
     }
+
+    @Test
+    fun invalidPairLeavesBothWorkspaceItemsInPlace() {
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNodeWithTag("workspace_canvas").performTouchInput {
+            swipe(Offset(width * 0.68f, height * 0.5f), Offset(width * 0.32f, height * 0.5f), 300)
+        }
+        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь, Огонь")).assertIsDisplayed()
+    }
+
+    @Test
+    fun draggingOutsideWorkspaceDeletesOnlyTheTemporaryItem() {
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNodeWithTag("workspace_canvas").performTouchInput {
+            swipe(Offset(width * 0.32f, height * 0.5f), Offset(-20f, height * 0.5f), 300)
+        }
+        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("")).assertIsDisplayed()
+        composeRule.onNodeWithTag("palette_fire").assertIsDisplayed()
+    }
 }

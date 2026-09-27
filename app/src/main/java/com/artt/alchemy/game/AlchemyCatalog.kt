@@ -132,7 +132,7 @@ object AlchemyCatalog {
             check(baseElementIds.all(definitions::containsKey)) { "Base elements must exist" }
         }
 
-    val recipes: List<Recipe> = buildRecipes()
+    val recipes: List<Recipe> = curatedRecipes()
 
     val recipeResultsByKey: Map<String, String> =
         recipes.associate { recipe -> recipeKey(recipe.firstId, recipe.secondId) to recipe.resultId }.also { results ->
@@ -148,38 +148,4 @@ object AlchemyCatalog {
         }
 
     private fun element(id: String, name: String, group: ElementGroup): ElementDefinition = ElementDefinition(id = id, name = name, group = group, color = group.color)
-
-    private fun buildRecipes(): List<Recipe> {
-        val derivedIds = elements.map(ElementDefinition::id).filterNot(baseElementIds::contains)
-        val unlockRecipes = listOf(
-            Recipe("fire", "water", "steam"),
-            Recipe("fire", "earth", "lava"),
-            Recipe("fire", "air", "energy"),
-            Recipe("water", "earth", "mud"),
-            Recipe("water", "air", "rain"),
-            Recipe("earth", "air", "dust")
-        ) + derivedIds.drop(6).mapIndexed { index, resultId ->
-            Recipe(
-                firstId = baseElementIds.sorted()[index % baseElementIds.size],
-                secondId = derivedIds[index + 5],
-                resultId = resultId
-            )
-        }
-
-        val usedKeys = unlockRecipes.map { recipeKey(it.firstId, it.secondId) }.toMutableSet()
-        val bonusRecipes = buildList {
-            for (firstIndex in elements.indices) {
-                for (secondIndex in firstIndex + 1 until elements.size) {
-                    if (size == 64) return@buildList
-                    val firstId = elements[firstIndex].id
-                    val secondId = elements[secondIndex].id
-                    if (usedKeys.add(recipeKey(firstId, secondId))) {
-                        add(Recipe(firstId, secondId, derivedIds[size % derivedIds.size]))
-                    }
-                }
-            }
-        }
-
-        return unlockRecipes + bonusRecipes
-    }
 }

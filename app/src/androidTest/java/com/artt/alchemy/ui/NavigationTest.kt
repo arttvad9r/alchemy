@@ -1,6 +1,8 @@
 package com.artt.alchemy.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -30,9 +32,12 @@ class NavigationTest {
 
     @Test
     fun switchingTabsKeepsHomeWorkspaceState() {
-        composeRule.onNodeWithTag("home_workspace").assertExists()
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь")).assertIsDisplayed()
+
         composeRule.onNodeWithTag("nav_elements").performClick()
         composeRule.onNodeWithTag("nav_home").performClick()
-        composeRule.onNodeWithTag("home_workspace").assertExists()
+
+        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь")).assertIsDisplayed()
     }
 }

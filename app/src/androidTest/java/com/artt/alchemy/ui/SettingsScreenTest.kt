@@ -27,4 +27,21 @@ class SettingsScreenTest {
         composeRule.onNodeWithTag("nav_home").performClick()
         composeRule.onNodeWithText("4 / 120").assertIsDisplayed()
     }
+
+    @Test
+    fun feedbackSettingsPersistAcrossActivityRecreation() {
+        composeRule.onNodeWithTag("nav_settings").performClick()
+        composeRule.onNodeWithTag("settings_reset").performClick()
+        composeRule.onNodeWithText("Сбросить").performClick()
+
+        composeRule.onNodeWithTag("settings_sound").performClick()
+        composeRule.onNodeWithTag("settings_vibration").performClick()
+        composeRule.onNodeWithTag("settings_sound").assertIsOff()
+        composeRule.onNodeWithTag("settings_vibration").assertIsOff()
+
+        composeRule.activityRule.scenario.recreate()
+        composeRule.onNodeWithTag("nav_settings").performClick()
+        composeRule.onNodeWithTag("settings_sound").assertIsOff()
+        composeRule.onNodeWithTag("settings_vibration").assertIsOff()
+    }
 }

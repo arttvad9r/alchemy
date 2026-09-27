@@ -39,6 +39,18 @@ class AlchemyEngineTest {
     }
 
     @Test
+    fun curatedProgressionContainsIntentionalRecipesAcrossAllTiers() {
+        assertEquals("stone", engine.combine("lava", "water"))
+        assertEquals("wood", engine.combine("tree", "stone"))
+        assertEquals("tool", engine.combine("metal", "wood"))
+        assertEquals("life", engine.combine("bacteria", "water"))
+        assertEquals("village", engine.combine("human", "house"))
+        assertEquals("book", engine.combine("paper", "ink"))
+        assertEquals("science", engine.combine("book", "energy"))
+        assertEquals("space", engine.combine("sky", "star"))
+    }
+
+    @Test
     fun unknown_pair_returns_null() {
         assertNull(engine.combine("fire", "fire"))
     }
