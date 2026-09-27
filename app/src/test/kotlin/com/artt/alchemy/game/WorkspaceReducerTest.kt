@@ -17,6 +17,19 @@ class WorkspaceReducerTest {
     }
 
     @Test
+    fun automatic_spawns_use_different_clear_positions() {
+        val first = reduce(WorkspaceState(), WorkspaceEvent.SpawnAutomatically("fire"), engine)
+        val second = reduce(first.workspace, WorkspaceEvent.SpawnAutomatically("water"), engine)
+        val items = second.workspace.items
+
+        assertEquals(2, items.size)
+        assertEquals(true, items[0].xFraction != items[1].xFraction || items[0].yFraction != items[1].yFraction)
+        val dx = items[0].xFraction - items[1].xFraction
+        val dy = items[0].yFraction - items[1].yFraction
+        assertEquals(true, dx * dx + dy * dy >= 0.04f)
+    }
+
+    @Test
     fun invalid_overlap_keeps_both_workspace_items() {
         val state = WorkspaceState(
             items = listOf(WorkspaceItem(1, "fire", 0.3f, 0.3f), WorkspaceItem(2, "fire", 0.3f, 0.3f)),

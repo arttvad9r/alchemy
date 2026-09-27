@@ -54,6 +54,12 @@ class WorkspaceJourneyTest {
     }
 
     @Test
+    fun paletteHasADraggableScrollbar() {
+        composeRule.onNodeWithTag("palette_scrollbar").assertIsDisplayed()
+        composeRule.onNodeWithTag("palette_scroll_thumb").assertIsDisplayed()
+    }
+
+    @Test
     fun draggingPaletteItemShowsPreviewWithoutLongPress() {
         composeRule.onNodeWithTag("palette_fire").performTouchInput {
             down(Offset(width * 0.5f, height * 0.5f))

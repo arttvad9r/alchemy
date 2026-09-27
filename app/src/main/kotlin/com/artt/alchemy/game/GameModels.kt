@@ -50,6 +50,8 @@ data class WorkspaceResult(
 sealed interface WorkspaceEvent {
     data class Spawn(val elementId: String, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
 
+    data class SpawnAutomatically(val elementId: String) : WorkspaceEvent
+
     data class Move(val instanceId: Long, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
 
     data class Remove(val instanceId: Long) : WorkspaceEvent

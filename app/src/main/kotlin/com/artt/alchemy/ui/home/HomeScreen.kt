@@ -4,13 +4,18 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,8 +23,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -118,42 +125,47 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
             Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
             Text(text = stringResource(R.string.palette_hint), style = MaterialTheme.typography.bodySmall)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(5),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(vertical = 12.dp),
+            val paletteState = rememberLazyGridState()
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(152.dp)
                     .testTag("palette_grid")
             ) {
-                items(unlocked, key = { it.id }) { element ->
-                    DraggablePaletteElement(
-                        element = element,
-                        modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
-                        onDragPosition = { position ->
-                            draggedElement = position?.let { element }
-                            dragPosition = position
-                        },
-                        onDrop = { drop ->
-                            workspaceBounds
-                                ?.takeIf { it.contains(drop) }
-                                ?.let { bounds ->
-                                    onEvent(
-                                        WorkspaceEvent.Spawn(
-                                            element.id,
-                                            (drop.x - bounds.left) / bounds.width,
-                                            (drop.y - bounds.top) / bounds.height
+                LazyVerticalGrid(
+                    state = paletteState,
+                    columns = GridCells.Fixed(5),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(top = 12.dp, end = 16.dp, bottom = 12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(unlocked, key = { it.id }) { element ->
+                        DraggablePaletteElement(
+                            element = element,
+                            modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
+                            onDragPosition = { position ->
+                                draggedElement = position?.let { element }
+                                dragPosition = position
+                            },
+                            onDrop = { drop ->
+                                workspaceBounds
+                                    ?.takeIf { it.contains(drop) }
+                                    ?.let { bounds ->
+                                        onEvent(
+                                            WorkspaceEvent.Spawn(
+                                                element.id,
+                                                (drop.x - bounds.left) / bounds.width,
+                                                (drop.y - bounds.top) / bounds.height
+                                            )
                                         )
-                                    )
-                                }
-                        },
-                        onTap = {
-                            onEvent(WorkspaceEvent.Spawn(element.id, 0.5f, 0.5f))
-                        }
-                    )
+                                    }
+                            },
+                            onTap = { onEvent(WorkspaceEvent.SpawnAutomatically(element.id)) }
+                        )
+                    }
                 }
+                PaletteScrollbar(state = paletteState, modifier = Modifier.align(Alignment.CenterEnd))
             }
         }
 
@@ -186,6 +198,39 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(onClick = onDismissNewElement) { Text(stringResource(R.string.ok)) }
             }
+        )
+    }
+}
+
+@Composable
+private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier) {
+    val totalItems = state.layoutInfo.totalItemsCount
+    val visibleItems = state.layoutInfo.visibleItemsInfo.map { it.index }.distinct().size.coerceAtLeast(1)
+    val thumbFraction = (visibleItems.toFloat() / totalItems.coerceAtLeast(visibleItems)).coerceIn(0.18f, 1f)
+    val maxFirstVisibleIndex = (totalItems - visibleItems).coerceAtLeast(1)
+    val scrollFraction = (state.firstVisibleItemIndex.toFloat() / maxFirstVisibleIndex).coerceIn(0f, 1f)
+    val dragState = rememberDraggableState { delta ->
+        state.dispatchRawDelta(delta * (totalItems.toFloat() / visibleItems).coerceAtLeast(1f))
+    }
+
+    BoxWithConstraints(
+        modifier = modifier
+            .width(12.dp)
+            .fillMaxHeight()
+            .background(MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .testTag("palette_scrollbar")
+    ) {
+        val thumbHeight = maxHeight * thumbFraction
+        val thumbOffset = (maxHeight - thumbHeight) * scrollFraction
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = thumbOffset)
+                .width(8.dp)
+                .height(thumbHeight)
+                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+                .draggable(state = dragState, orientation = Orientation.Vertical)
+                .testTag("palette_scroll_thumb")
         )
     }
 }
