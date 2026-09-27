@@ -1,13 +1,15 @@
 # Выпускная проверка primitive-сборки
 
 Дата проверки: 27 сентября 2026 года  
-Кандидат: `57244be` (`fix: harden recipes and runtime acceptance`)
+Кодовый кандидат: `30cad1a` (`fix: use AGP 9 Kotlin source sets`)
+
+`57244be` заменил алгоритмический filler на явный курируемый граф рецептов и усилил runtime-тесты. `30cad1a` дополнительно исправил скрытую проблему AGP 9 built-in Kotlin: все Kotlin sources/tests перенесены из `src/*/java` в штатные `src/*/kotlin`, после чего выполнена полная перекомпиляция без опоры на старые build outputs.
 Пакет: `com.artt.alchemy`
 
 ## Среда
 
-- Ручная проверка: AVD `android-phone`, портрет `1080×2400`.
-- Инструментальные Compose-тесты: AVD `qa-api36-ime`.
+- Свежая ручная проверка hardening-кандидата: AVD `qa-api36-ime` (`emulator-5554`).
+- Инструментальные Compose-тесты: тот же AVD `qa-api36-ime`.
 - Сборка: Kotlin + Jetpack Compose, debug-вариант.
 
 ## Детерминированный gate
@@ -16,25 +18,30 @@
 
 ```bash
 ./gradlew formatCode
-./gradlew qualityCheck
-./gradlew testDebugUnitTest
-./gradlew assembleDebug
-./gradlew installDebug installDebugAndroidTest
-adb -s emulator-5556 shell am instrument -w \
+./gradlew testDebugUnitTest qualityCheck assembleDebug --rerun-tasks
+./gradlew assembleDebugAndroidTest --rerun-tasks
+adb -s emulator-5554 install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s emulator-5554 install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb -s emulator-5554 shell am instrument -w \
   -e class com.artt.alchemy.ui.NavigationTest,com.artt.alchemy.ui.WorkspaceJourneyTest,com.artt.alchemy.ui.CollectionScreensTest,com.artt.alchemy.ui.SettingsScreenTest \
   com.artt.alchemy.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
-Результат инструментального прогона: `OK (10 tests)`.
+Результат host unit-прогона: `15 tests, 0 failures, 0 errors`.
+
+Результат инструментального прогона: `OK (10 tests)`. После полного rerun реально созданы built-in Kotlin class outputs, включая `AlchemyCatalog.class` и `AlchemyEngine.class`; package-specific crash scan после instrumentation и ручного сценария пуст.
 
 ## Пройденный пользовательский путь
 
-Приложение запущено на `android-phone` командой:
+После свежей сборки APK был установлен, данные приложения очищены и Activity запущена на `qa-api36-ime`:
 
 ```bash
-android run --apks app/build/outputs/apk/debug/app-debug.apk \
-  --activity com.artt.alchemy.MainActivity --device emulator-5554
+adb -s emulator-5554 install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s emulator-5554 shell pm clear com.artt.alchemy
+adb -s emulator-5554 shell am start -W -n com.artt.alchemy/.MainActivity
 ```
+
+Для проверки механики использовались настоящие `adb shell input tap/swipe`, а не Compose callbacks.
 
 Проверено вручную:
 
@@ -49,20 +56,15 @@ android run --apks app/build/outputs/apk/debug/app-debug.apk \
 
 ## Артефакты
 
-Для каждого верхнеуровневого раздела сохранены screenshot и layout dump:
+Свежие runtime-артефакты hardening-кандидата, снятые после установки текущего APK:
 
-- `artifacts/home.png`, `artifacts/home.json`
-- `artifacts/elements.png`, `artifacts/elements.json`
-- `artifacts/recipes.png`, `artifacts/recipes.json`
-- `artifacts/achievements.png`, `artifacts/achievements.json`
-- `artifacts/settings.png`, `artifacts/settings.json`
+- чистый старт: `artifacts/hardened-home-fresh.png`;
+- настоящий tap/tap/swipe и результат «Пар» (`5 / 120`): `artifacts/hardened-home-combination.png`;
+- состояние после force-stop/relaunch: `artifacts/hardened-home-relaunch.png`;
+- неверная пара `Огонь + Огонь` оставляет оба экземпляра: `artifacts/hardened-invalid-pair.png`;
+- перенос за границу удаляет временный экземпляр, палитра сохраняется: `artifacts/hardened-boundary-delete.png`.
 
-Дополнительные доказательства:
-
-- успешное открытие «Пара»: `artifacts/home-combination.png`, `artifacts/home-combination.json`;
-- сохранение после перезапуска: `artifacts/home-relaunch.json`;
-- подтверждение сброса: `artifacts/reset-confirmation.png`, `artifacts/reset-confirmation.json`;
-- масштаб шрифта `1.5`: `artifacts/home-font-150.png`, `artifacts/home-font-150.json`, `artifacts/settings-font-150.png`, `artifacts/settings-font-150.json`.
+Пять `hardened-*.png` выше пересняты после полной AGP 9 перекомпиляции exact-candidate `30cad1a`. Старые `home/elements/recipes/achievements/settings*.png|json`, `reset-confirmation*` и `*-font-150*` были сняты на более раннем `6e791fa`; они остаются только исторической визуальной документацией.
 
 ## Доступность и адаптация
 
