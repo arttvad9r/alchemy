@@ -38,7 +38,7 @@
 app/
   build.gradle.kts                         # приложение, Compose и тестовые зависимости
   src/main/AndroidManifest.xml             # launcher и portrait orientation
-  src/main/java/com/artt/alchemy/
+  src/main/kotlin/com/artt/alchemy/
     AlchemyApplication.kt                  # test-tags root policy
     MainActivity.kt                        # activity и root composition
     data/ProgressStore.kt                  # SharedPreferences persistent snapshot
@@ -57,8 +57,8 @@ app/
     ui/settings/SettingsScreen.kt          # feedback toggles, help, reset confirmation
     ui/theme/…                             # template theme adjusted for primitive game UI
   src/main/res/values/strings.xml          # fixed Russian labels
-  src/test/java/com/artt/alchemy/game/…    # JUnit tests for pure rules
-  src/androidTest/java/com/artt/alchemy/ui/… # Compose behavior tests
+  src/test/kotlin/com/artt/alchemy/game/…    # JUnit tests for pure rules
+  src/androidTest/kotlin/com/artt/alchemy/ui/… # Compose behavior tests
 project-engineering.yaml
 .android-engineering/…
 docs/testing.md
@@ -113,10 +113,10 @@ git commit -m "chore: bootstrap Android Compose project"
 ### Task 2: Определить каталог и симметричный рецептный движок
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/game/GameModels.kt`
-- Create: `app/src/main/java/com/artt/alchemy/game/AlchemyCatalog.kt`
-- Create: `app/src/main/java/com/artt/alchemy/game/AlchemyEngine.kt`
-- Test: `app/src/test/java/com/artt/alchemy/game/AlchemyEngineTest.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/game/GameModels.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/game/AlchemyCatalog.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/game/AlchemyEngine.kt`
+- Test: `app/src/test/kotlin/com/artt/alchemy/game/AlchemyEngineTest.kt`
 
 **Interfaces:**
 - Produces: `data class ElementDefinition(val id: String, val name: String, val group: ElementGroup, val color: Long)`; `data class Recipe(val firstId: String, val secondId: String, val resultId: String)`; `object AlchemyCatalog`; `class AlchemyEngine(catalog: AlchemyCatalog)`.
@@ -151,16 +151,16 @@ Expected: PASS with all four tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/game app/src/test/java/com/artt/alchemy/game
+git add app/src/main/kotlin/com/artt/alchemy/game app/src/test/kotlin/com/artt/alchemy/game
 git commit -m "feat: add alchemy catalog and recipe engine"
 ```
 
 ### Task 3: Реализовать чистое состояние рабочей области
 
 **Files:**
-- Modify: `app/src/main/java/com/artt/alchemy/game/GameModels.kt`
-- Create: `app/src/main/java/com/artt/alchemy/game/WorkspaceReducer.kt`
-- Test: `app/src/test/java/com/artt/alchemy/game/WorkspaceReducerTest.kt`
+- Modify: `app/src/main/kotlin/com/artt/alchemy/game/GameModels.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/game/WorkspaceReducer.kt`
+- Test: `app/src/test/kotlin/com/artt/alchemy/game/WorkspaceReducerTest.kt`
 
 **Interfaces:**
 - Produces: `data class WorkspaceItem(val instanceId: Long, val elementId: String, val xFraction: Float, val yFraction: Float)`.
@@ -197,16 +197,16 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/game app/src/test/java/com/artt/alchemy/game
+git add app/src/main/kotlin/com/artt/alchemy/game app/src/test/kotlin/com/artt/alchemy/game
 git commit -m "feat: add workspace reducer"
 ```
 
 ### Task 4: Сохранить прогресс и собрать единый UI state
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/data/ProgressStore.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/AlchemyViewModel.kt`
-- Test: `app/src/test/java/com/artt/alchemy/game/ProgressRulesTest.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/data/ProgressStore.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/AlchemyViewModel.kt`
+- Test: `app/src/test/kotlin/com/artt/alchemy/game/ProgressRulesTest.kt`
 
 **Interfaces:**
 - Produces: `data class PlayerProgress(val unlockedIds: Set<String>, val knownRecipeKeys: Set<String>, val successfulMixCount: Int, val mixAttemptCount: Int, val soundEnabled: Boolean, val vibrationEnabled: Boolean)`.
@@ -242,20 +242,20 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/data app/src/main/java/com/artt/alchemy/ui app/src/test/java/com/artt/alchemy/game
+git add app/src/main/kotlin/com/artt/alchemy/data app/src/main/kotlin/com/artt/alchemy/ui app/src/test/kotlin/com/artt/alchemy/game
 git commit -m "feat: persist alchemy progress"
 ```
 
 ### Task 5: Построить корневую навигацию и примитивный Home
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/AlchemyApplication.kt`
-- Modify: `app/src/main/java/com/artt/alchemy/MainActivity.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/AlchemyApp.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/components/PrimitiveElement.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/home/HomeScreen.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/AlchemyApplication.kt`
+- Modify: `app/src/main/kotlin/com/artt/alchemy/MainActivity.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/AlchemyApp.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/components/PrimitiveElement.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/home/HomeScreen.kt`
 - Modify: `app/src/main/res/values/strings.xml`
-- Test: `app/src/androidTest/java/com/artt/alchemy/ui/NavigationTest.kt`
+- Test: `app/src/androidTest/kotlin/com/artt/alchemy/ui/NavigationTest.kt`
 
 **Interfaces:**
 - Produces: `enum class AppTab { HOME, ELEMENTS, RECIPES, ACHIEVEMENTS, SETTINGS }`.
@@ -296,9 +296,9 @@ git commit -m "feat: add primitive home and top-level navigation"
 ### Task 6: Сделать рабочую область с реальным перетаскиванием
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/ui/home/WorkspaceCanvas.kt`
-- Modify: `app/src/main/java/com/artt/alchemy/ui/home/HomeScreen.kt`
-- Test: `app/src/androidTest/java/com/artt/alchemy/ui/WorkspaceJourneyTest.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/home/WorkspaceCanvas.kt`
+- Modify: `app/src/main/kotlin/com/artt/alchemy/ui/home/HomeScreen.kt`
+- Test: `app/src/androidTest/kotlin/com/artt/alchemy/ui/WorkspaceJourneyTest.kt`
 
 **Interfaces:**
 - Produces: `@Composable fun WorkspaceCanvas(items: List<WorkspaceItem>, onMove: (instanceId: Long, Offset) -> Unit, modifier: Modifier = Modifier)`.
@@ -337,18 +337,18 @@ Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/ui/home app/src/main/java/com/artt/alchemy/ui app/src/androidTest/java/com/artt/alchemy/ui
+git add app/src/main/kotlin/com/artt/alchemy/ui/home app/src/main/kotlin/com/artt/alchemy/ui app/src/androidTest/kotlin/com/artt/alchemy/ui
 git commit -m "feat: add draggable alchemy workspace"
 ```
 
 ### Task 7: Реализовать экраны коллекции, рецептов и достижений
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/ui/elements/ElementsScreen.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/recipes/RecipesScreen.kt`
-- Create: `app/src/main/java/com/artt/alchemy/ui/achievements/AchievementsScreen.kt`
-- Modify: `app/src/main/java/com/artt/alchemy/game/AlchemyCatalog.kt`
-- Test: `app/src/androidTest/java/com/artt/alchemy/ui/CollectionScreensTest.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/elements/ElementsScreen.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/recipes/RecipesScreen.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/achievements/AchievementsScreen.kt`
+- Modify: `app/src/main/kotlin/com/artt/alchemy/game/AlchemyCatalog.kt`
+- Test: `app/src/androidTest/kotlin/com/artt/alchemy/ui/CollectionScreensTest.kt`
 
 **Interfaces:**
 - Produces: `data class AchievementDefinition(val id: String, val title: String, val target: Int, val current: (PlayerProgress) -> Int)`.
@@ -382,17 +382,17 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/game/AlchemyCatalog.kt app/src/main/java/com/artt/alchemy/ui/elements app/src/main/java/com/artt/alchemy/ui/recipes app/src/main/java/com/artt/alchemy/ui/achievements app/src/androidTest/java/com/artt/alchemy/ui
+git add app/src/main/kotlin/com/artt/alchemy/game/AlchemyCatalog.kt app/src/main/kotlin/com/artt/alchemy/ui/elements app/src/main/kotlin/com/artt/alchemy/ui/recipes app/src/main/kotlin/com/artt/alchemy/ui/achievements app/src/androidTest/kotlin/com/artt/alchemy/ui
 git commit -m "feat: add collection recipes and achievements"
 ```
 
 ### Task 8: Реализовать настройки, сброс и доступность
 
 **Files:**
-- Create: `app/src/main/java/com/artt/alchemy/ui/settings/SettingsScreen.kt`
-- Modify: `app/src/main/java/com/artt/alchemy/ui/AlchemyViewModel.kt`
+- Create: `app/src/main/kotlin/com/artt/alchemy/ui/settings/SettingsScreen.kt`
+- Modify: `app/src/main/kotlin/com/artt/alchemy/ui/AlchemyViewModel.kt`
 - Modify: `app/src/main/res/values/strings.xml`
-- Test: `app/src/androidTest/java/com/artt/alchemy/ui/SettingsScreenTest.kt`
+- Test: `app/src/androidTest/kotlin/com/artt/alchemy/ui/SettingsScreenTest.kt`
 
 **Interfaces:**
 - Produces: `@Composable fun SettingsScreen(state: AlchemyUiState, onSoundChanged: (Boolean) -> Unit, onVibrationChanged: (Boolean) -> Unit, onRequestReset: () -> Unit, onConfirmReset: () -> Unit, onDismissReset: () -> Unit)`.
@@ -424,7 +424,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add app/src/main/java/com/artt/alchemy/ui/settings app/src/main/java/com/artt/alchemy/ui/AlchemyViewModel.kt app/src/main/res/values/strings.xml app/src/androidTest/java/com/artt/alchemy/ui
+git add app/src/main/kotlin/com/artt/alchemy/ui/settings app/src/main/kotlin/com/artt/alchemy/ui/AlchemyViewModel.kt app/src/main/res/values/strings.xml app/src/androidTest/kotlin/com/artt/alchemy/ui
  git commit -m "feat: add settings and progress reset"
 ```
 

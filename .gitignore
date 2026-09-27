@@ -12,3 +12,6 @@ local.properties
 .android-engineering/runtime/
 .android-engineering/evidence/
 .worktrees/
+
+# Local Kotlin/Gradle state
+.kotlin/
