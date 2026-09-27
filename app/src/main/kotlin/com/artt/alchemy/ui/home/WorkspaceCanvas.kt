@@ -8,9 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -24,6 +27,7 @@ fun WorkspaceCanvas(
     items: List<WorkspaceItem>,
     onMove: (instanceId: Long, position: Offset) -> Unit,
     onResolve: (instanceId: Long, position: Offset) -> Unit,
+    onBoundsChanged: (Rect) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val currentItems by rememberUpdatedState(items)
@@ -35,6 +39,7 @@ fun WorkspaceCanvas(
             .fillMaxSize()
             .testTag("workspace_canvas")
             .semantics { contentDescription = currentItems.joinToString { AlchemyCatalog.elementsById.getValue(it.elementId).name } }
+            .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) }
             .pointerInput(Unit) {
                 var activeItemId: Long? = null
                 var lastPosition = Offset.Zero

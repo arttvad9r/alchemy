@@ -1,12 +1,13 @@
 package com.artt.alchemy.ui
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import com.artt.alchemy.MainActivity
@@ -18,32 +19,29 @@ class WorkspaceJourneyTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun draggingKnownIngredientsTogetherShowsResultOnWorkspace() {
-        composeRule.onNodeWithTag("palette_fire").performClick()
-        composeRule.onNodeWithTag("palette_water").performClick()
-        composeRule.onNodeWithTag("workspace_canvas").performTouchInput {
-            swipe(Offset(width * 0.68f, height * 0.5f), Offset(width * 0.32f, height * 0.5f), 300)
-        }
-        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Пар")).assertIsDisplayed()
+    fun draggingPaletteItemsIntoWorkspacePlacesThemAtTheirDropPositions() {
+        composeRule.onNodeWithTag("palette_fire").dragIntoWorkspace(2f)
+        composeRule.onNodeWithTag("palette_water").dragIntoWorkspace(3.2f)
+
+        composeRule
+            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь, Вода"))
+            .assertIsDisplayed()
     }
 
     @Test
-    fun invalidPairLeavesBothWorkspaceItemsInPlace() {
-        composeRule.onNodeWithTag("palette_fire").performClick()
-        composeRule.onNodeWithTag("palette_fire").performClick()
-        composeRule.onNodeWithTag("workspace_canvas").performTouchInput {
-            swipe(Offset(width * 0.68f, height * 0.5f), Offset(width * 0.32f, height * 0.5f), 300)
+    fun tappingPaletteItemDoesNotAddItToWorkspace() {
+        composeRule.onNodeWithTag("palette_fire").performTouchInput {
+            val center = Offset(width / 2f, height / 2f)
+            down(center)
+            up()
         }
-        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь, Огонь")).assertIsDisplayed()
+
+        composeRule.onNodeWithTag("workspace_canvas").assertContentDescriptionEquals("")
     }
 
-    @Test
-    fun draggingOutsideWorkspaceDeletesOnlyTheTemporaryItem() {
-        composeRule.onNodeWithTag("palette_fire").performClick()
-        composeRule.onNodeWithTag("workspace_canvas").performTouchInput {
-            swipe(Offset(width * 0.32f, height * 0.5f), Offset(-20f, height * 0.5f), 300)
+    private fun SemanticsNodeInteraction.dragIntoWorkspace(targetXMultiplier: Float) {
+        performTouchInput {
+            swipe(Offset(width * 0.5f, height * 0.5f), Offset(width * targetXMultiplier, -600f), 300)
         }
-        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("")).assertIsDisplayed()
-        composeRule.onNodeWithTag("palette_fire").assertIsDisplayed()
     }
 }

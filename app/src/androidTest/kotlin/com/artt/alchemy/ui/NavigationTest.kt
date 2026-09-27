@@ -1,11 +1,14 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import com.artt.alchemy.MainActivity
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +35,9 @@ class NavigationTest {
 
     @Test
     fun switchingTabsKeepsHomeWorkspaceState() {
-        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNodeWithTag("palette_fire").performTouchInput {
+            swipe(Offset(width * 0.5f, height * 0.5f), Offset(width * 2f, -600f), 300)
+        }
         composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь")).assertIsDisplayed()
 
         composeRule.onNodeWithTag("nav_elements").performClick()
