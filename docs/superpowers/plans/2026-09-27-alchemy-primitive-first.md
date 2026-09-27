@@ -79,10 +79,10 @@ README_RU.md
 
 Run:
 ```bash
-android create empty-activity --name='Алхимия' --applicationId=com.artt.alchemy --namespace=com.artt.alchemy --minSdk=31 --output=/home/artt/.hermes/cache/scratch/alchemy-template
+android create empty-activity --name='Алхимия' --minSdk=31 --output=/home/artt/.hermes/cache/scratch/alchemy-template
 ```
 
-Copy generated project files into the repository without replacing `docs/` or `.git/`; remove only the scratch template after the repository compiles.
+The installed CLI does not expose namespace/applicationId creation flags. In Step 2, set `namespace = "com.artt.alchemy"` and `applicationId = "com.artt.alchemy"` in the generated Gradle configuration and move Kotlin sources to that package before compiling.
 
 - [ ] **Step 2: Configure the template for this project**
 
