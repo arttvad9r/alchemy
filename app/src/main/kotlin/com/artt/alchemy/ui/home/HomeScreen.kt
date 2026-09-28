@@ -2,6 +2,9 @@ package com.artt.alchemy.ui.home
 
 import android.media.AudioManager
 import android.media.ToneGenerator
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -66,6 +69,7 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.ui.AlchemyUiState
+import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
@@ -75,12 +79,15 @@ import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
 
+private const val EFFECT_DURATION_MILLIS = 700
+
 @Composable
 fun HomeScreen(
     state: AlchemyUiState,
     onEvent: (WorkspaceEvent) -> Unit,
     onDismissNewElement: () -> Unit,
     onFeedbackHandled: () -> Unit,
+    onEffectConsumed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlocked = AlchemyCatalog.elements.filter { it.id in state.progress.unlockedIds }
@@ -91,6 +98,23 @@ fun HomeScreen(
     val previewHalfSize = with(androidx.compose.ui.platform.LocalDensity.current) { 36.dp.roundToPx() }
     val hapticFeedback = LocalHapticFeedback.current
     val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 40) }
+
+    // The effect is taken out of the UI state at once so it does not replay when Home is shown again.
+    var playingEffect by remember { mutableStateOf<CombinationEffect?>(null) }
+    val effectProgress = remember { Animatable(0f) }
+    LaunchedEffect(state.combinationEffect) {
+        state.combinationEffect?.let { effect ->
+            playingEffect = effect
+            onEffectConsumed()
+        }
+    }
+    LaunchedEffect(playingEffect) {
+        if (playingEffect != null) {
+            effectProgress.snapTo(0f)
+            effectProgress.animateTo(1f, tween(EFFECT_DURATION_MILLIS, easing = LinearOutSlowInEasing))
+            playingEffect = null
+        }
+    }
 
     DisposableEffect(toneGenerator) {
         onDispose(toneGenerator::release)
@@ -149,7 +173,9 @@ fun HomeScreen(
                     items = state.workspace.items,
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
-                    onBoundsChanged = { workspaceBounds = it }
+                    onBoundsChanged = { workspaceBounds = it },
+                    effect = playingEffect,
+                    effectProgress = { effectProgress.value }
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -232,7 +258,8 @@ fun HomeScreen(
         }
     }
 
-    state.newlyUnlockedId?.let { elementId ->
+    // The discovery card waits until the combination effect has played.
+    state.newlyUnlockedId?.takeIf { playingEffect == null }?.let { elementId ->
         AlertDialog(
             onDismissRequest = onDismissNewElement,
             title = { Text(stringResource(R.string.new_element_title)) },

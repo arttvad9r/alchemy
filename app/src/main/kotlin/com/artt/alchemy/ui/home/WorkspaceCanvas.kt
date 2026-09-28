@@ -17,6 +17,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
@@ -28,8 +29,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.WorkspaceItem
+import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.components.elementIconRes
 import kotlin.math.roundToInt
 
@@ -38,6 +41,11 @@ private const val LABEL_SIZE_FRACTION = 0.042f
 private const val ICON_SHARE = 0.66f
 private const val ICON_TOP_SHARE = 0.85f
 private const val LABEL_SHADOW_RADIUS = 6f
+private const val ALTAR_WIDTH_FRACTION = 0.72f
+private const val CIRCLE_WIDTH_SHARE = 0.78f
+private const val CIRCLE_PERSPECTIVE = 0.34f
+private const val CIRCLE_TOP_SHARE = 0.3f
+private const val SCENE_ALPHA = 0.9f
 
 @Composable
 fun WorkspaceCanvas(
@@ -45,6 +53,8 @@ fun WorkspaceCanvas(
     onMove: (instanceId: Long, position: Offset) -> Unit,
     onResolve: (instanceId: Long, position: Offset) -> Unit,
     onBoundsChanged: (Rect) -> Unit,
+    effect: CombinationEffect?,
+    effectProgress: () -> Float,
     modifier: Modifier = Modifier
 ) {
     val currentItems by rememberUpdatedState(items)
@@ -53,6 +63,12 @@ fun WorkspaceCanvas(
     val icons = items.map(WorkspaceItem::elementId).distinct().associateWith { elementId ->
         key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
     }
+    val altar = ImageBitmap.imageResource(R.drawable.scene_altar)
+    val magicCircle = ImageBitmap.imageResource(R.drawable.scene_magic_circle)
+    val flash = ImageBitmap.imageResource(R.drawable.fx_combine_flash)
+    val burst = ImageBitmap.imageResource(R.drawable.fx_success_burst)
+    val sparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_gold)
+
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val labelPaint = remember(labelColor) {
         android.graphics.Paint().apply {
@@ -98,6 +114,7 @@ fun WorkspaceCanvas(
                 }
             }
     ) {
+        drawScene(altar, magicCircle)
         val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
         labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
         currentItems.forEach { item ->
@@ -115,7 +132,52 @@ fun WorkspaceCanvas(
             val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
             drawContext.canvas.nativeCanvas.drawText(element.name, center.x, labelBaseline, labelPaint)
         }
+        effect?.let { current ->
+            val progress = effectProgress()
+            val center = Offset(current.xFraction * size.width, current.yFraction * size.height)
+            val fade = 1f - progress
+            if (current.isDiscovery) {
+                drawCentered(burst, center, radius * (2.4f + 1.6f * progress), fade)
+                drawCentered(sparkles, center, radius * 3.2f, fade)
+            }
+            drawCentered(flash, center, radius * (1.6f + 2f * progress), fade)
+        }
     }
+}
+
+/** Altar with the magic circle on its top, anchored to the bottom of the workspace. */
+private fun DrawScope.drawScene(altar: ImageBitmap, magicCircle: ImageBitmap) {
+    val altarWidth = size.width * ALTAR_WIDTH_FRACTION
+    val altarHeight = altarWidth * altar.height / altar.width
+    val altarTop = size.height - altarHeight
+    drawImage(
+        image = altar,
+        dstOffset = IntOffset(((size.width - altarWidth) / 2).roundToInt(), altarTop.roundToInt()),
+        dstSize = IntSize(altarWidth.roundToInt(), altarHeight.roundToInt()),
+        alpha = SCENE_ALPHA,
+        filterQuality = FilterQuality.Medium
+    )
+    // The glyph lies flat on the platform, so it is squashed vertically.
+    val circleWidth = altarWidth * CIRCLE_WIDTH_SHARE
+    val circleHeight = circleWidth * CIRCLE_PERSPECTIVE
+    drawImage(
+        image = magicCircle,
+        dstOffset = IntOffset(((size.width - circleWidth) / 2).roundToInt(), (altarTop + altarHeight * CIRCLE_TOP_SHARE - circleHeight / 2).roundToInt()),
+        dstSize = IntSize(circleWidth.roundToInt(), circleHeight.roundToInt()),
+        alpha = SCENE_ALPHA,
+        filterQuality = FilterQuality.Medium
+    )
+}
+
+private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float) {
+    val height = width * image.height / image.width
+    drawImage(
+        image = image,
+        dstOffset = IntOffset((center.x - width / 2).roundToInt(), (center.y - height / 2).roundToInt()),
+        dstSize = IntSize(width.roundToInt(), height.roundToInt()),
+        alpha = alpha.coerceIn(0f, 1f),
+        filterQuality = FilterQuality.Medium
+    )
 }
 
 private fun normalize(position: Offset, width: Int, height: Int): Offset = Offset(position.x / width, position.y / height)

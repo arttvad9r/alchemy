@@ -59,6 +59,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                         onEvent = viewModel::onWorkspaceEvent,
                         onDismissNewElement = viewModel::dismissNewElement,
                         onFeedbackHandled = viewModel::consumeCombinationFeedback,
+                        onEffectConsumed = viewModel::consumeCombinationEffect,
                         modifier = Modifier.padding(padding)
                     )
                     AppTab.ELEMENTS -> ElementsScreen(state.progress, Modifier.padding(padding))
