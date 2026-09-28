@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -83,6 +84,7 @@ import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
 
 private const val EFFECT_DURATION_MILLIS = 700
+private const val DISCOVERY_CARD_AFTER_EFFECT = 0.3f
 private const val TRANSITION_DURATION_MILLIS = 450L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
 
@@ -122,6 +124,8 @@ fun HomeScreen(
             effectProgress.snapTo(0f)
             effectProgress.animateTo(1f, tween(EFFECT_DURATION_MILLIS, easing = LinearOutSlowInEasing))
             playingEffect = null
+            // Back to the start, so the next effect never begins looking already half played.
+            effectProgress.snapTo(0f)
         }
     }
 
@@ -264,9 +268,10 @@ fun HomeScreen(
         }
     }
 
-    // The discovery card waits until the combination effect has played. The effect is still in the UI state
-    // for the first frame, before it is taken to play, so both are checked.
-    state.newlyUnlockedId?.takeIf { playingEffect == null && state.combinationEffect == null }?.let { elementId ->
+    // The discovery card comes up once the flash has shown, while the burst plays on beneath it. The effect is
+    // still in the UI state for the first frame, before it is taken to play, so that is checked too.
+    val effectShown by remember { derivedStateOf { effectProgress.value >= DISCOVERY_CARD_AFTER_EFFECT } }
+    state.newlyUnlockedId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
         AlchemyDialog(onDismissRequest = onDismissNewElement, panelRes = R.drawable.dialog_gold) {
             // Scrolls on small screens with large text, so the button is never pushed out of reach.

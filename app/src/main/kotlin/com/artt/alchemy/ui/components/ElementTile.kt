@@ -27,8 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.LocaleList
-import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
@@ -135,7 +133,7 @@ val ElementRarity.labelRes: Int
 
 /**
  * An element's fact set as a short piece of reading text: body size, medium weight, single line spacing
- * and a paragraph indent, justified with hyphenation so narrow lines do not open wide gaps.
+ * and a paragraph indent, justified without hyphenation.
  */
 @Composable
 fun FactText(text: String, modifier: Modifier = Modifier) {
@@ -146,10 +144,7 @@ fun FactText(text: String, modifier: Modifier = Modifier) {
             // Single spacing: the font's own line height.
             lineHeight = TextUnit.Unspecified,
             textIndent = TextIndent(firstLine = FACT_FONT_SIZE * FACT_INDENT),
-            hyphens = Hyphens.Auto,
-            lineBreak = LineBreak.Paragraph,
-            // Hyphenation follows the text's language, not the system's, so it works on any device.
-            localeList = LocaleList("ru")
+            lineBreak = LineBreak.Paragraph
         ),
         fontSize = FACT_FONT_SIZE,
         color = MaterialTheme.colorScheme.onSurface,
