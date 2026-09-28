@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,9 +26,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.LocaleList
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
@@ -124,3 +132,44 @@ val ElementRarity.labelRes: Int
         ElementRarity.EPIC -> R.string.rarity_epic
         ElementRarity.LEGENDARY -> R.string.rarity_legendary
     }
+
+/**
+ * An element's fact set as a short piece of reading text: body size, medium weight, single line spacing
+ * and a paragraph indent, justified with hyphenation so narrow lines do not open wide gaps.
+ */
+@Composable
+fun FactText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text = remember(text) { withTypographicBinding(text) },
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontWeight = FontWeight.Medium,
+            // Single spacing: the font's own line height.
+            lineHeight = TextUnit.Unspecified,
+            textIndent = TextIndent(firstLine = FACT_FONT_SIZE * FACT_INDENT),
+            hyphens = Hyphens.Auto,
+            lineBreak = LineBreak.Paragraph,
+            // Hyphenation follows the text's language, not the system's, so it works on any device.
+            localeList = LocaleList("ru")
+        ),
+        fontSize = FACT_FONT_SIZE,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Justify,
+        modifier = modifier
+    )
+}
+
+private val FACT_FONT_SIZE = 16.sp
+
+private const val NO_BREAK_SPACE = '\u00A0'
+private const val WORD_JOINER = '\u2060'
+private val NUMBER_BEFORE_WORD = Regex("""(\d) """)
+
+/**
+ * Russian typesetting rules for line breaks: a number stays with the word after it ("408 км/ч"),
+ * a dash never starts a line, and a unit like "км/ч" is not split at its slash.
+ */
+internal fun withTypographicBinding(text: String): String = text
+    .replace(NUMBER_BEFORE_WORD, "$1$NO_BREAK_SPACE")
+    .replace(" —", "$NO_BREAK_SPACE—")
+    .replace("/", "/$WORD_JOINER")
+private const val FACT_INDENT = 1.5f

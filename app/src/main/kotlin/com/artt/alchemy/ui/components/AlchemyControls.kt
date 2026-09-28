@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
 import kotlin.math.roundToInt
@@ -70,6 +71,9 @@ private const val PROGRESS_INSET_X = 6f
 private const val PROGRESS_INSET_Y = 7f
 
 private val SEARCH_ICON_SPACE = 60.dp
+
+private const val DIALOG_WIDTH_FRACTION = 0.9f
+private val DIALOG_MAX_WIDTH = 480.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
     BLUE(R.drawable.btn_blue, Color.White),
@@ -151,11 +155,14 @@ fun AlchemyDialog(
     @DrawableRes panelRes: Int,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Dialog(onDismissRequest = onDismissRequest) {
+    // A set width instead of the platform's narrow default, so reading text gets long enough lines.
+    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val art = ImageBitmap.imageResource(panelRes)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .fillMaxWidth(DIALOG_WIDTH_FRACTION)
+                .widthIn(max = DIALOG_MAX_WIDTH)
                 .drawBehind { drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height)) }
                 // Clears the ornaments on the top and bottom edges of the panel art.
                 .padding(start = 32.dp, top = 52.dp, end = 32.dp, bottom = 44.dp),

@@ -56,8 +56,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.Hyphens
-import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -74,6 +72,7 @@ import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
+import com.artt.alchemy.ui.components.FactText
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.panelBackground
@@ -276,14 +275,7 @@ fun HomeScreen(
                 FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
                 RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
                 Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
-                // Justified, with hyphenation so narrow lines do not open wide gaps between words.
-                Text(
-                    elementFacts.getValue(elementId),
-                    style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto, lineBreak = LineBreak.Paragraph),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Justify,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
-                )
+                FactText(elementFacts.getValue(elementId), Modifier.padding(top = 8.dp, bottom = 16.dp))
                 AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
                     onClick()
                     onDismissNewElement()
