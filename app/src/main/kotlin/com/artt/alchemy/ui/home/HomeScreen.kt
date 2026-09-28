@@ -289,8 +289,9 @@ fun HomeScreen(
         }
     }
 
-    // The discovery card waits until the combination effect has played.
-    state.newlyUnlockedId?.takeIf { playingEffect == null }?.let { elementId ->
+    // The discovery card waits until the combination effect has played. The effect is still in the UI state
+    // for the first frame, before it is taken to play, so both are checked.
+    state.newlyUnlockedId?.takeIf { playingEffect == null && state.combinationEffect == null }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
         AlchemyDialog(onDismissRequest = onDismissNewElement, panelRes = R.drawable.dialog_gold) {
             Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
