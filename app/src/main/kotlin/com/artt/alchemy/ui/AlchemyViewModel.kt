@@ -50,7 +50,9 @@ data class AlchemyUiState(
     val itemTransitions: List<ItemTransition> = emptyList(),
     val isResetConfirmationVisible: Boolean = false,
     // Ids of achievements earned and not yet announced; the first one is on screen.
-    val achievementQueue: List<String> = emptyList()
+    val achievementQueue: List<String> = emptyList(),
+    // Elements found this session that the catalog has not shown yet.
+    val freshElementIds: Set<String> = emptySet()
 )
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
@@ -96,6 +98,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             progress = progress,
             workspace = result.workspace,
             newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
+            freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
             achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress)
         )
     }
@@ -130,6 +133,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun dismissAchievement() {
         state = state.copy(achievementQueue = state.achievementQueue.drop(1))
+    }
+
+    fun markElementsSeen() {
+        if (state.freshElementIds.isNotEmpty()) state = state.copy(freshElementIds = emptySet())
     }
 
     fun dismissNewElement() {

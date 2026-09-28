@@ -3,7 +3,9 @@ package com.artt.alchemy.ui.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,9 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
@@ -79,6 +84,7 @@ import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
+import kotlinx.coroutines.currentCoroutineContext
 
 private const val EFFECT_DURATION_MILLIS = 700
 private const val DISCOVERY_CARD_AFTER_EFFECT = 0.3f
@@ -139,6 +145,7 @@ fun HomeScreen(
         workspaceBounds?.let { bounds -> Offset((origin.x - bounds.left) / bounds.width, (origin.y - bounds.top) / bounds.height) }
     }
     var transitionClock by remember { mutableLongStateOf(0L) }
+    var transitionDuration by remember { mutableLongStateOf(TRANSITION_DURATION_MILLIS) }
     LaunchedEffect(state.itemTransitions) {
         if (state.itemTransitions.isNotEmpty()) {
             val now = withFrameMillis { it }
@@ -147,14 +154,9 @@ fun HomeScreen(
             onTransitionsConsumed()
         }
     }
-    val hasPlayingTransitions = playingTransitions.isNotEmpty()
-    LaunchedEffect(hasPlayingTransitions) {
-        while (playingTransitions.isNotEmpty()) {
-            withFrameMillis { now ->
-                transitionClock = now
-                playingTransitions.removeAll { now - it.startMillis >= TRANSITION_DURATION_MILLIS }
-            }
-        }
+    TransitionClock(playingTransitions) { now, duration ->
+        transitionClock = now
+        transitionDuration = duration
     }
 
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
@@ -195,7 +197,7 @@ fun HomeScreen(
                             playingTransitions.map {
                                 TransitionFrame(
                                     it.transition,
-                                    ((transitionClock - it.startMillis).toFloat() / TRANSITION_DURATION_MILLIS).coerceIn(0f, 1f),
+                                    ((transitionClock - it.startMillis).toFloat() / transitionDuration).coerceIn(0f, 1f),
                                     it.origin
                                 )
                             }
@@ -309,10 +311,23 @@ fun HomeScreen(
 /** How many elements are open out of the whole catalog, on a small panel with a book. */
 @Composable
 private fun ProgressCounter(unlocked: Int) {
+    val bounce = remember { Animatable(1f) }
+    var previous by remember { mutableIntStateOf(unlocked) }
+    LaunchedEffect(unlocked) {
+        if (unlocked > previous) {
+            bounce.snapTo(COUNTER_BOUNCE_SCALE)
+            bounce.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+        }
+        previous = unlocked
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
+            .graphicsLayer {
+                scaleX = bounce.value
+                scaleY = bounce.value
+            }
             .background(PanelColor, RoundedCornerShape(12.dp))
             .border(1.dp, PanelBorderColor, RoundedCornerShape(12.dp))
             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -325,6 +340,25 @@ private fun ProgressCounter(unlocked: Int) {
         )
     }
 }
+
+/** Ticks every frame while transitions play, reporting the frame time and how long a transition lasts. */
+@Composable
+private fun TransitionClock(playing: MutableList<PlayingTransition>, onTick: (now: Long, duration: Long) -> Unit) {
+    val hasPlaying = playing.isNotEmpty()
+    LaunchedEffect(hasPlaying) {
+        // Follows the system's animation scale, like the animations Compose times itself.
+        val scale = currentCoroutineContext()[MotionDurationScale]?.scaleFactor ?: 1f
+        val duration = (TRANSITION_DURATION_MILLIS * scale).toLong().coerceAtLeast(1L)
+        while (playing.isNotEmpty()) {
+            withFrameMillis { now ->
+                onTick(now, duration)
+                playing.removeAll { now - it.startMillis >= duration }
+            }
+        }
+    }
+}
+
+private const val COUNTER_BOUNCE_SCALE = 1.25f
 
 private data class PlayingTransition(val transition: ItemTransition, val startMillis: Long, val origin: Offset?)
 

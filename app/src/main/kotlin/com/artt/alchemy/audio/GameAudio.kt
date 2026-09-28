@@ -1,5 +1,8 @@
 package com.artt.alchemy.audio
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -46,27 +49,58 @@ class SoundEffects(context: Context) {
 /** The looping background track, created on first start and kept paused while the app is hidden. */
 class BackgroundMusic(private val context: Context) {
     private var player: MediaPlayer? = null
+    private var fade: ValueAnimator? = null
+    private var currentVolume = 0f
 
     fun start() {
         val current = player ?: MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)?.apply {
             isLooping = true
-            setVolume(MUSIC_VOLUME, MUSIC_VOLUME)
+            setVolume(0f, 0f)
         }?.also { player = it } ?: return
         if (!current.isPlaying) current.start()
+        fadeTo(current, MUSIC_VOLUME) {}
     }
 
     fun pause() {
-        player?.takeIf { it.isPlaying }?.pause()
+        val current = player?.takeIf { it.isPlaying } ?: return
+        fadeTo(current, 0f) { current.pause() }
     }
 
     fun release() {
+        fade?.cancel()
+        fade = null
         player?.release()
         player = null
+    }
+
+    private fun fadeTo(target: MediaPlayer, volume: Float, onEnd: () -> Unit) {
+        fade?.cancel()
+        val from = currentVolume
+        fade = ValueAnimator.ofFloat(from, volume).apply {
+            duration = FADE_MILLIS
+            addUpdateListener { animator ->
+                currentVolume = animator.animatedValue as Float
+                target.setVolume(currentVolume, currentVolume)
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                private var cancelled = false
+
+                override fun onAnimationCancel(animation: Animator) {
+                    cancelled = true
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    if (!cancelled) onEnd()
+                }
+            })
+            start()
+        }
     }
 
     private companion object {
         // Quiet enough to sit under the effects.
         const val MUSIC_VOLUME = 0.26f
+        const val FADE_MILLIS = 300L
     }
 }
 

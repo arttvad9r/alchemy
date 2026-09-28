@@ -47,6 +47,7 @@
     <string name="cancel">Отмена</string>
     <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
+    <string name="element_new_badge">Новое</string>
     <string name="new_element_title">Новый элемент</string>
     <string name="new_element_message">Открыт элемент: %1$s</string>
 </resources>

@@ -1,17 +1,21 @@
 package com.artt.alchemy.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -56,6 +60,10 @@ import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
 import kotlin.math.roundToInt
 
+private const val PRESS_MILLIS = 90
+private const val PRESSED_SCALE = 0.96f
+private const val PRESSED_ALPHA = 0.85f
+
 /** A source range of the art; fixed segments keep their proportions, stretched ones absorb the rest. */
 private data class Segment(val start: Float, val end: Float, val stretch: Boolean)
 
@@ -98,13 +106,23 @@ enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
 @Composable
 fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val art = ImageBitmap.imageResource(style.res)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val press by animateFloatAsState(if (pressed) 1f else 0f, tween(PRESS_MILLIS), label = "buttonPress")
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .defaultMinSize(minHeight = 48.dp)
             .widthIn(min = 96.dp)
+            // The press follows the art's own shape; the platform ripple would be a plain rectangle.
+            .graphicsLayer {
+                val scale = 1f - (1f - PRESSED_SCALE) * press
+                scaleX = scale
+                scaleY = scale
+                alpha = 1f - (1f - PRESSED_ALPHA) * press
+            }
             .drawBehind { drawSliced(art, CapSegments, WholeHeight, size.height / art.height) }
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(interactionSource = interactionSource, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge, color = style.textColor)
@@ -132,13 +150,19 @@ fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: M
 
 @Composable
 fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(if (checked) R.drawable.toggle_on else R.drawable.toggle_off),
-        contentDescription = null,
+    Box(
         modifier = modifier
             .size(width = 64.dp, height = 34.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-    )
+    ) {
+        Crossfade(targetState = checked, animationSpec = tween(PRESS_MILLIS * 2), label = "toggle") { on ->
+            Image(
+                painter = painterResource(if (on) R.drawable.toggle_on else R.drawable.toggle_off),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }
 
 /** Single-line Material text field drawn over the search field art, which has the magnifier drawn in. */
