@@ -48,10 +48,11 @@ fun ElementsScreen(progress: PlayerProgress, onClick: () -> Unit, modifier: Modi
     var query by remember { mutableStateOf("") }
     var openedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
+    // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
     val entries = AlchemyCatalog.elements.filter { element ->
         (selectedGroup == null || element.group == selectedGroup) &&
             (query.isBlank() || (element.id in progress.unlockedIds && element.name.contains(query, ignoreCase = true)))
-    }
+    }.sortedBy { it.id !in progress.unlockedIds }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // Three columns on a phone keep long names whole even with large text; wider screens get more.
