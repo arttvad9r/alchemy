@@ -6,24 +6,37 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.WorkspaceItem
+import com.artt.alchemy.ui.components.elementIconRes
+import kotlin.math.roundToInt
 
 private const val ITEM_RADIUS_FRACTION = 0.11f
+private const val LABEL_SIZE_FRACTION = 0.042f
+private const val ICON_SHARE = 0.66f
+private const val ICON_TOP_SHARE = 0.85f
 
 @Composable
 fun WorkspaceCanvas(
@@ -36,6 +49,18 @@ fun WorkspaceCanvas(
     val currentItems by rememberUpdatedState(items)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnResolve by rememberUpdatedState(onResolve)
+    val icons = items.map(WorkspaceItem::elementId).distinct().associateWith { elementId ->
+        key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
+    }
+    val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val labelPaint = remember(labelColor) {
+        android.graphics.Paint().apply {
+            color = labelColor
+            textAlign = android.graphics.Paint.Align.CENTER
+            isFakeBoldText = true
+            isAntiAlias = true
+        }
+    }
 
     Canvas(
         modifier = modifier
@@ -70,21 +95,22 @@ fun WorkspaceCanvas(
                 }
             }
     ) {
+        val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
+        labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
         currentItems.forEach { item ->
             val element = AlchemyCatalog.elementsById.getValue(item.elementId)
             val center = Offset(item.xFraction * size.width, item.yFraction * size.height)
-            drawCircle(color = Color(element.color), radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION, center = center)
-            drawContext.canvas.nativeCanvas.drawText(
-                element.name,
-                center.x,
-                center.y,
-                android.graphics.Paint().apply {
-                    color = android.graphics.Color.WHITE
-                    textAlign = android.graphics.Paint.Align.CENTER
-                    textSize = minOf(size.width, size.height) * 0.09f
-                    isFakeBoldText = true
-                }
+            val icon = icons[item.elementId] ?: return@forEach
+            // Icon and label share the item's square so the label stays inside the workspace like the icon.
+            val iconSize = radius * 2 * ICON_SHARE
+            drawImage(
+                image = icon,
+                dstOffset = IntOffset((center.x - iconSize / 2).roundToInt(), (center.y - radius * ICON_TOP_SHARE).roundToInt()),
+                dstSize = IntSize(iconSize.roundToInt(), iconSize.roundToInt()),
+                filterQuality = FilterQuality.Medium
             )
+            val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
+            drawContext.canvas.nativeCanvas.drawText(element.name, center.x, labelBaseline, labelPaint)
         }
     }
 }

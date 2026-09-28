@@ -61,7 +61,8 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.ui.AlchemyUiState
-import com.artt.alchemy.ui.components.PrimitiveElement
+import com.artt.alchemy.ui.components.ElementIcon
+import com.artt.alchemy.ui.components.ElementTile
 import kotlin.math.roundToInt
 
 @Composable
@@ -173,7 +174,7 @@ fun HomeScreen(
         val position = dragPosition
         val bounds = homeBounds
         if (element != null && position != null && bounds != null) {
-            PrimitiveElement(
+            ElementTile(
                 element = element,
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -194,7 +195,13 @@ fun HomeScreen(
         AlertDialog(
             onDismissRequest = onDismissNewElement,
             title = { Text(stringResource(R.string.new_element_title)) },
-            text = { Text(stringResource(R.string.new_element_message, AlchemyCatalog.elementsById.getValue(elementId).name)) },
+            text = {
+                val element = AlchemyCatalog.elementsById.getValue(elementId)
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                    ElementIcon(element, Modifier.width(120.dp))
+                    Text(stringResource(R.string.new_element_message, element.name))
+                }
+            },
             confirmButton = {
                 TextButton(onClick = onDismissNewElement) { Text(stringResource(R.string.ok)) }
             }
@@ -247,7 +254,7 @@ private fun DraggablePaletteElement(
     val currentOnDragPosition by rememberUpdatedState(onDragPosition)
     val currentOnDrop by rememberUpdatedState(onDrop)
 
-    PrimitiveElement(
+    ElementTile(
         element = element,
         modifier = modifier.onGloballyPositioned { coordinates = it }
             .pointerInput(element.id) {

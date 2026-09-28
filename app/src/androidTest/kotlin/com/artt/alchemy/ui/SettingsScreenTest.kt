@@ -25,7 +25,7 @@ class SettingsScreenTest {
         composeRule.onNodeWithTag("settings_sound").assertIsOff()
 
         composeRule.onNodeWithTag("nav_home").performClick()
-        composeRule.onNodeWithText("4 / 120").assertIsDisplayed()
+        composeRule.onNodeWithText("4 / 180").assertIsDisplayed()
     }
 
     @Test
