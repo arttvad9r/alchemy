@@ -45,6 +45,7 @@
     <string name="reset_confirmation_message">Откроются только четыре базовых элемента. Это действие нельзя отменить.</string>
     <string name="reset_confirm">Сбросить</string>
     <string name="cancel">Отмена</string>
+    <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
     <string name="new_element_title">Новый элемент</string>
     <string name="new_element_message">Открыт элемент: %1$s</string>

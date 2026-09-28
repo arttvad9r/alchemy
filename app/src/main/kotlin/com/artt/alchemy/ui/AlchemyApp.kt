@@ -76,7 +76,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                         onTransitionsConsumed = viewModel::consumeItemTransitions,
                         modifier = Modifier.padding(padding)
                     )
-                    AppTab.ELEMENTS -> ElementsScreen(state.progress, Modifier.padding(padding))
+                    AppTab.ELEMENTS -> ElementsScreen(state.progress, onClick = viewModel::onButtonClick, modifier = Modifier.padding(padding))
                     AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
                     AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
                     AppTab.SETTINGS -> SettingsScreen(

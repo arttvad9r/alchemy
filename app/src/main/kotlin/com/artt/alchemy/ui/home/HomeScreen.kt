@@ -54,6 +54,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -61,6 +62,7 @@ import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
+import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.ItemTransition
@@ -267,7 +269,14 @@ fun HomeScreen(
             Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
             FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
             RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
-            Text(stringResource(R.string.new_element_message, element.name), modifier = Modifier.padding(bottom = 16.dp))
+            Text(stringResource(R.string.new_element_message, element.name))
+            Text(
+                elementFacts.getValue(elementId),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+            )
             AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
                 onClick()
                 onDismissNewElement()

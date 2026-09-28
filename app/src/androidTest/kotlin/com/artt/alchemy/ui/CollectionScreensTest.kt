@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.MainActivity
+import com.artt.alchemy.game.elementFacts
 import org.junit.Rule
 import org.junit.Test
 
@@ -42,5 +43,16 @@ class CollectionScreensTest {
             composeRule.onNodeWithTag("nav_$tab").performClick()
             composeRule.onNode(isHeading() and hasText(title)).assertIsDisplayed()
         }
+    }
+
+    @Test
+    fun openElementShowsItsFactAndCloses() {
+        composeRule.onNodeWithTag("nav_elements").performClick()
+        composeRule.onNodeWithTag("element_fire").performClick()
+
+        composeRule.onNodeWithText(elementFacts.getValue("fire")).assertIsDisplayed()
+
+        composeRule.onNodeWithTag("element_details_close").performClick()
+        composeRule.onNodeWithTag("element_details").assertDoesNotExist()
     }
 }

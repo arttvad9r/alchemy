@@ -1,5 +1,6 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -43,8 +44,9 @@ import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
 
 @Composable
-fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
+fun ElementsScreen(progress: PlayerProgress, onClick: () -> Unit, modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
+    var openedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
     val entries = AlchemyCatalog.elements.filter { element ->
         (selectedGroup == null || element.group == selectedGroup) &&
@@ -94,22 +96,35 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
             items(entries.chunked(columns), key = { row -> row.first().id }) { row ->
                 Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                     row.forEach { element ->
-                        ElementCard(element, unlocked = element.id in progress.unlockedIds, Modifier.weight(1f).fillMaxHeight())
+                        val unlocked = element.id in progress.unlockedIds
+                        ElementCard(
+                            element,
+                            unlocked = unlocked,
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            onOpen = {
+                                onClick()
+                                openedElement = element
+                            }.takeIf { unlocked }
+                        )
                     }
                     repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
         }
     }
+    openedElement?.let { element ->
+        ElementDetailsDialog(element, onDismiss = { openedElement = null })
+    }
 }
 
 @Composable
-private fun ElementCard(element: ElementDefinition, unlocked: Boolean, modifier: Modifier = Modifier) {
+private fun ElementCard(element: ElementDefinition, unlocked: Boolean, modifier: Modifier = Modifier, onOpen: (() -> Unit)? = null) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .padding(3.dp)
             .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
+            .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
             .panelBackground(R.drawable.card_base)
             // Clears the ornament on the top edge of the card art.
             .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
