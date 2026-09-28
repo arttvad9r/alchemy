@@ -55,6 +55,8 @@ UI_ASSETS = {
     "ui/buttons/search_field.png": ("field_search", 512),
     "ui/panels_states/undiscovered_question_panel.png": ("element_unknown", 256),
     "ui/panels_states/card_base.png": ("card_base", 512),
+    "ui/panels_states/selected_ring_blue.png": ("fx_selected_ring", 256),
+    "effects/energy_ring.png": ("fx_energy_ring", 512),
 }
 
 PROGRESS_BAR = "ui/buttons/progress_bar.png"

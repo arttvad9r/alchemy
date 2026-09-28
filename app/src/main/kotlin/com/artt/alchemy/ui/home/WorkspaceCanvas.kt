@@ -10,8 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -46,6 +48,7 @@ private const val LABEL_SHADOW_RADIUS = 6f
 private const val WATERMARK_SIZE_FRACTION = 0.85f
 private const val WATERMARK_ALPHA = 0.28f
 private const val SMOKE_ALPHA = 0.9f
+private const val HELD_RING_SHARE = 1.45f
 
 @Composable
 fun WorkspaceCanvas(
@@ -61,6 +64,7 @@ fun WorkspaceCanvas(
     val currentItems by rememberUpdatedState(items)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnResolve by rememberUpdatedState(onResolve)
+    var heldId by remember { mutableStateOf<Long?>(null) }
     val icons = items.map(WorkspaceItem::elementId).distinct().associateWith { elementId ->
         key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
     }
@@ -70,6 +74,8 @@ fun WorkspaceCanvas(
     val sparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_gold)
     val appearSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_blue)
     val smoke = ImageBitmap.imageResource(R.drawable.fx_smoke_puff)
+    val heldRing = ImageBitmap.imageResource(R.drawable.fx_selected_ring)
+    val energyRing = ImageBitmap.imageResource(R.drawable.fx_energy_ring)
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val labelPaint = remember(labelColor) {
@@ -98,21 +104,26 @@ fun WorkspaceCanvas(
                             distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
                         }
                         ?: return@awaitEachGesture
-                    var lastPosition = down.position
-                    val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
-                        change.consume()
-                        lastPosition = change.position
-                        currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
-                    } ?: return@awaitEachGesture
+                    heldId = item.instanceId
+                    try {
+                        var lastPosition = down.position
+                        val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
+                            change.consume()
+                            lastPosition = change.position
+                            currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                        } ?: return@awaitEachGesture
 
-                    drag(dragStart.id) { change ->
-                        change.consume()
-                        lastPosition = change.position
-                        currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                        drag(dragStart.id) { change ->
+                            change.consume()
+                            lastPosition = change.position
+                            currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                        }
+                        val position = normalize(lastPosition, size.width, size.height)
+                        currentOnMove(item.instanceId, position)
+                        if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
+                    } finally {
+                        heldId = null
                     }
-                    val position = normalize(lastPosition, size.width, size.height)
-                    currentOnMove(item.instanceId, position)
-                    if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
                 }
             }
     ) {
@@ -125,6 +136,10 @@ fun WorkspaceCanvas(
             val icon = icons[item.elementId] ?: return@forEach
             // Icon and label share the item's square so the label stays inside the workspace like the icon.
             val iconSize = radius * 2 * ICON_SHARE
+            if (item.instanceId == heldId) {
+                val iconCenter = Offset(center.x, center.y - radius * ICON_TOP_SHARE + iconSize / 2)
+                drawCentered(heldRing, iconCenter, iconSize * HELD_RING_SHARE, 1f)
+            }
             drawImage(
                 image = icon,
                 dstOffset = IntOffset((center.x - iconSize / 2).roundToInt(), (center.y - radius * ICON_TOP_SHARE).roundToInt()),
@@ -149,6 +164,8 @@ fun WorkspaceCanvas(
             if (current.isDiscovery) {
                 drawCentered(burst, center, radius * (2.4f + 1.6f * progress), fade)
                 drawCentered(sparkles, center, radius * 3.2f, fade)
+            } else {
+                drawCentered(energyRing, center, radius * (1.4f + 2.2f * progress), fade)
             }
             drawCentered(flash, center, radius * (1.6f + 2f * progress), fade)
         }
