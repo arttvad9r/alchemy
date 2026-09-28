@@ -41,16 +41,20 @@ data class AchievementDefinition(
     val current: (PlayerProgress) -> Int
 )
 
+// The base elements are given at the start, so only elements found by mixing count.
+private val PlayerProgress.discoveredIds: Set<String>
+    get() = unlockedIds - AlchemyCatalog.baseElementIds
+
 private val achievements = listOf(
-    AchievementDefinition("first_unlocks", R.string.achievement_first_unlocks, 10) { it.unlockedIds.size },
+    AchievementDefinition("first_unlocks", R.string.achievement_first_unlocks, 10) { it.discoveredIds.size },
     AchievementDefinition("mixes", R.string.achievement_mixes, 25) { it.successfulMixCount },
     AchievementDefinition("experiments", R.string.achievement_experiments, 50) { it.mixAttemptCount }
 ) + ElementGroup.entries.map { group ->
     AchievementDefinition(
         id = "group_${group.name.lowercase()}",
         title = group.achievementTitleRes,
-        target = AlchemyCatalog.elements.count { it.group == group }
-    ) { progress -> progress.unlockedIds.count { AlchemyCatalog.elementsById.getValue(it).group == group } }
+        target = AlchemyCatalog.elements.count { it.group == group && it.id !in AlchemyCatalog.baseElementIds }
+    ) { progress -> progress.discoveredIds.count { AlchemyCatalog.elementsById.getValue(it).group == group } }
 }
 
 @Composable
