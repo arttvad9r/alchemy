@@ -4,10 +4,13 @@
 
 ## `assets/`
 
-- `catalog/` — базовый пакет Clean Assets v2: 192 файла. Включает иконки элементов, UI, фоны, эффекты, реквизит, исходные листы и превью.
-- `remaining-elements/` — пакет 138 недостающих элементов: 298 файлов. Включает `png_512/`, обрезанные PNG, исходные листы и превью.
+Все ассеты лежат в одной структуре, сгруппированной по назначению:
 
-В каждой папке сохранены исходные `README_RU.md` и манифесты `asset_manifest.csv` / `asset_manifest.json`.
+- `elements/` — все иконки элементов; `trimmed/` содержит их обрезанные варианты.
+- `backgrounds/`, `combine_scene/`, `effects/`, `props/`, `ui/` — фоны, сцена объединения, эффекты, реквизит и интерфейс.
+- `previews/` и `raw_sheets/` — листы предпросмотра и исходные листы.
+
+Исходные описания и манифесты сохранены в корне `assets/` с понятными именами: `README_CATALOG_RU.md`, `README_REMAINING_ELEMENTS_RU.md`, `asset_manifest_catalog.*` и `asset_manifest_remaining_elements.*`.
 
 ## `references/`
 
