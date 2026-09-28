@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
@@ -36,10 +38,11 @@ fun ElementDetailsDialog(element: ElementDefinition, onDismiss: () -> Unit) {
             FramedElementIcon(element, Modifier.width(120.dp))
             Text(element.name, style = MaterialTheme.typography.headlineSmall, color = Gold, modifier = Modifier.padding(top = 8.dp))
             RarityBadge(element.rarity, Modifier.padding(top = 4.dp))
+            // Justified, with hyphenation so narrow lines do not open wide gaps between words.
             Text(
                 elementFacts.getValue(element.id),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium.copy(hyphens = Hyphens.Auto, lineBreak = LineBreak.Paragraph),
+                textAlign = TextAlign.Justify,
                 modifier = Modifier.padding(top = 12.dp)
             )
             AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 16.dp).testTag("element_details_close"))

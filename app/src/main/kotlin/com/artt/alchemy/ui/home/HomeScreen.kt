@@ -30,7 +30,9 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,6 +56,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -266,21 +270,25 @@ fun HomeScreen(
     state.newlyUnlockedId?.takeIf { playingEffect == null && state.combinationEffect == null }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
         AlchemyDialog(onDismissRequest = onDismissNewElement, panelRes = R.drawable.dialog_gold) {
-            Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
-            FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
-            RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
-            Text(stringResource(R.string.new_element_message, element.name))
-            Text(
-                elementFacts.getValue(elementId),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
-            )
-            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
-                onClick()
-                onDismissNewElement()
-            })
+            // Scrolls on small screens with large text, so the button is never pushed out of reach.
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
+                FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
+                RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
+                Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
+                // Justified, with hyphenation so narrow lines do not open wide gaps between words.
+                Text(
+                    elementFacts.getValue(elementId),
+                    style = MaterialTheme.typography.bodySmall.copy(hyphens = Hyphens.Auto, lineBreak = LineBreak.Paragraph),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                )
+                AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
+                    onClick()
+                    onDismissNewElement()
+                })
+            }
         }
     }
 }
