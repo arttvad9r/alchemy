@@ -5,7 +5,6 @@ import android.media.ToneGenerator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,11 +33,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +66,9 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
+import com.artt.alchemy.ui.components.AlchemyButton
+import com.artt.alchemy.ui.components.AlchemyDialog
+import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
@@ -151,14 +150,12 @@ fun HomeScreen(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.workspace_title), style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(
+                AlchemyButton(
+                    text = stringResource(R.string.clear_workspace),
+                    style = ButtonStyle.BLUE,
                     onClick = { onEvent(WorkspaceEvent.Clear) },
-                    colors = ButtonDefaults.textButtonColors(containerColor = PanelColor),
-                    border = BorderStroke(1.dp, PanelBorderColor),
                     modifier = Modifier.testTag("clear_workspace")
-                ) {
-                    Text(stringResource(R.string.clear_workspace))
-                }
+                )
             }
             // The scene background shows through the workspace, like the altar in the reference.
             Box(
@@ -260,21 +257,14 @@ fun HomeScreen(
 
     // The discovery card waits until the combination effect has played.
     state.newlyUnlockedId?.takeIf { playingEffect == null }?.let { elementId ->
-        AlertDialog(
-            onDismissRequest = onDismissNewElement,
-            title = { Text(stringResource(R.string.new_element_title)) },
-            text = {
-                val element = AlchemyCatalog.elementsById.getValue(elementId)
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    FramedElementIcon(element, Modifier.width(140.dp))
-                    RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
-                    Text(stringResource(R.string.new_element_message, element.name))
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = onDismissNewElement) { Text(stringResource(R.string.ok)) }
-            }
-        )
+        val element = AlchemyCatalog.elementsById.getValue(elementId)
+        AlchemyDialog(onDismissRequest = onDismissNewElement, panelRes = R.drawable.dialog_gold) {
+            Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
+            FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
+            RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
+            Text(stringResource(R.string.new_element_message, element.name), modifier = Modifier.padding(bottom = 16.dp))
+            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onDismissNewElement)
+        }
     }
 }
 

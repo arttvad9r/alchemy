@@ -14,25 +14,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.AlchemyUiState
+import com.artt.alchemy.ui.components.AlchemyButton
+import com.artt.alchemy.ui.components.AlchemyDialog
+import com.artt.alchemy.ui.components.AlchemyToggle
+import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -82,26 +81,27 @@ fun SettingsScreen(
             }
             Text(stringResource(R.string.help_text), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Button(
+        AlchemyButton(
+            text = stringResource(R.string.reset_progress),
+            style = ButtonStyle.RED,
             onClick = onRequestReset,
-            colors = ButtonDefaults.buttonColors(containerColor = RESET_COLOR, contentColor = Color.White),
             modifier = Modifier.fillMaxWidth().testTag("settings_reset")
-        ) {
-            Text(stringResource(R.string.reset_progress))
-        }
+        )
     }
     if (state.isResetConfirmationVisible) {
-        AlertDialog(
-            onDismissRequest = onDismissReset,
-            title = { Text(stringResource(R.string.reset_confirmation_title)) },
-            text = { Text(stringResource(R.string.reset_confirmation_message)) },
-            confirmButton = {
-                TextButton(onClick = onConfirmReset) { Text(stringResource(R.string.reset_confirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismissReset) { Text(stringResource(R.string.cancel)) }
+        AlchemyDialog(onDismissRequest = onDismissReset, panelRes = R.drawable.dialog_blue) {
+            Text(stringResource(R.string.reset_confirmation_title), style = MaterialTheme.typography.headlineSmall)
+            Text(
+                stringResource(R.string.reset_confirmation_message),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                AlchemyButton(stringResource(R.string.cancel), ButtonStyle.DARK, onDismissReset)
+                AlchemyButton(stringResource(R.string.reset_confirm), ButtonStyle.RED, onConfirmReset)
             }
-        )
+        }
     }
 }
 
@@ -127,7 +127,7 @@ private fun SettingToggle(label: String, iconRes: Int, enabled: Boolean, tag: St
     ) {
         Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
         Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-        Switch(
+        AlchemyToggle(
             checked = enabled,
             onCheckedChange = onChanged,
             modifier = Modifier
@@ -138,4 +138,3 @@ private fun SettingToggle(label: String, iconRes: Int, enabled: Boolean, tag: St
 }
 
 private val SETTING_ICON_SIZE = 32.dp
-private val RESET_COLOR = Color(0xFFB3263A)

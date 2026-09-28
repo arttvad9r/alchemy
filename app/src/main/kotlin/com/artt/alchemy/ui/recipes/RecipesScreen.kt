@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +32,7 @@ import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.recipeKey
+import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -50,11 +50,10 @@ fun RecipesScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
         }
 
     Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(12.dp)) {
-        OutlinedTextField(
+        AlchemySearchField(
             value = query,
             onValueChange = { query = it },
-            label = { Text(stringResource(R.string.recipe_filter)) },
-            singleLine = true,
+            placeholder = stringResource(R.string.recipe_filter),
             modifier = Modifier.fillMaxWidth().testTag("recipes_filter")
         )
         if (recipes.isEmpty()) {

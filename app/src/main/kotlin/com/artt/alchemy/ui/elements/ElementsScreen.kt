@@ -1,6 +1,5 @@
 package com.artt.alchemy.ui.elements
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -16,9 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items as lazyRowItems
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,6 +31,8 @@ import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementGroup
+import com.artt.alchemy.ui.components.AlchemySearchField
+import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.rarity
@@ -57,30 +54,28 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
         contentPadding = PaddingValues(12.dp)
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            OutlinedTextField(
+            AlchemySearchField(
                 value = query,
                 onValueChange = { query = it },
-                label = { Text(stringResource(R.string.element_search)) },
-                leadingIcon = { Image(painterResource(R.drawable.ic_search), contentDescription = null, modifier = Modifier.size(24.dp)) },
-                singleLine = true,
+                placeholder = stringResource(R.string.element_search),
                 modifier = Modifier.fillMaxWidth().testTag("elements_search")
             )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(end = 8.dp)) {
                 item {
-                    FilterChip(
+                    AlchemyTab(
+                        text = stringResource(R.string.group_all),
                         selected = selectedGroup == null,
                         onClick = { selectedGroup = null },
-                        label = { Text(stringResource(R.string.group_all)) },
                         modifier = Modifier.testTag("elements_group_all")
                     )
                 }
                 lazyRowItems(ElementGroup.entries) { group ->
-                    FilterChip(
+                    AlchemyTab(
+                        text = stringResource(group.labelRes),
                         selected = selectedGroup == group,
                         onClick = { selectedGroup = group },
-                        label = { Text(stringResource(group.labelRes)) },
                         modifier = Modifier.padding(start = 8.dp).testTag("elements_group_${group.name.lowercase()}")
                     )
                 }

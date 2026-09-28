@@ -39,6 +39,17 @@ UI_ASSETS = {
     "effects/combine_flash.png": ("fx_combine_flash", 512),
     "effects/success_burst.png": ("fx_success_burst", 512),
     "effects/sparkles_gold.png": ("fx_sparkles_gold", 512),
+    "ui/buttons/button_small_blue.png": ("btn_blue", 512),
+    "ui/buttons/button_small_gold.png": ("btn_gold", 512),
+    "ui/buttons/button_danger_red.png": ("btn_red", 512),
+    "ui/buttons/button_secondary_dark.png": ("btn_dark", 512),
+    "ui/buttons/toggle_on.png": ("toggle_on", 512),
+    "ui/buttons/toggle_off.png": ("toggle_off", 512),
+    "ui/buttons/tab_active.png": ("tab_active", 512),
+    "ui/buttons/tab_inactive.png": ("tab_inactive", 512),
+    "ui/buttons/input_field.png": ("field", 512),
+    "ui/panels_states/dialog_panel_gold.png": ("dialog_gold", 512),
+    "ui/panels_states/dialog_panel_blue.png": ("dialog_blue", 512),
 }
 
 
