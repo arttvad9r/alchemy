@@ -66,7 +66,7 @@ class BackgroundMusic(private val context: Context) {
 
     private companion object {
         // Quiet enough to sit under the effects.
-        const val MUSIC_VOLUME = 0.35f
+        const val MUSIC_VOLUME = 0.26f
     }
 }
 
