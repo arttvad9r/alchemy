@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Deep night blue with a violet glow behind the icon, like the sky of the game's scene. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:type="radial"
+        android:centerX="0.5"
+        android:centerY="0.46"
+        android:gradientRadius="54dp"
+        android:startColor="#FF3E348C"
+        android:endColor="#FF0C0E28" />
+</shape>
