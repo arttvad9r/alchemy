@@ -51,9 +51,12 @@ ALCHEMY_RELEASE_KEY_PASSWORD=...
 
 Проект написан на Kotlin и Jetpack Compose без игровых движков и сторонних библиотек, кроме AndroidX. Графика и звуки лежат в `assets/` и перегоняются в ресурсы скриптами из `tools/` (см. [ART_ASSETS.md](ART_ASSETS.md)).
 
-## Авторы звуков и музыки
+## Лицензия и авторы
 
+Код и графика распространяются под лицензией [MIT](LICENSE).
+
+- Графика (иллюстрации элементов, фоны, интерфейс) сгенерирована с помощью ChatGPT.
 - Звуковые эффекты — [Kenney](https://kenney.nl), CC0.
 - Музыка — «Crystal Cave» от cynicmusic, [pixelsphere.org](https://pixelsphere.org), CC0.
 
-Подробности в [assets/audio/README.md](assets/audio/README.md).
+Подробности о звуках — в [assets/audio/README.md](assets/audio/README.md).
