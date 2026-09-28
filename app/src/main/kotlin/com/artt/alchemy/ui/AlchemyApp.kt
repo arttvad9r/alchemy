@@ -13,14 +13,20 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artt.alchemy.R
@@ -91,6 +97,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
 
 @Composable
 private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit) {
+    val labelStyle = navigationLabelStyle(AppTab.entries.map { stringResource(it.labelRes) })
     NavigationBar(containerColor = PanelColor, tonalElevation = 0.dp) {
         AppTab.entries.forEach { tab ->
             val selected = selectedTab == tab
@@ -104,7 +111,7 @@ private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit
                         modifier = Modifier.size(30.dp).alpha(if (selected) 1f else 0.6f)
                     )
                 },
-                label = { Text(stringResource(tab.labelRes), maxLines = 1) },
+                label = { Text(stringResource(tab.labelRes), style = labelStyle, maxLines = 1, softWrap = false) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedTextColor = Gold,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -113,6 +120,31 @@ private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit
                 modifier = Modifier.testTag(tab.testTag)
             )
         }
+    }
+}
+
+// Before the system text scale, so very large text still gets a readable floor of its own.
+private const val NAV_LABEL_MIN_SIZE_SP = 6f
+private const val NAV_LABEL_SIZE_STEP_SP = 0.5f
+
+// Room a navigation item keeps around its label.
+private val NAV_LABEL_PADDING = 16.dp
+
+/**
+ * The label style at the largest size where every label fits its item on one line, shared by all
+ * labels so large system text shrinks them together instead of cutting some off.
+ */
+@Composable
+private fun navigationLabelStyle(labels: List<String>): TextStyle {
+    val base = MaterialTheme.typography.labelMedium
+    val measurer = rememberTextMeasurer()
+    val itemWidth = LocalWindowInfo.current.containerSize.width / labels.size -
+        with(LocalDensity.current) { NAV_LABEL_PADDING.roundToPx() }
+    return remember(labels, base, itemWidth) {
+        val fitting = generateSequence(base.fontSize.value) { it - NAV_LABEL_SIZE_STEP_SP }
+            .takeWhile { it >= NAV_LABEL_MIN_SIZE_SP }
+            .firstOrNull { size -> labels.all { measurer.measure(it, base.copy(fontSize = size.sp), maxLines = 1).size.width <= itemWidth } }
+        base.copy(fontSize = (fitting ?: NAV_LABEL_MIN_SIZE_SP).sp)
     }
 }
 

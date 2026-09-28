@@ -32,7 +32,7 @@ import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
-import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 
@@ -55,10 +55,7 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Image(painterResource(R.drawable.nav_settings), contentDescription = null, modifier = Modifier.size(40.dp))
-            Text(stringResource(R.string.settings), style = MaterialTheme.typography.headlineMedium, color = Gold)
-        }
+        ScreenBanner(stringResource(R.string.settings))
         SettingsPanel {
             SettingToggle(
                 label = stringResource(R.string.sound),

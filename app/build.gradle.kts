@@ -14,14 +14,30 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // The release key stays out of the repository: its path and passwords come from
+    // ~/.gradle/gradle.properties. Without them the release build is left unsigned.
+    val releaseStoreFile = providers.gradleProperty("ALCHEMY_RELEASE_STORE_FILE").orNull
+    signingConfigs {
+        if (releaseStoreFile != null) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = providers.gradleProperty("ALCHEMY_RELEASE_STORE_PASSWORD").get()
+                keyAlias = providers.gradleProperty("ALCHEMY_RELEASE_KEY_ALIAS").get()
+                keyPassword = providers.gradleProperty("ALCHEMY_RELEASE_KEY_PASSWORD").get()
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
