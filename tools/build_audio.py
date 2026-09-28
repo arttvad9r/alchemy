@@ -15,8 +15,8 @@ AUDIO = ROOT / "assets/audio"
 RAW_DIR = ROOT / "app/src/main/res/raw"
 
 EFFECTS = {
-    "kenney/drop_002.ogg": "sfx_place",
-    "kenney/glass_001.ogg": "sfx_combine",
+    "kenney/maximize_006.ogg": "sfx_place",
+    "kenney/confirmation_004.ogg": "sfx_combine",
     "kenney/jingles_STEEL02.ogg": "sfx_discover",
     "kenney/bong_001.ogg": "sfx_no_match",
     "kenney/minimize_002.ogg": "sfx_remove",
@@ -26,6 +26,10 @@ EFFECTS = {
     "kenney/toggle_002.ogg": "sfx_toggle_off",
     "kenney/bookFlip3.ogg": "sfx_page",
 }
+
+# The most frequent sounds get a soft onset and no bright top, so they never click.
+SOFTENED = {"sfx_place", "sfx_combine"}
+SOFTEN_FILTER = "afade=t=in:d=0.015,lowpass=f=3500"
 
 MUSIC = "music/crystal_cave_song18.mp3"
 # Encoder delay at the start of the MP3: where its first sample above silence is.
@@ -39,7 +43,8 @@ def ffmpeg(*args: str) -> None:
 def main() -> None:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     for source, name in EFFECTS.items():
-        ffmpeg("-i", str(AUDIO / source), "-ac", "1", "-c:a", "libvorbis", "-q:a", "4", str(RAW_DIR / f"{name}.ogg"))
+        soften = ["-af", SOFTEN_FILTER] if name in SOFTENED else []
+        ffmpeg("-i", str(AUDIO / source), "-ac", "1", *soften, "-c:a", "libvorbis", "-q:a", "4", str(RAW_DIR / f"{name}.ogg"))
     ffmpeg(
         "-ss", str(MUSIC_LEADING_SILENCE), "-i", str(AUDIO / MUSIC),
         "-c:a", "libvorbis", "-q:a", "3", str(RAW_DIR / "music_crystal_cave.ogg"),
