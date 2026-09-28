@@ -49,7 +49,8 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
     }
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        // Three columns on a phone keep long names whole even with large text; wider screens get more.
+        columns = GridCells.Adaptive(CARD_MIN_WIDTH),
         modifier = modifier.fillMaxSize().testTag("screen_elements"),
         contentPadding = PaddingValues(12.dp)
     ) {
@@ -89,27 +90,27 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(6.dp)
+                    .padding(3.dp)
                     .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
                     .panelBackground(R.drawable.card_base)
                     // Clears the ornament on the top edge of the card art.
-                    .padding(start = 10.dp, top = 14.dp, end = 10.dp, bottom = 10.dp)
+                    .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = 7.dp)
             ) {
                 FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
                 // An invisible two-line name with a badge sizes every card alike, so rows line up, while
                 // the real name and badge sit together in the middle of that room.
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 6.dp)) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 4.dp)) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.alpha(0f).clearAndSetSemantics {}
                     ) {
-                        Text("", style = MaterialTheme.typography.labelLarge, minLines = 2)
+                        Text("", style = MaterialTheme.typography.labelMedium, minLines = 2)
                         RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = if (unlocked) element.name else stringResource(R.string.locked_element),
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelMedium,
                             textAlign = TextAlign.Center,
                             maxLines = 2,
                             color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
@@ -130,3 +131,5 @@ private val ElementGroup.labelRes: Int
         ElementGroup.CIVILIZATION -> R.string.group_civilization
         ElementGroup.COSMOS -> R.string.group_cosmos
     }
+
+private val CARD_MIN_WIDTH = 104.dp

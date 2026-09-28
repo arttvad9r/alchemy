@@ -53,7 +53,6 @@ UI_ASSETS = {
     "effects/sparkles_blue.png": ("fx_sparkles_blue", 512),
     "effects/smoke_puff.png": ("fx_smoke_puff", 512),
     "ui/buttons/search_field.png": ("field_search", 512),
-    "ui/panels_states/undiscovered_question_panel.png": ("element_unknown", 256),
     "ui/panels_states/card_base.png": ("card_base", 512),
     "ui/panels_states/selected_ring_blue.png": ("fx_selected_ring", 256),
     "effects/energy_ring.png": ("fx_energy_ring", 512),

@@ -17,7 +17,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,8 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.theme.color
 
+private val SilhouetteFilter = ColorFilter.tint(Color(0xFF46528F))
+
 // Share of the frame taken by its ornamental border on each side.
 private const val FRAME_INSET = 0.16f
 
@@ -39,42 +43,33 @@ val ElementDefinition.rarity: ElementRarity
     get() = AlchemyCatalog.rarityById.getValue(id)
 
 @Composable
-fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier) {
+fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silhouette: Boolean = false) {
     Image(
         painter = painterResource(elementIconRes(element.id)),
         contentDescription = null,
+        colorFilter = if (silhouette) SilhouetteFilter else null,
         modifier = modifier.aspectRatio(1f)
     )
 }
 
-/** Square frame in the colors of [rarity]. */
+/** Square rarity frame; [rarity] null draws the neutral frame used for locked elements. */
 @Composable
-fun ElementFrame(rarity: ElementRarity, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+fun ElementFrame(rarity: ElementRarity?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Box(contentAlignment = Alignment.Center, modifier = modifier.aspectRatio(1f)) {
         Image(
             painter = painterResource(rarity.frameRes),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().then(if (rarity == null) Modifier.alpha(0.7f) else Modifier)
         )
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize(1f - 2 * FRAME_INSET), content = content)
     }
 }
 
-/** The element in its rarity frame, or the question mark panel while it is [locked], which gives nothing away. */
 @Composable
 fun FramedElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, locked: Boolean = false) {
-    if (locked) {
-        Image(
-            painter = painterResource(R.drawable.element_unknown),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = modifier.aspectRatio(1f)
-        )
-    } else {
-        ElementFrame(rarity = element.rarity, modifier = modifier) {
-            ElementIcon(element, Modifier.fillMaxSize())
-        }
+    ElementFrame(rarity = if (locked) null else element.rarity, modifier = modifier) {
+        ElementIcon(element, Modifier.fillMaxSize(), silhouette = locked)
     }
 }
 
@@ -112,9 +107,9 @@ fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onCli
     }
 }
 
-private val ElementRarity.frameRes: Int
+private val ElementRarity?.frameRes: Int
     get() = when (this) {
-        ElementRarity.BASE -> R.drawable.frame_base
+        null, ElementRarity.BASE -> R.drawable.frame_base
         ElementRarity.COMMON -> R.drawable.frame_common
         ElementRarity.RARE -> R.drawable.frame_rare
         ElementRarity.EPIC -> R.drawable.frame_epic
