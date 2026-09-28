@@ -200,8 +200,9 @@ fun HomeScreen(
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
                     onBoundsChanged = { workspaceBounds = it },
-                    effect = playingEffect,
-                    effectProgress = { effectProgress.value },
+                    // A new effect is drawn from its first frame, before it is taken to play.
+                    effect = playingEffect ?: state.combinationEffect,
+                    effectProgress = { if (playingEffect == null) 0f else effectProgress.value },
                     transitions = {
                         playingTransitions.map {
                             it.transition to ((transitionClock - it.startMillis).toFloat() / TRANSITION_DURATION_MILLIS).coerceIn(0f, 1f)

@@ -1,5 +1,6 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -95,22 +96,27 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
                     .padding(start = 10.dp, top = 14.dp, end = 10.dp, bottom = 10.dp)
             ) {
                 FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
-                Text(
-                    text = if (unlocked) element.name else stringResource(R.string.locked_element),
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = TextAlign.Center,
-                    minLines = 2,
-                    maxLines = 2,
-                    color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-                // A locked card keeps the badge's room, hidden, so every card in a row has the same height.
-                RarityBadge(
-                    element.rarity,
-                    Modifier
-                        .padding(top = 4.dp)
-                        .then(if (unlocked) Modifier else Modifier.alpha(0f).clearAndSetSemantics {})
-                )
+                // An invisible two-line name with a badge sizes every card alike, so rows line up, while
+                // the real name and badge sit together in the middle of that room.
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 6.dp)) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.alpha(0f).clearAndSetSemantics {}
+                    ) {
+                        Text("", style = MaterialTheme.typography.labelLarge, minLines = 2)
+                        RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = if (unlocked) element.name else stringResource(R.string.locked_element),
+                            style = MaterialTheme.typography.labelLarge,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
+                    }
+                }
             }
         }
     }
