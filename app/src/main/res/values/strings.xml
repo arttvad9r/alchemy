@@ -36,6 +36,8 @@
     <string name="settings">Настройки</string>
     <string name="sound">Звук</string>
     <string name="vibration">Вибрация</string>
+    <string name="music">Музыка</string>
+    <string name="music_credit">Музыка: «Crystal Cave» — cynicmusic, pixelsphere.org</string>
     <string name="help">Как играть</string>
     <string name="help_text">Нажмите открытый элемент, чтобы добавить его в свободное место рабочей области, или сразу перетащите его на поле. Наложите элементы один на другой, чтобы получить результат. Неверная пара останется без изменений. Перетащите элемент за границу рабочей области, чтобы удалить его с поля.</string>
     <string name="reset_progress">Сбросить прогресс</string>

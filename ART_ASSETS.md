@@ -19,6 +19,10 @@
 
 Исходные описания и манифесты сохранены в корне `assets/` с понятными именами: `README_CATALOG_RU.md`, `README_REMAINING_ELEMENTS_RU.md`, `asset_manifest_catalog.*` и `asset_manifest_remaining_elements.*`.
 
+## Звуки
+
+Звуки и музыка лежат в `assets/audio/`; источники, лицензии и назначение каждого файла описаны в `assets/audio/README.md`, в `res/raw` их перегоняет `tools/build_audio.py`.
+
 ## `references/`
 
 Экранные референсы переименованы по содержимому:

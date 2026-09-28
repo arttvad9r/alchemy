@@ -55,6 +55,7 @@ fun WorkspaceCanvas(
     items: List<WorkspaceItem>,
     onMove: (instanceId: Long, position: Offset) -> Unit,
     onResolve: (instanceId: Long, position: Offset) -> Unit,
+    onPickUp: () -> Unit,
     onBoundsChanged: (Rect) -> Unit,
     effect: CombinationEffect?,
     effectProgress: () -> Float,
@@ -64,6 +65,7 @@ fun WorkspaceCanvas(
     val currentItems by rememberUpdatedState(items)
     val currentOnMove by rememberUpdatedState(onMove)
     val currentOnResolve by rememberUpdatedState(onResolve)
+    val currentOnPickUp by rememberUpdatedState(onPickUp)
     var heldId by remember { mutableStateOf<Long?>(null) }
     val icons = items.map(WorkspaceItem::elementId).distinct().associateWith { elementId ->
         key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
@@ -105,6 +107,7 @@ fun WorkspaceCanvas(
                         }
                         ?: return@awaitEachGesture
                     heldId = item.instanceId
+                    currentOnPickUp()
                     try {
                         var lastPosition = down.position
                         val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->

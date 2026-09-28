@@ -41,6 +41,7 @@ fun SettingsScreen(
     state: AlchemyUiState,
     onSoundChanged: (Boolean) -> Unit,
     onVibrationChanged: (Boolean) -> Unit,
+    onMusicChanged: (Boolean) -> Unit,
     onRequestReset: () -> Unit,
     onConfirmReset: () -> Unit,
     onDismissReset: () -> Unit,
@@ -72,6 +73,18 @@ fun SettingsScreen(
                 enabled = state.progress.vibrationEnabled,
                 tag = "settings_vibration",
                 onChanged = onVibrationChanged
+            )
+            SettingToggle(
+                label = stringResource(R.string.music),
+                iconRes = R.drawable.ic_music,
+                enabled = state.progress.musicEnabled,
+                tag = "settings_music",
+                onChanged = onMusicChanged
+            )
+            Text(
+                stringResource(R.string.music_credit),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         SettingsPanel {
