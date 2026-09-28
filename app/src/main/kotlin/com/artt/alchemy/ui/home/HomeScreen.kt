@@ -45,7 +45,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -72,6 +71,7 @@ import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
@@ -79,6 +79,10 @@ import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
 
 private const val EFFECT_DURATION_MILLIS = 700
+private const val WORKSPACE_PANEL_ALPHA = 0.88f
+
+// Keeps the frame border thin; unscaled corners would eat into the item area.
+private const val WORKSPACE_FRAME_SCALE = 1.3f
 
 @Composable
 fun HomeScreen(
@@ -157,13 +161,12 @@ fun HomeScreen(
                     modifier = Modifier.testTag("clear_workspace")
                 )
             }
-            // The scene background shows through the workspace, like the altar in the reference.
+            // A distinct slab over the scene: the background only faintly shows through.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(1.dp, PanelBorderColor.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+                    .panelBackground(R.drawable.dialog_blue, alpha = WORKSPACE_PANEL_ALPHA, maxScale = WORKSPACE_FRAME_SCALE)
                     .testTag("home_workspace")
             ) {
                 WorkspaceCanvas(

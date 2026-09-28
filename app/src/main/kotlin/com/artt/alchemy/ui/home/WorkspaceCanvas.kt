@@ -41,11 +41,8 @@ private const val LABEL_SIZE_FRACTION = 0.042f
 private const val ICON_SHARE = 0.66f
 private const val ICON_TOP_SHARE = 0.85f
 private const val LABEL_SHADOW_RADIUS = 6f
-private const val ALTAR_WIDTH_FRACTION = 0.72f
-private const val CIRCLE_WIDTH_SHARE = 0.78f
-private const val CIRCLE_PERSPECTIVE = 0.34f
-private const val CIRCLE_TOP_SHARE = 0.3f
-private const val SCENE_ALPHA = 0.9f
+private const val WATERMARK_SIZE_FRACTION = 0.85f
+private const val WATERMARK_ALPHA = 0.28f
 
 @Composable
 fun WorkspaceCanvas(
@@ -63,7 +60,6 @@ fun WorkspaceCanvas(
     val icons = items.map(WorkspaceItem::elementId).distinct().associateWith { elementId ->
         key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
     }
-    val altar = ImageBitmap.imageResource(R.drawable.scene_altar)
     val magicCircle = ImageBitmap.imageResource(R.drawable.scene_magic_circle)
     val flash = ImageBitmap.imageResource(R.drawable.fx_combine_flash)
     val burst = ImageBitmap.imageResource(R.drawable.fx_success_burst)
@@ -114,7 +110,7 @@ fun WorkspaceCanvas(
                 }
             }
     ) {
-        drawScene(altar, magicCircle)
+        drawWatermark(magicCircle)
         val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
         labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
         currentItems.forEach { item ->
@@ -145,28 +141,9 @@ fun WorkspaceCanvas(
     }
 }
 
-/** Altar with the magic circle on its top, anchored to the bottom of the workspace. */
-private fun DrawScope.drawScene(altar: ImageBitmap, magicCircle: ImageBitmap) {
-    val altarWidth = size.width * ALTAR_WIDTH_FRACTION
-    val altarHeight = altarWidth * altar.height / altar.width
-    val altarTop = size.height - altarHeight
-    drawImage(
-        image = altar,
-        dstOffset = IntOffset(((size.width - altarWidth) / 2).roundToInt(), altarTop.roundToInt()),
-        dstSize = IntSize(altarWidth.roundToInt(), altarHeight.roundToInt()),
-        alpha = SCENE_ALPHA,
-        filterQuality = FilterQuality.Medium
-    )
-    // The glyph lies flat on the platform, so it is squashed vertically.
-    val circleWidth = altarWidth * CIRCLE_WIDTH_SHARE
-    val circleHeight = circleWidth * CIRCLE_PERSPECTIVE
-    drawImage(
-        image = magicCircle,
-        dstOffset = IntOffset(((size.width - circleWidth) / 2).roundToInt(), (altarTop + altarHeight * CIRCLE_TOP_SHARE - circleHeight / 2).roundToInt()),
-        dstSize = IntSize(circleWidth.roundToInt(), circleHeight.roundToInt()),
-        alpha = SCENE_ALPHA,
-        filterQuality = FilterQuality.Medium
-    )
+/** The magic circle as a faint watermark in the middle of the workspace. */
+private fun DrawScope.drawWatermark(magicCircle: ImageBitmap) {
+    drawCentered(magicCircle, center, minOf(size.width, size.height) * WATERMARK_SIZE_FRACTION, WATERMARK_ALPHA)
 }
 
 private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float) {

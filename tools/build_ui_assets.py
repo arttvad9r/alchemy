@@ -34,7 +34,6 @@ UI_ASSETS = {
     "ui/panels_states/frame_rare_green.png": ("frame_rare", 256),
     "ui/panels_states/frame_epic_purple.png": ("frame_epic", 256),
     "ui/panels_states/frame_legendary_gold.png": ("frame_legendary", 256),
-    "combine_scene/altar_platform_base.png": ("scene_altar", 512),
     "combine_scene/magic_circle_glyph.png": ("scene_magic_circle", 512),
     "effects/combine_flash.png": ("fx_combine_flash", 512),
     "effects/success_burst.png": ("fx_success_burst", 512),

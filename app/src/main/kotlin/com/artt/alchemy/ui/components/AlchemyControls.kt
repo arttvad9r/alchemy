@@ -143,7 +143,16 @@ fun AlchemyDialog(
     }
 }
 
-private fun DrawScope.drawSliced(image: ImageBitmap, columns: List<Segment>, rows: List<Segment>, fixedScale: Float) {
+/** Panel art stretched to the modifier's bounds, keeping corners and edge ornaments intact. */
+@Composable
+fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale: Float = Float.MAX_VALUE): Modifier {
+    val art = ImageBitmap.imageResource(res)
+    return drawBehind {
+        drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height, maxScale), alpha)
+    }
+}
+
+private fun DrawScope.drawSliced(image: ImageBitmap, columns: List<Segment>, rows: List<Segment>, fixedScale: Float, alpha: Float = 1f) {
     val xs = layout(columns, image.width, size.width, fixedScale)
     val ys = layout(rows, image.height, size.height, fixedScale)
     columns.forEachIndexed { column, horizontal ->
@@ -160,6 +169,7 @@ private fun DrawScope.drawSliced(image: ImageBitmap, columns: List<Segment>, row
                 srcSize = IntSize(srcWidth, srcHeight),
                 dstOffset = IntOffset(dstX, dstY),
                 dstSize = IntSize(xs[column + 1].roundToInt() - dstX, ys[row + 1].roundToInt() - dstY),
+                alpha = alpha,
                 filterQuality = FilterQuality.Medium
             )
         }

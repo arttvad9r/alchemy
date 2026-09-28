@@ -15,3 +15,6 @@ local.properties
 
 # Local Kotlin/Gradle state
 .kotlin/
+
+# Claude Code session data copied into the checkout
+/-home-artt-Projects-Alchemy-From-Scratch/
