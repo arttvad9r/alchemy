@@ -83,6 +83,7 @@ private const val WORKSPACE_PANEL_ALPHA = 0.88f
 
 // Keeps the frame border thin; unscaled corners would eat into the item area.
 private const val WORKSPACE_FRAME_SCALE = 1.3f
+private val WORKSPACE_FRAME_INSET = 12.dp
 
 @Composable
 fun HomeScreen(
@@ -159,6 +160,8 @@ fun HomeScreen(
                     .weight(1f)
                     .panelBackground(R.drawable.dialog_blue, alpha = WORKSPACE_PANEL_ALPHA, maxScale = WORKSPACE_FRAME_SCALE)
                     .testTag("home_workspace")
+                    // Items live inside the frame, so ones near an edge never cover its border.
+                    .padding(WORKSPACE_FRAME_INSET)
             ) {
                 WorkspaceCanvas(
                     items = state.workspace.items,
