@@ -3,9 +3,11 @@ package com.artt.alchemy.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,7 +15,9 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -30,7 +34,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.achievements.AchievementToast
 import com.artt.alchemy.ui.achievements.AchievementsScreen
+import com.artt.alchemy.ui.achievements.achievementsById
 import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
@@ -91,6 +97,23 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                     )
                 }
             }
+            AchievementBanner(state, viewModel)
+        }
+    }
+}
+
+// Waits until a discovery card or its effect is done, so the banner never covers the reveal.
+@Composable
+private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: AlchemyViewModel) {
+    val achievement = state.achievementQueue.firstOrNull()?.let(achievementsById::getValue)
+    if (achievement != null && state.newlyUnlockedId == null && state.combinationEffect == null) {
+        key(achievement.id) {
+            AchievementToast(
+                achievement = achievement,
+                onShown = viewModel::onAchievementShown,
+                onDismiss = viewModel::dismissAchievement,
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp)
+            )
         }
     }
 }

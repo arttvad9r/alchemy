@@ -3,6 +3,7 @@ package com.artt.alchemy.ui.components
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -25,7 +26,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -80,6 +84,7 @@ private val SEARCH_ICON_SPACE = 60.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
 private const val DIALOG_ENTRANCE_MILLIS = 200
+private const val PROGRESS_FILL_MILLIS = 600
 private const val DIALOG_START_SCALE = 0.9f
 private val DIALOG_MAX_WIDTH = 480.dp
 
@@ -193,6 +198,10 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
     val track = ImageBitmap.imageResource(R.drawable.progress_track)
     val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
     val fraction = progress.coerceIn(0f, 1f)
+    // Starts empty so the fill grows to its value when the bar first appears, then follows changes.
+    var target by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(fraction) { target = fraction }
+    val shown by animateFloatAsState(target, tween(PROGRESS_FILL_MILLIS), label = "progressFill")
     Box(
         modifier = modifier
             .height(16.dp)
@@ -202,7 +211,7 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
                 drawSliced(track, CapSegments, WholeHeight, scale)
                 val insetX = PROGRESS_INSET_X * scale
                 val insetY = PROGRESS_INSET_Y * scale
-                val fillWidth = (size.width - 2 * insetX) * fraction
+                val fillWidth = (size.width - 2 * insetX) * shown
                 if (fillWidth >= 1f) {
                     val fillHeight = size.height - 2 * insetY
                     drawSliced(

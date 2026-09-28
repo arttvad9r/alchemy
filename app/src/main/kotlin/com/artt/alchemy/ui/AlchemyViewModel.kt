@@ -20,6 +20,7 @@ import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.reduce
+import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
 enum class AppTab {
     HOME,
@@ -47,7 +48,9 @@ data class AlchemyUiState(
     val newlyUnlockedId: String? = null,
     val combinationEffect: CombinationEffect? = null,
     val itemTransitions: List<ItemTransition> = emptyList(),
-    val isResetConfirmationVisible: Boolean = false
+    val isResetConfirmationVisible: Boolean = false,
+    // Ids of achievements earned and not yet announced; the first one is on screen.
+    val achievementQueue: List<String> = emptyList()
 )
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
@@ -92,7 +95,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
             progress = progress,
             workspace = result.workspace,
-            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId
+            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
+            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress)
         )
     }
 
@@ -116,6 +120,16 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun onButtonClick() {
         playSound(Sound.CLICK)
+    }
+
+    /** The achievement banner came on screen: the reward chime and a tap. */
+    fun onAchievementShown() {
+        playSound(Sound.DISCOVER)
+        vibrate(Haptic.CLICK)
+    }
+
+    fun dismissAchievement() {
+        state = state.copy(achievementQueue = state.achievementQueue.drop(1))
     }
 
     fun dismissNewElement() {

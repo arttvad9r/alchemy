@@ -33,6 +33,7 @@
     <string name="achievement_civilization">Строитель цивилизации</string>
     <string name="achievement_cosmos">Покоритель космоса</string>
     <string name="achievement_completed">Получено</string>
+    <string name="achievement_unlocked">Достижение получено</string>
     <string name="settings">Настройки</string>
     <string name="sound">Звук</string>
     <string name="vibration">Вибрация</string>
