@@ -27,6 +27,7 @@ UI_ASSETS = {
     "ui/icons/settings_gear.png": ("nav_settings", 128),
     "ui/icons/audio.png": ("ic_audio", 96),
     "ui/icons/haptics.png": ("ic_haptics", 96),
+    "ui/icons/music.png": ("ic_music", 96),
     "ui/icons/help.png": ("ic_help", 96),
     "ui/panels_states/frame_base_silver.png": ("frame_base", 256),
     "ui/panels_states/frame_common_blue.png": ("frame_common", 256),

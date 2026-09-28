@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.achievements.AchievementsScreen
@@ -35,6 +36,11 @@ import com.artt.alchemy.ui.theme.PanelColor
 @Composable
 fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
     val state = viewModel.state
+    // Music plays only while the app is on screen.
+    LifecycleResumeEffect(state.progress.musicEnabled) {
+        viewModel.resumeMusic()
+        onPauseOrDispose { viewModel.pauseMusic() }
+    }
     AlchemyTheme {
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             Image(
@@ -58,7 +64,8 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                         state = state,
                         onEvent = viewModel::onWorkspaceEvent,
                         onDismissNewElement = viewModel::dismissNewElement,
-                        onFeedbackHandled = viewModel::consumeCombinationFeedback,
+                        onPickUp = viewModel::onPickUp,
+                        onClick = viewModel::onButtonClick,
                         onEffectConsumed = viewModel::consumeCombinationEffect,
                         onTransitionsConsumed = viewModel::consumeItemTransitions,
                         modifier = Modifier.padding(padding)
@@ -70,6 +77,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                         state = state,
                         onSoundChanged = viewModel::setSoundEnabled,
                         onVibrationChanged = viewModel::setVibrationEnabled,
+                        onMusicChanged = viewModel::setMusicEnabled,
                         onRequestReset = viewModel::requestReset,
                         onConfirmReset = viewModel::confirmReset,
                         onDismissReset = viewModel::dismissReset,

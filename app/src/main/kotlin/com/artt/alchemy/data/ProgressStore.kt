@@ -11,7 +11,8 @@ data class PlayerProgress(
     val successfulMixCount: Int,
     val mixAttemptCount: Int,
     val soundEnabled: Boolean,
-    val vibrationEnabled: Boolean
+    val vibrationEnabled: Boolean,
+    val musicEnabled: Boolean
 )
 
 fun initialPlayerProgress(): PlayerProgress = PlayerProgress(
@@ -20,7 +21,8 @@ fun initialPlayerProgress(): PlayerProgress = PlayerProgress(
     successfulMixCount = 0,
     mixAttemptCount = 0,
     soundEnabled = true,
-    vibrationEnabled = true
+    vibrationEnabled = true,
+    musicEnabled = true
 )
 
 fun PlayerProgress.recordAttempt(combination: Combination?): PlayerProgress = if (combination == null) {
@@ -45,7 +47,8 @@ class ProgressStore(context: Context) {
         successfulMixCount = preferences.getInt(KEY_SUCCESSFUL_MIX_COUNT, 0),
         mixAttemptCount = preferences.getInt(KEY_MIX_ATTEMPT_COUNT, 0),
         soundEnabled = preferences.getBoolean(KEY_SOUND_ENABLED, true),
-        vibrationEnabled = preferences.getBoolean(KEY_VIBRATION_ENABLED, true)
+        vibrationEnabled = preferences.getBoolean(KEY_VIBRATION_ENABLED, true),
+        musicEnabled = preferences.getBoolean(KEY_MUSIC_ENABLED, true)
     )
 
     fun save(progress: PlayerProgress) {
@@ -56,6 +59,7 @@ class ProgressStore(context: Context) {
             .putInt(KEY_MIX_ATTEMPT_COUNT, progress.mixAttemptCount)
             .putBoolean(KEY_SOUND_ENABLED, progress.soundEnabled)
             .putBoolean(KEY_VIBRATION_ENABLED, progress.vibrationEnabled)
+            .putBoolean(KEY_MUSIC_ENABLED, progress.musicEnabled)
             .apply()
     }
 
@@ -71,5 +75,6 @@ class ProgressStore(context: Context) {
         const val KEY_MIX_ATTEMPT_COUNT = "mix_attempt_count"
         const val KEY_SOUND_ENABLED = "sound_enabled"
         const val KEY_VIBRATION_ENABLED = "vibration_enabled"
+        const val KEY_MUSIC_ENABLED = "music_enabled"
     }
 }

@@ -1,7 +1,5 @@
 package com.artt.alchemy.ui.home
 
-import android.media.AudioManager
-import android.media.ToneGenerator
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -36,7 +34,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -50,12 +47,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -94,7 +89,8 @@ fun HomeScreen(
     state: AlchemyUiState,
     onEvent: (WorkspaceEvent) -> Unit,
     onDismissNewElement: () -> Unit,
-    onFeedbackHandled: () -> Unit,
+    onPickUp: () -> Unit,
+    onClick: () -> Unit,
     onEffectConsumed: () -> Unit,
     onTransitionsConsumed: () -> Unit,
     modifier: Modifier = Modifier
@@ -105,8 +101,6 @@ fun HomeScreen(
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var dragPosition by remember { mutableStateOf<Offset?>(null) }
     val previewHalfSize = with(androidx.compose.ui.platform.LocalDensity.current) { 36.dp.roundToPx() }
-    val hapticFeedback = LocalHapticFeedback.current
-    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 40) }
 
     // The effect is taken out of the UI state at once so it does not replay when Home is shown again.
     var playingEffect by remember { mutableStateOf<CombinationEffect?>(null) }
@@ -142,17 +136,6 @@ fun HomeScreen(
                 transitionClock = now
                 playingTransitions.removeAll { now - it.startMillis >= TRANSITION_DURATION_MILLIS }
             }
-        }
-    }
-
-    DisposableEffect(toneGenerator) {
-        onDispose(toneGenerator::release)
-    }
-    LaunchedEffect(state.feedbackEventId) {
-        if (state.feedbackEventId != 0L) {
-            if (state.progress.vibrationEnabled) hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            if (state.progress.soundEnabled) toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 100)
-            onFeedbackHandled()
         }
     }
 
@@ -199,6 +182,7 @@ fun HomeScreen(
                     items = state.workspace.items,
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
+                    onPickUp = onPickUp,
                     onBoundsChanged = { workspaceBounds = it },
                     // A new effect is drawn from its first frame, before it is taken to play.
                     effect = playingEffect ?: state.combinationEffect,
@@ -260,7 +244,8 @@ fun HomeScreen(
                                             )
                                         }
                                 },
-                                onTap = { onEvent(WorkspaceEvent.SpawnAutomatically(element.id)) }
+                                onTap = { onEvent(WorkspaceEvent.SpawnAutomatically(element.id)) },
+                                onPickUp = onPickUp
                             )
                         }
                     }
@@ -299,7 +284,10 @@ fun HomeScreen(
             FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
             RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
             Text(stringResource(R.string.new_element_message, element.name), modifier = Modifier.padding(bottom = 16.dp))
-            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onDismissNewElement)
+            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
+                onClick()
+                onDismissNewElement()
+            })
         }
     }
 }
@@ -345,11 +333,13 @@ private fun DraggablePaletteElement(
     modifier: Modifier,
     onDragPosition: (Offset?) -> Unit,
     onDrop: (Offset) -> Unit,
-    onTap: () -> Unit
+    onTap: () -> Unit,
+    onPickUp: () -> Unit
 ) {
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
     val currentOnDragPosition by rememberUpdatedState(onDragPosition)
     val currentOnDrop by rememberUpdatedState(onDrop)
+    val currentOnPickUp by rememberUpdatedState(onPickUp)
 
     ElementTile(
         element = element,
@@ -358,6 +348,7 @@ private fun DraggablePaletteElement(
                 var lastPosition: Offset? = null
                 detectDragGestures(
                     onDragStart = { position ->
+                        currentOnPickUp()
                         lastPosition = coordinates?.localToRoot(position)
                         currentOnDragPosition(lastPosition)
                     },

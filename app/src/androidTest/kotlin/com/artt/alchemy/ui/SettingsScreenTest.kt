@@ -36,12 +36,15 @@ class SettingsScreenTest {
 
         composeRule.onNodeWithTag("settings_sound").performClick()
         composeRule.onNodeWithTag("settings_vibration").performClick()
+        composeRule.onNodeWithTag("settings_music").performClick()
         composeRule.onNodeWithTag("settings_sound").assertIsOff()
         composeRule.onNodeWithTag("settings_vibration").assertIsOff()
+        composeRule.onNodeWithTag("settings_music").assertIsOff()
 
         composeRule.activityRule.scenario.recreate()
         composeRule.onNodeWithTag("nav_settings").performClick()
         composeRule.onNodeWithTag("settings_sound").assertIsOff()
         composeRule.onNodeWithTag("settings_vibration").assertIsOff()
+        composeRule.onNodeWithTag("settings_music").assertIsOff()
     }
 }

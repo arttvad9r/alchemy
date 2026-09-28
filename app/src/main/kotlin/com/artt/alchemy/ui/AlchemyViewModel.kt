@@ -5,6 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.artt.alchemy.audio.BackgroundMusic
+import com.artt.alchemy.audio.Haptic
+import com.artt.alchemy.audio.Haptics
+import com.artt.alchemy.audio.Sound
+import com.artt.alchemy.audio.SoundEffects
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
@@ -36,7 +41,6 @@ data class AlchemyUiState(
     val workspace: WorkspaceState = WorkspaceState(),
     val selectedTab: AppTab = AppTab.HOME,
     val newlyUnlockedId: String? = null,
-    val feedbackEventId: Long = 0,
     val combinationEffect: CombinationEffect? = null,
     val itemTransitions: List<ItemTransition> = emptyList(),
     val isResetConfirmationVisible: Boolean = false
@@ -50,6 +54,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         private set
 
     private var combinationEffectCount = 0L
+
+    private val sounds = SoundEffects(application)
+    private val haptics = Haptics(application)
+    private val music = BackgroundMusic(application)
 
     fun onWorkspaceEvent(event: WorkspaceEvent) {
         val result = reduce(state.workspace, event, engine)
@@ -68,6 +76,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         }
 
         val transitions = itemTransitions(state.workspace, result)
+        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId != null)?.let(::play)
 
         if (progress != state.progress) store.save(progress)
         state = state.copy(
@@ -76,8 +85,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
             progress = progress,
             workspace = result.workspace,
-            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
-            feedbackEventId = if (result.combination != null) state.feedbackEventId + 1 else state.feedbackEventId
+            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId
         )
     }
 
@@ -90,36 +98,91 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun selectTab(tab: AppTab) {
+        if (tab != state.selectedTab) playSound(if (tab == AppTab.RECIPES) Sound.PAGE else Sound.CLICK)
         state = state.copy(selectedTab = tab)
+    }
+
+    /** An element was taken in hand, from the palette or on the workspace. */
+    fun onPickUp() {
+        vibrate(Haptic.TICK)
+    }
+
+    fun onButtonClick() {
+        playSound(Sound.CLICK)
     }
 
     fun dismissNewElement() {
         state = state.copy(newlyUnlockedId = null)
     }
 
-    fun consumeCombinationFeedback() {
-        state = state.copy(feedbackEventId = 0)
-    }
-
     fun requestReset() {
+        playSound(Sound.CLICK)
         state = state.copy(isResetConfirmationVisible = true)
     }
 
     fun dismissReset() {
+        playSound(Sound.CLICK)
         state = state.copy(isResetConfirmationVisible = false)
     }
 
     fun confirmReset() {
+        playSound(Sound.CLEAR)
         store.clear()
         state = AlchemyUiState(progress = initialPlayerProgress(), selectedTab = AppTab.SETTINGS)
+        resumeMusic()
     }
 
     fun setSoundEnabled(enabled: Boolean) {
         updateProgress { copy(soundEnabled = enabled) }
+        // Heard only when turning sound on, as a sample of it.
+        playSound(Sound.TOGGLE_ON)
     }
 
     fun setVibrationEnabled(enabled: Boolean) {
+        playSound(if (enabled) Sound.TOGGLE_ON else Sound.TOGGLE_OFF)
         updateProgress { copy(vibrationEnabled = enabled) }
+        vibrate(Haptic.CLICK)
+    }
+
+    fun setMusicEnabled(enabled: Boolean) {
+        playSound(if (enabled) Sound.TOGGLE_ON else Sound.TOGGLE_OFF)
+        updateProgress { copy(musicEnabled = enabled) }
+        if (enabled) resumeMusic() else music.pause()
+    }
+
+    /** Plays the music while the app is on screen, if the player wants it. */
+    fun resumeMusic() {
+        if (state.progress.musicEnabled) music.start()
+    }
+
+    fun pauseMusic() {
+        music.pause()
+    }
+
+    override fun onCleared() {
+        sounds.release()
+        music.release()
+    }
+
+    private fun play(feedback: GameFeedback) {
+        val (sound, haptic) = when (feedback) {
+            GameFeedback.PLACE -> Sound.PLACE to Haptic.TICK
+            GameFeedback.COMBINE -> Sound.COMBINE to Haptic.CLICK
+            GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
+            GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
+            GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
+            GameFeedback.CLEAR -> Sound.CLEAR to Haptic.CLICK
+        }
+        playSound(sound)
+        vibrate(haptic)
+    }
+
+    private fun playSound(sound: Sound) {
+        if (state.progress.soundEnabled) sounds.play(sound)
+    }
+
+    private fun vibrate(haptic: Haptic) {
+        if (state.progress.vibrationEnabled) haptics.perform(haptic)
     }
 
     private fun updateProgress(transform: PlayerProgress.() -> PlayerProgress) {
