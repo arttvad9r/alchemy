@@ -1,11 +1,9 @@
 <resources>
     <string name="app_name">Алхимия</string>
     <string name="progress">%1$d / %2$d</string>
-    <string name="workspace_title">Рабочая область</string>
     <string name="clear_workspace">Очистить</string>
     <string name="workspace_hint">Перетащите элементы сюда</string>
     <string name="palette_title">Открытые элементы</string>
-    <string name="palette_hint">Нажмите, чтобы добавить, или сразу перетащите на поле</string>
     <string name="tab_home">Дом</string>
     <string name="tab_elements">Элементы</string>
     <string name="tab_recipes">Рецепты</string>

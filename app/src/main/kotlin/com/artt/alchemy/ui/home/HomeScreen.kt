@@ -161,25 +161,6 @@ fun HomeScreen(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium, color = Gold)
                 Spacer(modifier = Modifier.weight(1f))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .background(PanelColor, RoundedCornerShape(14.dp))
-                        .border(1.dp, PanelBorderColor, RoundedCornerShape(14.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(22.dp))
-                    Text(
-                        text = stringResource(R.string.progress, state.progress.unlockedIds.size, AlchemyCatalog.elements.size),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Gold
-                    )
-                }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.workspace_title), style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.weight(1f))
                 AlchemyButton(
                     text = stringResource(R.string.clear_workspace),
                     style = ButtonStyle.BLUE,
@@ -187,6 +168,7 @@ fun HomeScreen(
                     modifier = Modifier.testTag("clear_workspace")
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
             // A distinct slab over the scene: the background only faintly shows through.
             Box(
                 modifier = Modifier
@@ -218,12 +200,11 @@ fun HomeScreen(
                     .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
                     .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
-                Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = stringResource(R.string.palette_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
+                    Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.weight(1f))
+                    ProgressCounter(unlocked = state.progress.unlockedIds.size)
+                }
                 val paletteState = rememberLazyGridState()
                 Box(
                     modifier = Modifier
@@ -301,6 +282,26 @@ fun HomeScreen(
             Text(stringResource(R.string.new_element_message, element.name), modifier = Modifier.padding(bottom = 16.dp))
             AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onDismissNewElement)
         }
+    }
+}
+
+/** How many elements are open out of the whole catalog, on a small panel with a book. */
+@Composable
+private fun ProgressCounter(unlocked: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .background(PanelColor, RoundedCornerShape(12.dp))
+            .border(1.dp, PanelBorderColor, RoundedCornerShape(12.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
+        Text(
+            text = stringResource(R.string.progress, unlocked, AlchemyCatalog.elements.size),
+            style = MaterialTheme.typography.titleSmall,
+            color = Gold
+        )
     }
 }
 

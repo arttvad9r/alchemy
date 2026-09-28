@@ -1,16 +1,20 @@
 package com.artt.alchemy.ui.elements
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.items as lazyRowItems
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,15 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
+import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
@@ -48,77 +51,84 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
             (query.isBlank() || (element.id in progress.unlockedIds && element.name.contains(query, ignoreCase = true)))
     }
 
-    LazyVerticalGrid(
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // Three columns on a phone keep long names whole even with large text; wider screens get more.
-        columns = GridCells.Adaptive(CARD_MIN_WIDTH),
-        modifier = modifier.fillMaxSize().testTag("screen_elements"),
-        contentPadding = PaddingValues(12.dp)
-    ) {
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            ScreenBanner(stringResource(R.string.tab_elements), Modifier.padding(bottom = 8.dp))
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            AlchemySearchField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = stringResource(R.string.element_search),
-                modifier = Modifier.fillMaxWidth().testTag("elements_search")
-            )
-        }
-        item(span = { GridItemSpan(maxLineSpan) }) {
-            LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(end = 8.dp)) {
-                item {
-                    AlchemyTab(
-                        text = stringResource(R.string.group_all),
-                        selected = selectedGroup == null,
-                        onClick = { selectedGroup = null },
-                        modifier = Modifier.testTag("elements_group_all")
-                    )
-                }
-                lazyRowItems(ElementGroup.entries) { group ->
-                    AlchemyTab(
-                        text = stringResource(group.labelRes),
-                        selected = selectedGroup == group,
-                        onClick = { selectedGroup = group },
-                        modifier = Modifier.padding(start = 8.dp).testTag("elements_group_${group.name.lowercase()}")
-                    )
-                }
+        val columns = maxOf(1, ((maxWidth - SCREEN_PADDING * 2) / CARD_MIN_WIDTH).toInt())
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().testTag("screen_elements"),
+            contentPadding = PaddingValues(SCREEN_PADDING)
+        ) {
+            item {
+                ScreenBanner(stringResource(R.string.tab_elements), Modifier.padding(bottom = 8.dp))
             }
-        }
-        items(entries, key = { it.id }) { element ->
-            val unlocked = element.id in progress.unlockedIds
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(3.dp)
-                    .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
-                    .panelBackground(R.drawable.card_base)
-                    // Clears the ornament on the top edge of the card art.
-                    .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = 7.dp)
-            ) {
-                FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
-                // An invisible two-line name with a badge sizes every card alike, so rows line up, while
-                // the real name and badge sit together in the middle of that room.
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 4.dp)) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.alpha(0f).clearAndSetSemantics {}
-                    ) {
-                        Text("", style = MaterialTheme.typography.labelMedium, minLines = 2)
-                        RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = if (unlocked) element.name else stringResource(R.string.locked_element),
-                            style = MaterialTheme.typography.labelMedium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+            item {
+                AlchemySearchField(
+                    value = query,
+                    onValueChange = { query = it },
+                    placeholder = stringResource(R.string.element_search),
+                    modifier = Modifier.fillMaxWidth().testTag("elements_search")
+                )
+            }
+            item {
+                LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+                    item {
+                        AlchemyTab(
+                            text = stringResource(R.string.group_all),
+                            selected = selectedGroup == null,
+                            onClick = { selectedGroup = null },
+                            modifier = Modifier.testTag("elements_group_all")
                         )
-                        if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
+                    }
+                    lazyRowItems(ElementGroup.entries) { group ->
+                        AlchemyTab(
+                            text = stringResource(group.labelRes),
+                            selected = selectedGroup == group,
+                            onClick = { selectedGroup = group },
+                            modifier = Modifier.padding(start = 8.dp).testTag("elements_group_${group.name.lowercase()}")
+                        )
                     }
                 }
             }
+            // Each row is as tall as its tallest card and every card in it stretches to match, so rows
+            // line up without reserving room for names that fit on one line.
+            items(entries.chunked(columns), key = { row -> row.first().id }) { row ->
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                    row.forEach { element ->
+                        ElementCard(element, unlocked = element.id in progress.unlockedIds, Modifier.weight(1f).fillMaxHeight())
+                    }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ElementCard(element: ElementDefinition, unlocked: Boolean, modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .padding(3.dp)
+            .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
+            .panelBackground(R.drawable.card_base)
+            // Clears the ornament on the top edge of the card art.
+            .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
+    ) {
+        FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
+        // The name and badge sit in the middle of what is left when a neighbour's name takes two lines.
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f).padding(top = CARD_TEXT_GAP)
+        ) {
+            Text(
+                text = if (unlocked) element.name else stringResource(R.string.locked_element),
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
         }
     }
 }
@@ -133,3 +143,10 @@ private val ElementGroup.labelRes: Int
     }
 
 private val CARD_MIN_WIDTH = 104.dp
+private val SCREEN_PADDING = 12.dp
+
+// Space above the name and below the badge, kept equal so the text sits evenly in the card.
+private val CARD_TEXT_GAP = 6.dp
+
+// The card art's bottom border, which the gap under the badge is measured from.
+private val CARD_BOTTOM_BORDER = 4.dp
