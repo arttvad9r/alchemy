@@ -1,0 +1,1382 @@
+[
+  {
+    "id": "milk",
+    "trimmed": "png_trimmed/milk.png",
+    "canvas_512": "png_512/milk.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "0,0",
+    "alpha_pixels": 64729,
+    "width_trimmed": 291,
+    "height_trimmed": 281
+  },
+  {
+    "id": "cheese",
+    "trimmed": "png_trimmed/cheese.png",
+    "canvas_512": "png_512/cheese.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "0,1",
+    "alpha_pixels": 43805,
+    "width_trimmed": 297,
+    "height_trimmed": 249
+  },
+  {
+    "id": "meat",
+    "trimmed": "png_trimmed/meat.png",
+    "canvas_512": "png_512/meat.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "0,2",
+    "alpha_pixels": 68228,
+    "width_trimmed": 306,
+    "height_trimmed": 295
+  },
+  {
+    "id": "leather",
+    "trimmed": "png_trimmed/leather.png",
+    "canvas_512": "png_512/leather.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "0,3",
+    "alpha_pixels": 53782,
+    "width_trimmed": 300,
+    "height_trimmed": 255
+  },
+  {
+    "id": "wool",
+    "trimmed": "png_trimmed/wool.png",
+    "canvas_512": "png_512/wool.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "1,0",
+    "alpha_pixels": 61983,
+    "width_trimmed": 298,
+    "height_trimmed": 283
+  },
+  {
+    "id": "cloth",
+    "trimmed": "png_trimmed/cloth.png",
+    "canvas_512": "png_512/cloth.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "1,1",
+    "alpha_pixels": 65739,
+    "width_trimmed": 310,
+    "height_trimmed": 310
+  },
+  {
+    "id": "rope",
+    "trimmed": "png_trimmed/rope.png",
+    "canvas_512": "png_512/rope.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "1,2",
+    "alpha_pixels": 67205,
+    "width_trimmed": 308,
+    "height_trimmed": 290
+  },
+  {
+    "id": "paper",
+    "trimmed": "png_trimmed/paper.png",
+    "canvas_512": "png_512/paper.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "1,3",
+    "alpha_pixels": 44419,
+    "width_trimmed": 295,
+    "height_trimmed": 266
+  },
+  {
+    "id": "ink",
+    "trimmed": "png_trimmed/ink.png",
+    "canvas_512": "png_512/ink.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "2,0",
+    "alpha_pixels": 64786,
+    "width_trimmed": 303,
+    "height_trimmed": 289
+  },
+  {
+    "id": "book",
+    "trimmed": "png_trimmed/book.png",
+    "canvas_512": "png_512/book.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "2,1",
+    "alpha_pixels": 56775,
+    "width_trimmed": 278,
+    "height_trimmed": 295
+  },
+  {
+    "id": "knowledge",
+    "trimmed": "png_trimmed/knowledge.png",
+    "canvas_512": "png_512/knowledge.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "2,2",
+    "alpha_pixels": 57153,
+    "width_trimmed": 310,
+    "height_trimmed": 275
+  },
+  {
+    "id": "wheel",
+    "trimmed": "png_trimmed/wheel.png",
+    "canvas_512": "png_512/wheel.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "2,3",
+    "alpha_pixels": 61663,
+    "width_trimmed": 299,
+    "height_trimmed": 279
+  },
+  {
+    "id": "cart",
+    "trimmed": "png_trimmed/cart.png",
+    "canvas_512": "png_512/cart.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "3,0",
+    "alpha_pixels": 67412,
+    "width_trimmed": 303,
+    "height_trimmed": 299
+  },
+  {
+    "id": "road",
+    "trimmed": "png_trimmed/road.png",
+    "canvas_512": "png_512/road.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "3,1",
+    "alpha_pixels": 64026,
+    "width_trimmed": 292,
+    "height_trimmed": 293
+  },
+  {
+    "id": "village",
+    "trimmed": "png_trimmed/village.png",
+    "canvas_512": "png_512/village.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "3,2",
+    "alpha_pixels": 66881,
+    "width_trimmed": 309,
+    "height_trimmed": 296
+  },
+  {
+    "id": "settlement",
+    "trimmed": "png_trimmed/settlement.png",
+    "canvas_512": "png_512/settlement.png",
+    "source": "raw_sheets/sheet_01.png",
+    "cell": "3,3",
+    "alpha_pixels": 59487,
+    "width_trimmed": 299,
+    "height_trimmed": 297
+  },
+  {
+    "id": "medicine",
+    "trimmed": "png_trimmed/medicine.png",
+    "canvas_512": "png_512/medicine.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "0,0",
+    "alpha_pixels": 60060,
+    "width_trimmed": 303,
+    "height_trimmed": 288
+  },
+  {
+    "id": "poison",
+    "trimmed": "png_trimmed/poison.png",
+    "canvas_512": "png_512/poison.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "0,1",
+    "alpha_pixels": 56145,
+    "width_trimmed": 309,
+    "height_trimmed": 263
+  },
+  {
+    "id": "mushroom",
+    "trimmed": "png_trimmed/mushroom.png",
+    "canvas_512": "png_512/mushroom.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "0,2",
+    "alpha_pixels": 55050,
+    "width_trimmed": 304,
+    "height_trimmed": 250
+  },
+  {
+    "id": "bone",
+    "trimmed": "png_trimmed/bone.png",
+    "canvas_512": "png_512/bone.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "0,3",
+    "alpha_pixels": 50115,
+    "width_trimmed": 294,
+    "height_trimmed": 288
+  },
+  {
+    "id": "skull",
+    "trimmed": "png_trimmed/skull.png",
+    "canvas_512": "png_512/skull.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "1,0",
+    "alpha_pixels": 67255,
+    "width_trimmed": 308,
+    "height_trimmed": 293
+  },
+  {
+    "id": "blood",
+    "trimmed": "png_trimmed/blood.png",
+    "canvas_512": "png_512/blood.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "1,1",
+    "alpha_pixels": 56831,
+    "width_trimmed": 313,
+    "height_trimmed": 261
+  },
+  {
+    "id": "corpse",
+    "trimmed": "png_trimmed/corpse.png",
+    "canvas_512": "png_512/corpse.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "1,2",
+    "alpha_pixels": 67874,
+    "width_trimmed": 313,
+    "height_trimmed": 294
+  },
+  {
+    "id": "ghost",
+    "trimmed": "png_trimmed/ghost.png",
+    "canvas_512": "png_512/ghost.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "1,3",
+    "alpha_pixels": 55881,
+    "width_trimmed": 306,
+    "height_trimmed": 288
+  },
+  {
+    "id": "cemetery",
+    "trimmed": "png_trimmed/cemetery.png",
+    "canvas_512": "png_512/cemetery.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "2,0",
+    "alpha_pixels": 41243,
+    "width_trimmed": 261,
+    "height_trimmed": 309
+  },
+  {
+    "id": "grave",
+    "trimmed": "png_trimmed/grave.png",
+    "canvas_512": "png_512/grave.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "2,1",
+    "alpha_pixels": 58182,
+    "width_trimmed": 313,
+    "height_trimmed": 309
+  },
+  {
+    "id": "wolf",
+    "trimmed": "png_trimmed/wolf.png",
+    "canvas_512": "png_512/wolf.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "2,2",
+    "alpha_pixels": 74354,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "horse",
+    "trimmed": "png_trimmed/horse.png",
+    "canvas_512": "png_512/horse.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "2,3",
+    "alpha_pixels": 55482,
+    "width_trimmed": 283,
+    "height_trimmed": 304
+  },
+  {
+    "id": "rider",
+    "trimmed": "png_trimmed/rider.png",
+    "canvas_512": "png_512/rider.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "3,0",
+    "alpha_pixels": 49051,
+    "width_trimmed": 312,
+    "height_trimmed": 263
+  },
+  {
+    "id": "string",
+    "trimmed": "png_trimmed/string.png",
+    "canvas_512": "png_512/string.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "3,1",
+    "alpha_pixels": 73724,
+    "width_trimmed": 313,
+    "height_trimmed": 301
+  },
+  {
+    "id": "bow",
+    "trimmed": "png_trimmed/bow.png",
+    "canvas_512": "png_512/bow.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "3,2",
+    "alpha_pixels": 65267,
+    "width_trimmed": 313,
+    "height_trimmed": 302
+  },
+  {
+    "id": "hunter",
+    "trimmed": "png_trimmed/hunter.png",
+    "canvas_512": "png_512/hunter.png",
+    "source": "raw_sheets/sheet_02.png",
+    "cell": "3,3",
+    "alpha_pixels": 65640,
+    "width_trimmed": 314,
+    "height_trimmed": 301
+  },
+  {
+    "id": "bakery",
+    "trimmed": "png_trimmed/bakery.png",
+    "canvas_512": "png_512/bakery.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "0,0",
+    "alpha_pixels": 56083,
+    "width_trimmed": 306,
+    "height_trimmed": 305
+  },
+  {
+    "id": "mill",
+    "trimmed": "png_trimmed/mill.png",
+    "canvas_512": "png_512/mill.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "0,1",
+    "alpha_pixels": 54318,
+    "width_trimmed": 309,
+    "height_trimmed": 238
+  },
+  {
+    "id": "farmer",
+    "trimmed": "png_trimmed/farmer.png",
+    "canvas_512": "png_512/farmer.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "0,2",
+    "alpha_pixels": 42411,
+    "width_trimmed": 313,
+    "height_trimmed": 206
+  },
+  {
+    "id": "baker",
+    "trimmed": "png_trimmed/baker.png",
+    "canvas_512": "png_512/baker.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "0,3",
+    "alpha_pixels": 37872,
+    "width_trimmed": 247,
+    "height_trimmed": 284
+  },
+  {
+    "id": "blacksmith",
+    "trimmed": "png_trimmed/blacksmith.png",
+    "canvas_512": "png_512/blacksmith.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "1,0",
+    "alpha_pixels": 64882,
+    "width_trimmed": 307,
+    "height_trimmed": 313
+  },
+  {
+    "id": "miner",
+    "trimmed": "png_trimmed/miner.png",
+    "canvas_512": "png_512/miner.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "1,1",
+    "alpha_pixels": 47075,
+    "width_trimmed": 293,
+    "height_trimmed": 249
+  },
+  {
+    "id": "merchant",
+    "trimmed": "png_trimmed/merchant.png",
+    "canvas_512": "png_512/merchant.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "1,2",
+    "alpha_pixels": 45897,
+    "width_trimmed": 313,
+    "height_trimmed": 235
+  },
+  {
+    "id": "scholar",
+    "trimmed": "png_trimmed/scholar.png",
+    "canvas_512": "png_512/scholar.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "1,3",
+    "alpha_pixels": 45754,
+    "width_trimmed": 314,
+    "height_trimmed": 280
+  },
+  {
+    "id": "priest",
+    "trimmed": "png_trimmed/priest.png",
+    "canvas_512": "png_512/priest.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "2,0",
+    "alpha_pixels": 59522,
+    "width_trimmed": 309,
+    "height_trimmed": 313
+  },
+  {
+    "id": "sailor",
+    "trimmed": "png_trimmed/sailor.png",
+    "canvas_512": "png_512/sailor.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "2,1",
+    "alpha_pixels": 52456,
+    "width_trimmed": 285,
+    "height_trimmed": 256
+  },
+  {
+    "id": "captain",
+    "trimmed": "png_trimmed/captain.png",
+    "canvas_512": "png_512/captain.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "2,2",
+    "alpha_pixels": 48968,
+    "width_trimmed": 295,
+    "height_trimmed": 234
+  },
+  {
+    "id": "pirate",
+    "trimmed": "png_trimmed/pirate.png",
+    "canvas_512": "png_512/pirate.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "2,3",
+    "alpha_pixels": 59342,
+    "width_trimmed": 314,
+    "height_trimmed": 313
+  },
+  {
+    "id": "hurricane",
+    "trimmed": "png_trimmed/hurricane.png",
+    "canvas_512": "png_512/hurricane.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "3,0",
+    "alpha_pixels": 55801,
+    "width_trimmed": 304,
+    "height_trimmed": 264
+  },
+  {
+    "id": "blizzard",
+    "trimmed": "png_trimmed/blizzard.png",
+    "canvas_512": "png_512/blizzard.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "3,1",
+    "alpha_pixels": 59861,
+    "width_trimmed": 300,
+    "height_trimmed": 279
+  },
+  {
+    "id": "volcano",
+    "trimmed": "png_trimmed/volcano.png",
+    "canvas_512": "png_512/volcano.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "3,2",
+    "alpha_pixels": 61979,
+    "width_trimmed": 289,
+    "height_trimmed": 281
+  },
+  {
+    "id": "desert",
+    "trimmed": "png_trimmed/desert.png",
+    "canvas_512": "png_512/desert.png",
+    "source": "raw_sheets/sheet_03.png",
+    "cell": "3,3",
+    "alpha_pixels": 51963,
+    "width_trimmed": 301,
+    "height_trimmed": 282
+  },
+  {
+    "id": "crown",
+    "trimmed": "png_trimmed/crown.png",
+    "canvas_512": "png_512/crown.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "0,0",
+    "alpha_pixels": 60523,
+    "width_trimmed": 292,
+    "height_trimmed": 304
+  },
+  {
+    "id": "king",
+    "trimmed": "png_trimmed/king.png",
+    "canvas_512": "png_512/king.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "0,1",
+    "alpha_pixels": 58978,
+    "width_trimmed": 290,
+    "height_trimmed": 303
+  },
+  {
+    "id": "queen",
+    "trimmed": "png_trimmed/queen.png",
+    "canvas_512": "png_512/queen.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "0,2",
+    "alpha_pixels": 60980,
+    "width_trimmed": 285,
+    "height_trimmed": 295
+  },
+  {
+    "id": "castle",
+    "trimmed": "png_trimmed/castle.png",
+    "canvas_512": "png_512/castle.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "0,3",
+    "alpha_pixels": 55523,
+    "width_trimmed": 275,
+    "height_trimmed": 279
+  },
+  {
+    "id": "tower",
+    "trimmed": "png_trimmed/tower.png",
+    "canvas_512": "png_512/tower.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "1,0",
+    "alpha_pixels": 65884,
+    "width_trimmed": 299,
+    "height_trimmed": 292
+  },
+  {
+    "id": "temple",
+    "trimmed": "png_trimmed/temple.png",
+    "canvas_512": "png_512/temple.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "1,1",
+    "alpha_pixels": 55750,
+    "width_trimmed": 295,
+    "height_trimmed": 305
+  },
+  {
+    "id": "statue",
+    "trimmed": "png_trimmed/statue.png",
+    "canvas_512": "png_512/statue.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "1,2",
+    "alpha_pixels": 63831,
+    "width_trimmed": 313,
+    "height_trimmed": 288
+  },
+  {
+    "id": "garden",
+    "trimmed": "png_trimmed/garden.png",
+    "canvas_512": "png_512/garden.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "1,3",
+    "alpha_pixels": 66433,
+    "width_trimmed": 305,
+    "height_trimmed": 311
+  },
+  {
+    "id": "fountain",
+    "trimmed": "png_trimmed/fountain.png",
+    "canvas_512": "png_512/fountain.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "2,0",
+    "alpha_pixels": 77029,
+    "width_trimmed": 314,
+    "height_trimmed": 308
+  },
+  {
+    "id": "park",
+    "trimmed": "png_trimmed/park.png",
+    "canvas_512": "png_512/park.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "2,1",
+    "alpha_pixels": 56438,
+    "width_trimmed": 312,
+    "height_trimmed": 282
+  },
+  {
+    "id": "market",
+    "trimmed": "png_trimmed/market.png",
+    "canvas_512": "png_512/market.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "2,2",
+    "alpha_pixels": 54974,
+    "width_trimmed": 293,
+    "height_trimmed": 294
+  },
+  {
+    "id": "barrel",
+    "trimmed": "png_trimmed/barrel.png",
+    "canvas_512": "png_512/barrel.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "2,3",
+    "alpha_pixels": 70596,
+    "width_trimmed": 300,
+    "height_trimmed": 313
+  },
+  {
+    "id": "juice",
+    "trimmed": "png_trimmed/juice.png",
+    "canvas_512": "png_512/juice.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "3,0",
+    "alpha_pixels": 73026,
+    "width_trimmed": 297,
+    "height_trimmed": 307
+  },
+  {
+    "id": "wine",
+    "trimmed": "png_trimmed/wine.png",
+    "canvas_512": "png_512/wine.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "3,1",
+    "alpha_pixels": 64812,
+    "width_trimmed": 302,
+    "height_trimmed": 302
+  },
+  {
+    "id": "beer",
+    "trimmed": "png_trimmed/beer.png",
+    "canvas_512": "png_512/beer.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "3,2",
+    "alpha_pixels": 62966,
+    "width_trimmed": 298,
+    "height_trimmed": 308
+  },
+  {
+    "id": "tavern",
+    "trimmed": "png_trimmed/tavern.png",
+    "canvas_512": "png_512/tavern.png",
+    "source": "raw_sheets/sheet_04.png",
+    "cell": "3,3",
+    "alpha_pixels": 67936,
+    "width_trimmed": 303,
+    "height_trimmed": 306
+  },
+  {
+    "id": "arrow",
+    "trimmed": "png_trimmed/arrow.png",
+    "canvas_512": "png_512/arrow.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "0,0",
+    "alpha_pixels": 51756,
+    "width_trimmed": 296,
+    "height_trimmed": 276
+  },
+  {
+    "id": "spear",
+    "trimmed": "png_trimmed/spear.png",
+    "canvas_512": "png_512/spear.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "0,1",
+    "alpha_pixels": 36265,
+    "width_trimmed": 263,
+    "height_trimmed": 289
+  },
+  {
+    "id": "sword",
+    "trimmed": "png_trimmed/sword.png",
+    "canvas_512": "png_512/sword.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "0,2",
+    "alpha_pixels": 50161,
+    "width_trimmed": 274,
+    "height_trimmed": 281
+  },
+  {
+    "id": "shield",
+    "trimmed": "png_trimmed/shield.png",
+    "canvas_512": "png_512/shield.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "0,3",
+    "alpha_pixels": 59871,
+    "width_trimmed": 295,
+    "height_trimmed": 285
+  },
+  {
+    "id": "armor",
+    "trimmed": "png_trimmed/armor.png",
+    "canvas_512": "png_512/armor.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "1,0",
+    "alpha_pixels": 62557,
+    "width_trimmed": 300,
+    "height_trimmed": 288
+  },
+  {
+    "id": "warrior",
+    "trimmed": "png_trimmed/warrior.png",
+    "canvas_512": "png_512/warrior.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "1,1",
+    "alpha_pixels": 62996,
+    "width_trimmed": 298,
+    "height_trimmed": 292
+  },
+  {
+    "id": "campfire",
+    "trimmed": "png_trimmed/campfire.png",
+    "canvas_512": "png_512/campfire.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "1,2",
+    "alpha_pixels": 57107,
+    "width_trimmed": 283,
+    "height_trimmed": 313
+  },
+  {
+    "id": "tent",
+    "trimmed": "png_trimmed/tent.png",
+    "canvas_512": "png_512/tent.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "1,3",
+    "alpha_pixels": 48920,
+    "width_trimmed": 306,
+    "height_trimmed": 285
+  },
+  {
+    "id": "camp",
+    "trimmed": "png_trimmed/camp.png",
+    "canvas_512": "png_512/camp.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "2,0",
+    "alpha_pixels": 54899,
+    "width_trimmed": 306,
+    "height_trimmed": 300
+  },
+  {
+    "id": "forge",
+    "trimmed": "png_trimmed/forge.png",
+    "canvas_512": "png_512/forge.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "2,1",
+    "alpha_pixels": 54677,
+    "width_trimmed": 289,
+    "height_trimmed": 299
+  },
+  {
+    "id": "hammer",
+    "trimmed": "png_trimmed/hammer.png",
+    "canvas_512": "png_512/hammer.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "2,2",
+    "alpha_pixels": 57304,
+    "width_trimmed": 300,
+    "height_trimmed": 286
+  },
+  {
+    "id": "plow",
+    "trimmed": "png_trimmed/plow.png",
+    "canvas_512": "png_512/plow.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "2,3",
+    "alpha_pixels": 54899,
+    "width_trimmed": 303,
+    "height_trimmed": 274
+  },
+  {
+    "id": "mine",
+    "trimmed": "png_trimmed/mine.png",
+    "canvas_512": "png_512/mine.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "3,0",
+    "alpha_pixels": 71334,
+    "width_trimmed": 308,
+    "height_trimmed": 292
+  },
+  {
+    "id": "gold",
+    "trimmed": "png_trimmed/gold.png",
+    "canvas_512": "png_512/gold.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "3,1",
+    "alpha_pixels": 59305,
+    "width_trimmed": 302,
+    "height_trimmed": 277
+  },
+  {
+    "id": "silver",
+    "trimmed": "png_trimmed/silver.png",
+    "canvas_512": "png_512/silver.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "3,2",
+    "alpha_pixels": 61942,
+    "width_trimmed": 305,
+    "height_trimmed": 277
+  },
+  {
+    "id": "gem",
+    "trimmed": "png_trimmed/gem.png",
+    "canvas_512": "png_512/gem.png",
+    "source": "raw_sheets/sheet_05.png",
+    "cell": "3,3",
+    "alpha_pixels": 64429,
+    "width_trimmed": 286,
+    "height_trimmed": 287
+  },
+  {
+    "id": "elixir",
+    "trimmed": "png_trimmed/elixir.png",
+    "canvas_512": "png_512/elixir.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "0,0",
+    "alpha_pixels": 51309,
+    "width_trimmed": 306,
+    "height_trimmed": 292
+  },
+  {
+    "id": "portal",
+    "trimmed": "png_trimmed/portal.png",
+    "canvas_512": "png_512/portal.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "0,1",
+    "alpha_pixels": 59413,
+    "width_trimmed": 311,
+    "height_trimmed": 312
+  },
+  {
+    "id": "spellbook",
+    "trimmed": "png_trimmed/spellbook.png",
+    "canvas_512": "png_512/spellbook.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "0,2",
+    "alpha_pixels": 58767,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "enchantment",
+    "trimmed": "png_trimmed/enchantment.png",
+    "canvas_512": "png_512/enchantment.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "0,3",
+    "alpha_pixels": 60064,
+    "width_trimmed": 314,
+    "height_trimmed": 314
+  },
+  {
+    "id": "clock",
+    "trimmed": "png_trimmed/clock.png",
+    "canvas_512": "png_512/clock.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "1,0",
+    "alpha_pixels": 35823,
+    "width_trimmed": 218,
+    "height_trimmed": 313
+  },
+  {
+    "id": "hourglass",
+    "trimmed": "png_trimmed/hourglass.png",
+    "canvas_512": "png_512/hourglass.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "1,1",
+    "alpha_pixels": 68030,
+    "width_trimmed": 313,
+    "height_trimmed": 293
+  },
+  {
+    "id": "star",
+    "trimmed": "png_trimmed/star.png",
+    "canvas_512": "png_512/star.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "1,2",
+    "alpha_pixels": 54578,
+    "width_trimmed": 252,
+    "height_trimmed": 313
+  },
+  {
+    "id": "observatory",
+    "trimmed": "png_trimmed/observatory.png",
+    "canvas_512": "png_512/observatory.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "1,3",
+    "alpha_pixels": 65936,
+    "width_trimmed": 314,
+    "height_trimmed": 281
+  },
+  {
+    "id": "astronomer",
+    "trimmed": "png_trimmed/astronomer.png",
+    "canvas_512": "png_512/astronomer.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "2,0",
+    "alpha_pixels": 65806,
+    "width_trimmed": 310,
+    "height_trimmed": 311
+  },
+  {
+    "id": "philosopher_stone",
+    "trimmed": "png_trimmed/philosopher_stone.png",
+    "canvas_512": "png_512/philosopher_stone.png",
+    "source": "raw_sheets/sheet_06.png",
+    "cell": "2,1",
+    "alpha_pixels": 71936,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "wind",
+    "trimmed": "png_trimmed/wind.png",
+    "canvas_512": "png_512/wind.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "0,0",
+    "alpha_pixels": 65502,
+    "width_trimmed": 314,
+    "height_trimmed": 296
+  },
+  {
+    "id": "clay",
+    "trimmed": "png_trimmed/clay.png",
+    "canvas_512": "png_512/clay.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "0,1",
+    "alpha_pixels": 59158,
+    "width_trimmed": 307,
+    "height_trimmed": 312
+  },
+  {
+    "id": "forest",
+    "trimmed": "png_trimmed/forest.png",
+    "canvas_512": "png_512/forest.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "0,2",
+    "alpha_pixels": 64440,
+    "width_trimmed": 307,
+    "height_trimmed": 289
+  },
+  {
+    "id": "moss",
+    "trimmed": "png_trimmed/moss.png",
+    "canvas_512": "png_512/moss.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "0,3",
+    "alpha_pixels": 67244,
+    "width_trimmed": 304,
+    "height_trimmed": 293
+  },
+  {
+    "id": "sky",
+    "trimmed": "png_trimmed/sky.png",
+    "canvas_512": "png_512/sky.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "1,0",
+    "alpha_pixels": 57518,
+    "width_trimmed": 309,
+    "height_trimmed": 310
+  },
+  {
+    "id": "sun",
+    "trimmed": "png_trimmed/sun.png",
+    "canvas_512": "png_512/sun.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "1,1",
+    "alpha_pixels": 58783,
+    "width_trimmed": 307,
+    "height_trimmed": 301
+  },
+  {
+    "id": "moon",
+    "trimmed": "png_trimmed/moon.png",
+    "canvas_512": "png_512/moon.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "1,2",
+    "alpha_pixels": 63056,
+    "width_trimmed": 308,
+    "height_trimmed": 297
+  },
+  {
+    "id": "salt",
+    "trimmed": "png_trimmed/salt.png",
+    "canvas_512": "png_512/salt.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "1,3",
+    "alpha_pixels": 66660,
+    "width_trimmed": 313,
+    "height_trimmed": 307
+  },
+  {
+    "id": "wave",
+    "trimmed": "png_trimmed/wave.png",
+    "canvas_512": "png_512/wave.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "2,0",
+    "alpha_pixels": 64055,
+    "width_trimmed": 291,
+    "height_trimmed": 313
+  },
+  {
+    "id": "algae",
+    "trimmed": "png_trimmed/algae.png",
+    "canvas_512": "png_512/algae.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "2,1",
+    "alpha_pixels": 70355,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "wood",
+    "trimmed": "png_trimmed/wood.png",
+    "canvas_512": "png_512/wood.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "2,2",
+    "alpha_pixels": 65935,
+    "width_trimmed": 313,
+    "height_trimmed": 310
+  },
+  {
+    "id": "field",
+    "trimmed": "png_trimmed/field.png",
+    "canvas_512": "png_512/field.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "2,3",
+    "alpha_pixels": 57941,
+    "width_trimmed": 295,
+    "height_trimmed": 297
+  },
+  {
+    "id": "farm",
+    "trimmed": "png_trimmed/farm.png",
+    "canvas_512": "png_512/farm.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "3,0",
+    "alpha_pixels": 78300,
+    "width_trimmed": 314,
+    "height_trimmed": 314
+  },
+  {
+    "id": "wheat",
+    "trimmed": "png_trimmed/wheat.png",
+    "canvas_512": "png_512/wheat.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "3,1",
+    "alpha_pixels": 84212,
+    "width_trimmed": 313,
+    "height_trimmed": 314
+  },
+  {
+    "id": "bread",
+    "trimmed": "png_trimmed/bread.png",
+    "canvas_512": "png_512/bread.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "3,2",
+    "alpha_pixels": 71068,
+    "width_trimmed": 312,
+    "height_trimmed": 306
+  },
+  {
+    "id": "cattle",
+    "trimmed": "png_trimmed/cattle.png",
+    "canvas_512": "png_512/cattle.png",
+    "source": "raw_sheets/sheet_07.png",
+    "cell": "3,3",
+    "alpha_pixels": 79249,
+    "width_trimmed": 309,
+    "height_trimmed": 304
+  },
+  {
+    "id": "city",
+    "trimmed": "png_trimmed/city.png",
+    "canvas_512": "png_512/city.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "0,0",
+    "alpha_pixels": 64928,
+    "width_trimmed": 301,
+    "height_trimmed": 305
+  },
+  {
+    "id": "bridge",
+    "trimmed": "png_trimmed/bridge.png",
+    "canvas_512": "png_512/bridge.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "0,1",
+    "alpha_pixels": 70032,
+    "width_trimmed": 313,
+    "height_trimmed": 309
+  },
+  {
+    "id": "boat",
+    "trimmed": "png_trimmed/boat.png",
+    "canvas_512": "png_512/boat.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "0,2",
+    "alpha_pixels": 64296,
+    "width_trimmed": 300,
+    "height_trimmed": 303
+  },
+  {
+    "id": "sail",
+    "trimmed": "png_trimmed/sail.png",
+    "canvas_512": "png_512/sail.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "0,3",
+    "alpha_pixels": 62577,
+    "width_trimmed": 295,
+    "height_trimmed": 307
+  },
+  {
+    "id": "ship",
+    "trimmed": "png_trimmed/ship.png",
+    "canvas_512": "png_512/ship.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "1,0",
+    "alpha_pixels": 66683,
+    "width_trimmed": 308,
+    "height_trimmed": 296
+  },
+  {
+    "id": "port",
+    "trimmed": "png_trimmed/port.png",
+    "canvas_512": "png_512/port.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "1,1",
+    "alpha_pixels": 69152,
+    "width_trimmed": 310,
+    "height_trimmed": 301
+  },
+  {
+    "id": "net",
+    "trimmed": "png_trimmed/net.png",
+    "canvas_512": "png_512/net.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "1,2",
+    "alpha_pixels": 66121,
+    "width_trimmed": 307,
+    "height_trimmed": 309
+  },
+  {
+    "id": "fisherman",
+    "trimmed": "png_trimmed/fisherman.png",
+    "canvas_512": "png_512/fisherman.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "1,3",
+    "alpha_pixels": 73313,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "feather",
+    "trimmed": "png_trimmed/feather.png",
+    "canvas_512": "png_512/feather.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "2,0",
+    "alpha_pixels": 69523,
+    "width_trimmed": 312,
+    "height_trimmed": 313
+  },
+  {
+    "id": "egg",
+    "trimmed": "png_trimmed/egg.png",
+    "canvas_512": "png_512/egg.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "2,1",
+    "alpha_pixels": 72760,
+    "width_trimmed": 304,
+    "height_trimmed": 313
+  },
+  {
+    "id": "nest",
+    "trimmed": "png_trimmed/nest.png",
+    "canvas_512": "png_512/nest.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "2,2",
+    "alpha_pixels": 71980,
+    "width_trimmed": 313,
+    "height_trimmed": 313
+  },
+  {
+    "id": "bee",
+    "trimmed": "png_trimmed/bee.png",
+    "canvas_512": "png_512/bee.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "2,3",
+    "alpha_pixels": 71725,
+    "width_trimmed": 314,
+    "height_trimmed": 313
+  },
+  {
+    "id": "honey",
+    "trimmed": "png_trimmed/honey.png",
+    "canvas_512": "png_512/honey.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "3,0",
+    "alpha_pixels": 73288,
+    "width_trimmed": 314,
+    "height_trimmed": 311
+  },
+  {
+    "id": "fruit",
+    "trimmed": "png_trimmed/fruit.png",
+    "canvas_512": "png_512/fruit.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "3,1",
+    "alpha_pixels": 69872,
+    "width_trimmed": 307,
+    "height_trimmed": 307
+  },
+  {
+    "id": "vegetable",
+    "trimmed": "png_trimmed/vegetable.png",
+    "canvas_512": "png_512/vegetable.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "3,2",
+    "alpha_pixels": 53226,
+    "width_trimmed": 272,
+    "height_trimmed": 308
+  },
+  {
+    "id": "herbs",
+    "trimmed": "png_trimmed/herbs.png",
+    "canvas_512": "png_512/herbs.png",
+    "source": "raw_sheets/sheet_08.png",
+    "cell": "3,3",
+    "alpha_pixels": 57587,
+    "width_trimmed": 288,
+    "height_trimmed": 306
+  },
+  {
+    "id": "oasis",
+    "trimmed": "png_trimmed/oasis.png",
+    "canvas_512": "png_512/oasis.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "0,0",
+    "alpha_pixels": 57722,
+    "width_trimmed": 297,
+    "height_trimmed": 305
+  },
+  {
+    "id": "jungle",
+    "trimmed": "png_trimmed/jungle.png",
+    "canvas_512": "png_512/jungle.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "0,1",
+    "alpha_pixels": 68062,
+    "width_trimmed": 312,
+    "height_trimmed": 299
+  },
+  {
+    "id": "island",
+    "trimmed": "png_trimmed/island.png",
+    "canvas_512": "png_512/island.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "0,2",
+    "alpha_pixels": 69016,
+    "width_trimmed": 312,
+    "height_trimmed": 272
+  },
+  {
+    "id": "beach",
+    "trimmed": "png_trimmed/beach.png",
+    "canvas_512": "png_512/beach.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "0,3",
+    "alpha_pixels": 60281,
+    "width_trimmed": 292,
+    "height_trimmed": 302
+  },
+  {
+    "id": "coral",
+    "trimmed": "png_trimmed/coral.png",
+    "canvas_512": "png_512/coral.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "1,0",
+    "alpha_pixels": 67666,
+    "width_trimmed": 306,
+    "height_trimmed": 295
+  },
+  {
+    "id": "shark",
+    "trimmed": "png_trimmed/shark.png",
+    "canvas_512": "png_512/shark.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "1,1",
+    "alpha_pixels": 59413,
+    "width_trimmed": 300,
+    "height_trimmed": 297
+  },
+  {
+    "id": "mermaid",
+    "trimmed": "png_trimmed/mermaid.png",
+    "canvas_512": "png_512/mermaid.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "1,2",
+    "alpha_pixels": 62282,
+    "width_trimmed": 313,
+    "height_trimmed": 297
+  },
+  {
+    "id": "dragon",
+    "trimmed": "png_trimmed/dragon.png",
+    "canvas_512": "png_512/dragon.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "1,3",
+    "alpha_pixels": 54530,
+    "width_trimmed": 291,
+    "height_trimmed": 294
+  },
+  {
+    "id": "phoenix",
+    "trimmed": "png_trimmed/phoenix.png",
+    "canvas_512": "png_512/phoenix.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "2,0",
+    "alpha_pixels": 66578,
+    "width_trimmed": 308,
+    "height_trimmed": 300
+  },
+  {
+    "id": "griffin",
+    "trimmed": "png_trimmed/griffin.png",
+    "canvas_512": "png_512/griffin.png",
+    "source": "raw_sheets/sheet_09.png",
+    "cell": "2,1",
+    "alpha_pixels": 61439,
+    "width_trimmed": 305,
+    "height_trimmed": 299
+  },
+  {
+    "id": "potion",
+    "trimmed": "png_trimmed/potion.png",
+    "canvas_512": "png_512/potion.png",
+    "source": "a_high_quality_fantasy_illustration_on_a_transpare_7_batch_1.png",
+    "cell": "generated_single",
+    "alpha_pixels": 734647,
+    "width_trimmed": 1079,
+    "height_trimmed": 1198
+  },
+  {
+    "id": "rune",
+    "trimmed": "png_trimmed/rune.png",
+    "canvas_512": "png_512/rune.png",
+    "source": "a_high_resolution_clean_cutout_style_fantasy_gam_8_batch_2.png",
+    "cell": "generated_single",
+    "alpha_pixels": 798433,
+    "width_trimmed": 1108,
+    "height_trimmed": 1015
+  },
+  {
+    "id": "wizard",
+    "trimmed": "png_trimmed/wizard.png",
+    "canvas_512": "png_512/wizard.png",
+    "source": "a_high_quality_fantasy_style_illustration_on_a_tra_9_batch_3.png",
+    "cell": "generated_single",
+    "alpha_pixels": 885535,
+    "width_trimmed": 1131,
+    "height_trimmed": 1152
+  },
+  {
+    "id": "golem",
+    "trimmed": "png_trimmed/golem.png",
+    "canvas_512": "png_512/golem.png",
+    "source": "a_high_quality_fantasy_digital_illustration_on_a_t_10_batch_4.png",
+    "cell": "generated_single",
+    "alpha_pixels": 644103,
+    "width_trimmed": 954,
+    "height_trimmed": 998
+  },
+  {
+    "id": "unicorn",
+    "trimmed": "png_trimmed/unicorn.png",
+    "canvas_512": "png_512/unicorn.png",
+    "source": "a_high_resolution_fantasy_game_style_icon_illustr_11_batch_5.png",
+    "cell": "generated_single",
+    "alpha_pixels": 599703,
+    "width_trimmed": 872,
+    "height_trimmed": 1026
+  },
+  {
+    "id": "alchemy",
+    "trimmed": "png_trimmed/alchemy.png",
+    "canvas_512": "png_512/alchemy.png",
+    "source": "a_clean_high_resolution_fantasy_game_style_illus_12_batch_6.png",
+    "cell": "generated_single",
+    "alpha_pixels": 628016,
+    "width_trimmed": 996,
+    "height_trimmed": 1177
+  }
+]

@@ -1,0 +1,1402 @@
+[
+  {
+    "category": "elements",
+    "name": "fire",
+    "file": "elements/fire.png",
+    "width": 170,
+    "height": 193,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "water",
+    "file": "elements/water.png",
+    "width": 164,
+    "height": 181,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "earth",
+    "file": "elements/earth.png",
+    "width": 173,
+    "height": 174,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "air",
+    "file": "elements/air.png",
+    "width": 184,
+    "height": 177,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "steam",
+    "file": "elements/steam.png",
+    "width": 204,
+    "height": 186,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "lava",
+    "file": "elements/lava.png",
+    "width": 206,
+    "height": 199,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "mud",
+    "file": "elements/mud.png",
+    "width": 185,
+    "height": 170,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "dust",
+    "file": "elements/dust.png",
+    "width": 188,
+    "height": 175,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "plant",
+    "file": "elements/plant.png",
+    "width": 160,
+    "height": 181,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "tree",
+    "file": "elements/tree.png",
+    "width": 203,
+    "height": 194,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "seed",
+    "file": "elements/seed.png",
+    "width": 188,
+    "height": 180,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "flower",
+    "file": "elements/flower.png",
+    "width": 185,
+    "height": 199,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "stone",
+    "file": "elements/stone.png",
+    "width": 168,
+    "height": 169,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "sand",
+    "file": "elements/sand.png",
+    "width": 190,
+    "height": 173,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "metal",
+    "file": "elements/metal.png",
+    "width": 193,
+    "height": 158,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "glass",
+    "file": "elements/glass.png",
+    "width": 169,
+    "height": 178,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "ice",
+    "file": "elements/ice.png",
+    "width": 190,
+    "height": 183,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "snow",
+    "file": "elements/snow.png",
+    "width": 174,
+    "height": 191,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "cloud",
+    "file": "elements/cloud.png",
+    "width": 187,
+    "height": 153,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "rain",
+    "file": "elements/rain.png",
+    "width": 156,
+    "height": 176,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "storm",
+    "file": "elements/storm.png",
+    "width": 190,
+    "height": 199,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "lightning",
+    "file": "elements/lightning.png",
+    "width": 159,
+    "height": 211,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "smoke",
+    "file": "elements/smoke.png",
+    "width": 173,
+    "height": 198,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "ash",
+    "file": "elements/ash.png",
+    "width": 190,
+    "height": 191,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "energy",
+    "file": "elements/energy.png",
+    "width": 193,
+    "height": 194,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "light",
+    "file": "elements/light.png",
+    "width": 195,
+    "height": 203,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "shadow",
+    "file": "elements/shadow.png",
+    "width": 190,
+    "height": 198,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "life",
+    "file": "elements/life.png",
+    "width": 194,
+    "height": 187,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "beast",
+    "file": "elements/beast.png",
+    "width": 178,
+    "height": 183,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "bird",
+    "file": "elements/bird.png",
+    "width": 168,
+    "height": 193,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "fish",
+    "file": "elements/fish.png",
+    "width": 168,
+    "height": 179,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "human",
+    "file": "elements/human.png",
+    "width": 186,
+    "height": 197,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "tool",
+    "file": "elements/tool.png",
+    "width": 175,
+    "height": 169,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "house",
+    "file": "elements/house.png",
+    "width": 193,
+    "height": 203,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "mountain",
+    "file": "elements/mountain.png",
+    "width": 200,
+    "height": 185,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "river",
+    "file": "elements/river.png",
+    "width": 195,
+    "height": 204,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "ocean",
+    "file": "elements/ocean.png",
+    "width": 201,
+    "height": 194,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "swamp",
+    "file": "elements/swamp.png",
+    "width": 200,
+    "height": 192,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "time",
+    "file": "elements/time.png",
+    "width": 190,
+    "height": 188,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "magic",
+    "file": "elements/magic.png",
+    "width": 195,
+    "height": 195,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "crystal",
+    "file": "elements/crystal.png",
+    "width": 177,
+    "height": 194,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "elements",
+    "name": "spirit",
+    "file": "elements/spirit.png",
+    "width": 176,
+    "height": 196,
+    "source": "raw_sheets/elements_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_primary_blue",
+    "file": "ui/buttons/button_primary_blue.png",
+    "width": 299,
+    "height": 155,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_secondary_dark",
+    "file": "ui/buttons/button_secondary_dark.png",
+    "width": 273,
+    "height": 138,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_arcane_purple",
+    "file": "ui/buttons/button_arcane_purple.png",
+    "width": 282,
+    "height": 146,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_premium_gold",
+    "file": "ui/buttons/button_premium_gold.png",
+    "width": 286,
+    "height": 143,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_danger_red",
+    "file": "ui/buttons/button_danger_red.png",
+    "width": 276,
+    "height": 144,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_small_blue",
+    "file": "ui/buttons/button_small_blue.png",
+    "width": 270,
+    "height": 132,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_small_purple",
+    "file": "ui/buttons/button_small_purple.png",
+    "width": 264,
+    "height": 128,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_small_gold",
+    "file": "ui/buttons/button_small_gold.png",
+    "width": 262,
+    "height": 131,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_icon_round",
+    "file": "ui/buttons/button_icon_round.png",
+    "width": 197,
+    "height": 200,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "button_icon_square",
+    "file": "ui/buttons/button_icon_square.png",
+    "width": 192,
+    "height": 188,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "toggle_on",
+    "file": "ui/buttons/toggle_on.png",
+    "width": 236,
+    "height": 141,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "toggle_off",
+    "file": "ui/buttons/toggle_off.png",
+    "width": 232,
+    "height": 127,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "checkbox_on",
+    "file": "ui/buttons/checkbox_on.png",
+    "width": 155,
+    "height": 161,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "checkbox_off",
+    "file": "ui/buttons/checkbox_off.png",
+    "width": 143,
+    "height": 146,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "radio_on",
+    "file": "ui/buttons/radio_on.png",
+    "width": 159,
+    "height": 163,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "radio_off",
+    "file": "ui/buttons/radio_off.png",
+    "width": 137,
+    "height": 140,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "slider",
+    "file": "ui/buttons/slider.png",
+    "width": 321,
+    "height": 106,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "progress_bar",
+    "file": "ui/buttons/progress_bar.png",
+    "width": 313,
+    "height": 68,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "tab_active",
+    "file": "ui/buttons/tab_active.png",
+    "width": 253,
+    "height": 136,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "tab_inactive",
+    "file": "ui/buttons/tab_inactive.png",
+    "width": 249,
+    "height": 111,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "input_field",
+    "file": "ui/buttons/input_field.png",
+    "width": 296,
+    "height": 101,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "search_field",
+    "file": "ui/buttons/search_field.png",
+    "width": 307,
+    "height": 102,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "dropdown_field",
+    "file": "ui/buttons/dropdown_field.png",
+    "width": 293,
+    "height": 103,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "tooltip_bubble",
+    "file": "ui/buttons/tooltip_bubble.png",
+    "width": 257,
+    "height": 162,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/buttons",
+    "name": "pill_badge_green",
+    "file": "ui/buttons/pill_badge_green.png",
+    "width": 212,
+    "height": 102,
+    "source": "raw_sheets/buttons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "home",
+    "file": "ui/icons/home.png",
+    "width": 200,
+    "height": 236,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "elements_leaf",
+    "file": "ui/icons/elements_leaf.png",
+    "width": 187,
+    "height": 211,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "recipes_book",
+    "file": "ui/icons/recipes_book.png",
+    "width": 208,
+    "height": 194,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "achievements_trophy",
+    "file": "ui/icons/achievements_trophy.png",
+    "width": 209,
+    "height": 201,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "settings_gear",
+    "file": "ui/icons/settings_gear.png",
+    "width": 201,
+    "height": 194,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "search",
+    "file": "ui/icons/search.png",
+    "width": 183,
+    "height": 190,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "favorite_star",
+    "file": "ui/icons/favorite_star.png",
+    "width": 210,
+    "height": 195,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "recent_clock",
+    "file": "ui/icons/recent_clock.png",
+    "width": 229,
+    "height": 217,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "hint_bulb",
+    "file": "ui/icons/hint_bulb.png",
+    "width": 203,
+    "height": 229,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "filters",
+    "file": "ui/icons/filters.png",
+    "width": 183,
+    "height": 203,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "profile_user",
+    "file": "ui/icons/profile_user.png",
+    "width": 169,
+    "height": 189,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "audio",
+    "file": "ui/icons/audio.png",
+    "width": 215,
+    "height": 181,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "music",
+    "file": "ui/icons/music.png",
+    "width": 203,
+    "height": 199,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "haptics",
+    "file": "ui/icons/haptics.png",
+    "width": 222,
+    "height": 192,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "notifications",
+    "file": "ui/icons/notifications.png",
+    "width": 50,
+    "height": 103,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "cloud_save",
+    "file": "ui/icons/cloud_save.png",
+    "width": 53,
+    "height": 103,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "help",
+    "file": "ui/icons/help.png",
+    "width": 186,
+    "height": 174,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "privacy_shield",
+    "file": "ui/icons/privacy_shield.png",
+    "width": 169,
+    "height": 197,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "info",
+    "file": "ui/icons/info.png",
+    "width": 174,
+    "height": 178,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "language",
+    "file": "ui/icons/language.png",
+    "width": 224,
+    "height": 194,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "close",
+    "file": "ui/icons/close.png",
+    "width": 163,
+    "height": 179,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "check",
+    "file": "ui/icons/check.png",
+    "width": 427,
+    "height": 209,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "plus",
+    "file": "ui/icons/plus.png",
+    "width": 236,
+    "height": 192,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "minus",
+    "file": "ui/icons/minus.png",
+    "width": 423,
+    "height": 214,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "back",
+    "file": "ui/icons/back.png",
+    "width": 204,
+    "height": 199,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "forward",
+    "file": "ui/icons/forward.png",
+    "width": 210,
+    "height": 199,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "up",
+    "file": "ui/icons/up.png",
+    "width": 203,
+    "height": 199,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "down",
+    "file": "ui/icons/down.png",
+    "width": 209,
+    "height": 197,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "play",
+    "file": "ui/icons/play.png",
+    "width": 210,
+    "height": 203,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/icons",
+    "name": "pause",
+    "file": "ui/icons/pause.png",
+    "width": 224,
+    "height": 202,
+    "source": "raw_sheets/icons_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "frame_base_silver",
+    "file": "ui/panels_states/frame_base_silver.png",
+    "width": 237,
+    "height": 235,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "frame_common_blue",
+    "file": "ui/panels_states/frame_common_blue.png",
+    "width": 237,
+    "height": 242,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "frame_rare_green",
+    "file": "ui/panels_states/frame_rare_green.png",
+    "width": 267,
+    "height": 238,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "frame_epic_purple",
+    "file": "ui/panels_states/frame_epic_purple.png",
+    "width": 300,
+    "height": 268,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "frame_legendary_gold",
+    "file": "ui/panels_states/frame_legendary_gold.png",
+    "width": 269,
+    "height": 272,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "selected_ring_blue",
+    "file": "ui/panels_states/selected_ring_blue.png",
+    "width": 281,
+    "height": 275,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "discovery_burst_gold",
+    "file": "ui/panels_states/discovery_burst_gold.png",
+    "width": 284,
+    "height": 272,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "locked_chain_panel",
+    "file": "ui/panels_states/locked_chain_panel.png",
+    "width": 245,
+    "height": 234,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "undiscovered_question_panel",
+    "file": "ui/panels_states/undiscovered_question_panel.png",
+    "width": 235,
+    "height": 250,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "unknown_silhouette_panel",
+    "file": "ui/panels_states/unknown_silhouette_panel.png",
+    "width": 236,
+    "height": 248,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "card_base",
+    "file": "ui/panels_states/card_base.png",
+    "width": 244,
+    "height": 306,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "card_selected_blue",
+    "file": "ui/panels_states/card_selected_blue.png",
+    "width": 266,
+    "height": 331,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "achievement_wreath_gold",
+    "file": "ui/panels_states/achievement_wreath_gold.png",
+    "width": 261,
+    "height": 262,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "dialog_panel_blue",
+    "file": "ui/panels_states/dialog_panel_blue.png",
+    "width": 363,
+    "height": 242,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "dialog_panel_gold",
+    "file": "ui/panels_states/dialog_panel_gold.png",
+    "width": 324,
+    "height": 247,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "banner_wide",
+    "file": "ui/panels_states/banner_wide.png",
+    "width": 445,
+    "height": 144,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "banner_small",
+    "file": "ui/panels_states/banner_small.png",
+    "width": 221,
+    "height": 111,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "section_header",
+    "file": "ui/panels_states/section_header.png",
+    "width": 357,
+    "height": 130,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "level_badge_ring",
+    "file": "ui/panels_states/level_badge_ring.png",
+    "width": 230,
+    "height": 237,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "ui/panels_states",
+    "name": "notification_button_red",
+    "file": "ui/panels_states/notification_button_red.png",
+    "width": 132,
+    "height": 135,
+    "source": "raw_sheets/panels_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "sparkles_blue",
+    "file": "effects/sparkles_blue.png",
+    "width": 275,
+    "height": 266,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "sparkles_purple",
+    "file": "effects/sparkles_purple.png",
+    "width": 246,
+    "height": 268,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "sparkles_gold",
+    "file": "effects/sparkles_gold.png",
+    "width": 240,
+    "height": 254,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "stars_cluster",
+    "file": "effects/stars_cluster.png",
+    "width": 275,
+    "height": 255,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "magic_dust",
+    "file": "effects/magic_dust.png",
+    "width": 264,
+    "height": 265,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "glow_blue_orb",
+    "file": "effects/glow_blue_orb.png",
+    "width": 260,
+    "height": 254,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "glow_purple_orb",
+    "file": "effects/glow_purple_orb.png",
+    "width": 265,
+    "height": 256,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "glow_gold_orb",
+    "file": "effects/glow_gold_orb.png",
+    "width": 255,
+    "height": 257,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "light_burst",
+    "file": "effects/light_burst.png",
+    "width": 47,
+    "height": 50,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "energy_ring",
+    "file": "effects/energy_ring.png",
+    "width": 289,
+    "height": 259,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "portal_swirl",
+    "file": "effects/portal_swirl.png",
+    "width": 282,
+    "height": 289,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "smoke_puff",
+    "file": "effects/smoke_puff.png",
+    "width": 276,
+    "height": 269,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "shockwave_ring",
+    "file": "effects/shockwave_ring.png",
+    "width": 347,
+    "height": 242,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "beam_up",
+    "file": "effects/beam_up.png",
+    "width": 306,
+    "height": 562,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "beam_down",
+    "file": "effects/beam_down.png",
+    "width": 287,
+    "height": 292,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "combine_flash",
+    "file": "effects/combine_flash.png",
+    "width": 300,
+    "height": 273,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "combine_particles",
+    "file": "effects/combine_particles.png",
+    "width": 250,
+    "height": 275,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "lightning_arc",
+    "file": "effects/lightning_arc.png",
+    "width": 347,
+    "height": 282,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "ember_sparks",
+    "file": "effects/ember_sparks.png",
+    "width": 250,
+    "height": 266,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "effects",
+    "name": "success_burst",
+    "file": "effects/success_burst.png",
+    "width": 291,
+    "height": 281,
+    "source": "raw_sheets/effects_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "books_stack",
+    "file": "props/books_stack.png",
+    "width": 309,
+    "height": 227,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "lantern",
+    "file": "props/lantern.png",
+    "width": 217,
+    "height": 293,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "candle_cluster",
+    "file": "props/candle_cluster.png",
+    "width": 272,
+    "height": 296,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "crystals_small",
+    "file": "props/crystals_small.png",
+    "width": 233,
+    "height": 209,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "crystals_large",
+    "file": "props/crystals_large.png",
+    "width": 303,
+    "height": 299,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "scroll_roll",
+    "file": "props/scroll_roll.png",
+    "width": 302,
+    "height": 219,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "stone_plaque",
+    "file": "props/stone_plaque.png",
+    "width": 263,
+    "height": 243,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "blank_parchment",
+    "file": "props/blank_parchment.png",
+    "width": 248,
+    "height": 243,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "rocks_small",
+    "file": "props/rocks_small.png",
+    "width": 237,
+    "height": 162,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "rocks_large",
+    "file": "props/rocks_large.png",
+    "width": 328,
+    "height": 242,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "plants_small",
+    "file": "props/plants_small.png",
+    "width": 277,
+    "height": 198,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "vine_cluster",
+    "file": "props/vine_cluster.png",
+    "width": 283,
+    "height": 288,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "stone_column_left",
+    "file": "props/stone_column_left.png",
+    "width": 185,
+    "height": 270,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "stone_column_right",
+    "file": "props/stone_column_right.png",
+    "width": 174,
+    "height": 271,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "stone_arch",
+    "file": "props/stone_arch.png",
+    "width": 341,
+    "height": 268,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "alchemy_table",
+    "file": "props/alchemy_table.png",
+    "width": 360,
+    "height": 278,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "wooden_chair",
+    "file": "props/wooden_chair.png",
+    "width": 203,
+    "height": 282,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "wooden_crate",
+    "file": "props/wooden_crate.png",
+    "width": 249,
+    "height": 227,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "barrel",
+    "file": "props/barrel.png",
+    "width": 216,
+    "height": 248,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "props",
+    "name": "floating_island_small",
+    "file": "props/floating_island_small.png",
+    "width": 287,
+    "height": 288,
+    "source": "raw_sheets/props_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "altar_platform_base",
+    "file": "combine_scene/altar_platform_base.png",
+    "width": 407,
+    "height": 206,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "magic_circle_glyph",
+    "file": "combine_scene/magic_circle_glyph.png",
+    "width": 288,
+    "height": 275,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "central_energy_pool",
+    "file": "combine_scene/central_energy_pool.png",
+    "width": 287,
+    "height": 402,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "pedestal_left",
+    "file": "combine_scene/pedestal_left.png",
+    "width": 250,
+    "height": 325,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "pedestal_right",
+    "file": "combine_scene/pedestal_right.png",
+    "width": 255,
+    "height": 331,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "arch_left",
+    "file": "combine_scene/arch_left.png",
+    "width": 213,
+    "height": 362,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "arch_right",
+    "file": "combine_scene/arch_right.png",
+    "width": 218,
+    "height": 362,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "crystal_cluster_left",
+    "file": "combine_scene/crystal_cluster_left.png",
+    "width": 305,
+    "height": 241,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "crystal_cluster_right",
+    "file": "combine_scene/crystal_cluster_right.png",
+    "width": 315,
+    "height": 270,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "hanging_lantern",
+    "file": "combine_scene/hanging_lantern.png",
+    "width": 252,
+    "height": 374,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "books_stack_scene",
+    "file": "combine_scene/books_stack_scene.png",
+    "width": 306,
+    "height": 268,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "parchment_sign",
+    "file": "combine_scene/parchment_sign.png",
+    "width": 303,
+    "height": 265,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "floor_edge_left",
+    "file": "combine_scene/floor_edge_left.png",
+    "width": 305,
+    "height": 204,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "floor_edge_right",
+    "file": "combine_scene/floor_edge_right.png",
+    "width": 289,
+    "height": 209,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "combine_scene",
+    "name": "fog_overlay",
+    "file": "combine_scene/fog_overlay.png",
+    "width": 229,
+    "height": 288,
+    "source": "raw_sheets/combine_sheet.png"
+  },
+  {
+    "category": "backgrounds",
+    "name": "bg_aether",
+    "file": "backgrounds/bg_aether.png",
+    "width": 941,
+    "height": 1672,
+    "source": "generated_background"
+  },
+  {
+    "category": "backgrounds",
+    "name": "bg_ember",
+    "file": "backgrounds/bg_ember.png",
+    "width": 941,
+    "height": 1672,
+    "source": "generated_background"
+  },
+  {
+    "category": "backgrounds",
+    "name": "bg_verdant",
+    "file": "backgrounds/bg_verdant.png",
+    "width": 941,
+    "height": 1672,
+    "source": "generated_background"
+  }
+]

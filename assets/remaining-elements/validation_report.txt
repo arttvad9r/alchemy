@@ -1,0 +1,5 @@
+total elements: 138
+png_trimmed files: 138
+png_512 files: 138
+empty outputs during build: 0
+empty outputs after validation: 0
