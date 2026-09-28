@@ -153,7 +153,7 @@ fun FactText(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-private val FACT_FONT_SIZE = 16.sp
+private val FACT_FONT_SIZE = 15.sp
 
 private const val NO_BREAK_SPACE = '\u00A0'
 private const val WORD_JOINER = '\u2060'
