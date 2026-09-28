@@ -20,13 +20,16 @@ class WorkspaceJourneyTest {
     fun draggingPaletteItemsIntoWorkspacePlacesThemAtTheirDropPositions() {
         composeRule.onNodeWithTag("palette_fire").dragIntoWorkspace(0.3f)
         composeRule
-            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь"))
+            .onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь"))
             .assertIsDisplayed()
 
         composeRule.onNodeWithTag("palette_water").dragIntoWorkspace(0.7f)
 
         composeRule
-            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь, Вода"))
+            .onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь"))
+            .assertIsDisplayed()
+        composeRule
+            .onNode(hasTestTag("workspace_item") and hasContentDescription("Вода"))
             .assertIsDisplayed()
     }
 
@@ -36,8 +39,10 @@ class WorkspaceJourneyTest {
         composeRule.onNodeWithTag("palette_water").dragIntoWorkspace(0.5f)
 
         composeRule
-            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Пар"))
+            .onNode(hasTestTag("workspace_item") and hasContentDescription("Пар"))
             .assertIsDisplayed()
+        composeRule.onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь")).assertDoesNotExist()
+        composeRule.onNode(hasTestTag("workspace_item") and hasContentDescription("Вода")).assertDoesNotExist()
     }
 
     @Test
@@ -49,7 +54,7 @@ class WorkspaceJourneyTest {
         }
 
         composeRule
-            .onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь"))
+            .onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь"))
             .assertIsDisplayed()
     }
 

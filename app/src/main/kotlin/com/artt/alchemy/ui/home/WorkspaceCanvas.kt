@@ -14,7 +14,11 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +42,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
@@ -152,69 +157,89 @@ fun WorkspaceCanvas(
         }
     }
 
-    Canvas(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag("workspace_canvas")
-            .semantics { contentDescription = currentItems.joinToString { AlchemyCatalog.elementsById.getValue(it.elementId).name } }
-            .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) }
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val item = currentItems
-                        .minByOrNull { candidate -> distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) }
-                        ?.takeIf { candidate ->
-                            distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
-                        }
-                        ?: return@awaitEachGesture
-                    heldId = item.instanceId
-                    currentOnPickUp()
-                    try {
-                        var lastPosition = down.position
-                        val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
-                            change.consume()
-                            lastPosition = change.position
-                            currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
-                        } ?: return@awaitEachGesture
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("workspace_canvas")
+                .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) }
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val item = currentItems
+                            .minByOrNull { candidate -> distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) }
+                            ?.takeIf { candidate ->
+                                distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
+                            }
+                            ?: return@awaitEachGesture
+                        heldId = item.instanceId
+                        currentOnPickUp()
+                        try {
+                            var lastPosition = down.position
+                            val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
+                                change.consume()
+                                lastPosition = change.position
+                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                            } ?: return@awaitEachGesture
 
-                        drag(dragStart.id) { change ->
-                            change.consume()
-                            lastPosition = change.position
-                            currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                            drag(dragStart.id) { change ->
+                                change.consume()
+                                lastPosition = change.position
+                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                            }
+                            val position = normalize(lastPosition, size.width, size.height)
+                            currentOnMove(item.instanceId, position)
+                            if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
+                        } finally {
+                            heldId = null
                         }
-                        val position = normalize(lastPosition, size.width, size.height)
-                        currentOnMove(item.instanceId, position)
-                        if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
-                    } finally {
-                        heldId = null
                     }
                 }
+        ) {
+            drawWatermark(art.magicCircle)
+            val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
+            labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
+            val frames = transitions()
+            val time = if (effect == null) 0f else effectTime()
+            val held = currentItems.find { it.instanceId == heldId }
+            held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }?.let { target ->
+                val iconSize = radius * 2 * ICON_SHARE
+                val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
+                drawCentered(art.energyRing, iconCenterOf(center, radius, iconSize), iconSize * TARGET_RING_SHARE, targetPulse)
             }
-    ) {
-        drawWatermark(art.magicCircle)
-        val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
-        labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
-        val frames = transitions()
-        val time = if (effect == null) 0f else effectTime()
-        val held = currentItems.find { it.instanceId == heldId }
-        held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }?.let { target ->
-            val iconSize = radius * 2 * ICON_SHARE
-            val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
-            drawCentered(art.energyRing, iconCenterOf(center, radius, iconSize), iconSize * TARGET_RING_SHARE, targetPulse)
+            val motion = ItemMotion(
+                appearing = frames.filter { it.transition.kind == TransitionKind.APPEAR }.associateBy { it.transition.instanceId },
+                shaking = frames.filter { it.transition.kind == TransitionKind.SHAKE }.associate { it.transition.instanceId to it.progress },
+                resultInstanceId = effect?.resultInstanceId,
+                effectTime = time,
+                heldId = heldId,
+                liftedId = liftedId,
+                lift = lift.value
+            )
+            // The item in hand is drawn last, so it never slides under the others.
+            currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion) }
+            drawTransitions(frames, art, radius)
+            effect?.let { drawEffect(it, time, art, radius) }
         }
-        val motion = ItemMotion(
-            appearing = frames.filter { it.transition.kind == TransitionKind.APPEAR }.associateBy { it.transition.instanceId },
-            shaking = frames.filter { it.transition.kind == TransitionKind.SHAKE }.associate { it.transition.instanceId to it.progress },
-            resultInstanceId = effect?.resultInstanceId,
-            effectTime = time,
-            heldId = heldId,
-            liftedId = liftedId,
-            lift = lift.value
-        )
-        // The item in hand is drawn last, so it never slides under the others.
-        currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion) }
-        drawTransitions(frames, art, radius)
-        effect?.let { drawEffect(it, time, art, radius) }
+        ItemAccessibilityNodes(items, constraints.maxWidth, constraints.maxHeight)
+    }
+}
+
+/** One invisible node per item over the canvas, so a screen reader can reach each element and hear its name. */
+@Composable
+private fun ItemAccessibilityNodes(items: List<WorkspaceItem>, width: Int, height: Int) {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    val side = with(LocalDensity.current) { (radius * 2).toDp() }
+    items.forEach { item ->
+        key(item.instanceId) {
+            Box(
+                modifier = Modifier
+                    .offset { IntOffset((item.xFraction * width - radius).roundToInt(), (item.yFraction * height - radius).roundToInt()) }
+                    .size(side)
+                    .testTag("workspace_item")
+                    .semantics { contentDescription = AlchemyCatalog.elementsById.getValue(item.elementId).name }
+            )
+        }
     }
 }
 
