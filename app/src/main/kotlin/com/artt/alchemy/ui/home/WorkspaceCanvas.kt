@@ -33,6 +33,8 @@ import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.ui.CombinationEffect
+import com.artt.alchemy.ui.ItemTransition
+import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.elementIconRes
 import kotlin.math.roundToInt
 
@@ -43,6 +45,7 @@ private const val ICON_TOP_SHARE = 0.85f
 private const val LABEL_SHADOW_RADIUS = 6f
 private const val WATERMARK_SIZE_FRACTION = 0.85f
 private const val WATERMARK_ALPHA = 0.28f
+private const val SMOKE_ALPHA = 0.9f
 
 @Composable
 fun WorkspaceCanvas(
@@ -52,6 +55,7 @@ fun WorkspaceCanvas(
     onBoundsChanged: (Rect) -> Unit,
     effect: CombinationEffect?,
     effectProgress: () -> Float,
+    transitions: () -> List<Pair<ItemTransition, Float>>,
     modifier: Modifier = Modifier
 ) {
     val currentItems by rememberUpdatedState(items)
@@ -64,6 +68,8 @@ fun WorkspaceCanvas(
     val flash = ImageBitmap.imageResource(R.drawable.fx_combine_flash)
     val burst = ImageBitmap.imageResource(R.drawable.fx_success_burst)
     val sparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_gold)
+    val appearSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_blue)
+    val smoke = ImageBitmap.imageResource(R.drawable.fx_smoke_puff)
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val labelPaint = remember(labelColor) {
@@ -127,6 +133,14 @@ fun WorkspaceCanvas(
             )
             val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
             drawContext.canvas.nativeCanvas.drawText(element.name, center.x, labelBaseline, labelPaint)
+        }
+        transitions().forEach { (transition, progress) ->
+            val center = Offset(transition.xFraction * size.width, transition.yFraction * size.height)
+            val fade = 1f - progress
+            when (transition.kind) {
+                TransitionKind.APPEAR -> drawCentered(appearSparkles, center, radius * (1.8f + 1.2f * progress), fade)
+                TransitionKind.VANISH -> drawCentered(smoke, center, radius * (1.4f + 1.4f * progress), fade * SMOKE_ALPHA)
+            }
         }
         effect?.let { current ->
             val progress = effectProgress()

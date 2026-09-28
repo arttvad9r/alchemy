@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -20,18 +22,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.theme.Gold
 import kotlin.math.roundToInt
 
 /** A source range of the art; fixed segments keep their proportions, stretched ones absorb the rest. */
@@ -50,6 +59,10 @@ private val PanelColumns = listOf(
 )
 private val PanelRows = listOf(Segment(0f, 0.3f, false), Segment(0.3f, 0.7f, true), Segment(0.7f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
+
+// Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
+private const val PROGRESS_INSET_X = 6f
+private const val PROGRESS_INSET_Y = 7f
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
     BLUE(R.drawable.btn_blue, Color.White),
@@ -143,6 +156,56 @@ fun AlchemyDialog(
     }
 }
 
+/** The bar art: an empty track with a glowing fill that grows with [progress] from 0 to 1. */
+@Composable
+fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
+    val track = ImageBitmap.imageResource(R.drawable.progress_track)
+    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
+    val fraction = progress.coerceIn(0f, 1f)
+    Box(
+        modifier = modifier
+            .height(16.dp)
+            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) }
+            .drawBehind {
+                val scale = size.height / track.height
+                drawSliced(track, CapSegments, WholeHeight, scale)
+                val insetX = PROGRESS_INSET_X * scale
+                val insetY = PROGRESS_INSET_Y * scale
+                val fillWidth = (size.width - 2 * insetX) * fraction
+                if (fillWidth >= 1f) {
+                    val fillHeight = size.height - 2 * insetY
+                    drawSliced(
+                        fill,
+                        CapSegments,
+                        WholeHeight,
+                        fillHeight / fill.height,
+                        topLeft = Offset(insetX, insetY),
+                        target = Size(fillWidth, fillHeight)
+                    )
+                }
+            }
+    )
+}
+
+/** Screen title on the ribbon banner, centered at the top of a screen. */
+@Composable
+fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
+    val art = ImageBitmap.imageResource(R.drawable.banner_wide)
+    Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 220.dp, minHeight = 60.dp)
+                .drawBehind { drawSliced(art, PanelColumns, WholeHeight, size.height / art.height) }
+                .semantics(mergeDescendants = true) { heading() }
+                // Keeps the text on the ribbon body, clear of the tails and the lower fold.
+                .padding(start = 44.dp, top = 10.dp, end = 44.dp, bottom = 16.dp)
+        ) {
+            Text(text = title, style = MaterialTheme.typography.titleLarge, color = Gold, maxLines = 1)
+        }
+    }
+}
+
 /** Panel art stretched to the modifier's bounds, keeping corners and edge ornaments intact. */
 @Composable
 fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale: Float = Float.MAX_VALUE): Modifier {
@@ -152,9 +215,17 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
     }
 }
 
-private fun DrawScope.drawSliced(image: ImageBitmap, columns: List<Segment>, rows: List<Segment>, fixedScale: Float, alpha: Float = 1f) {
-    val xs = layout(columns, image.width, size.width, fixedScale)
-    val ys = layout(rows, image.height, size.height, fixedScale)
+private fun DrawScope.drawSliced(
+    image: ImageBitmap,
+    columns: List<Segment>,
+    rows: List<Segment>,
+    fixedScale: Float,
+    alpha: Float = 1f,
+    topLeft: Offset = Offset.Zero,
+    target: Size = size
+) {
+    val xs = layout(columns, image.width, target.width, fixedScale).map { it + topLeft.x }
+    val ys = layout(rows, image.height, target.height, fixedScale).map { it + topLeft.y }
     columns.forEachIndexed { column, horizontal ->
         rows.forEachIndexed { row, vertical ->
             val srcX = (horizontal.start * image.width).roundToInt()

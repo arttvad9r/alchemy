@@ -38,6 +38,7 @@ data class AlchemyUiState(
     val newlyUnlockedId: String? = null,
     val feedbackEventId: Long = 0,
     val combinationEffect: CombinationEffect? = null,
+    val itemTransitions: List<ItemTransition> = emptyList(),
     val isResetConfirmationVisible: Boolean = false
 )
 
@@ -66,9 +67,13 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             )
         }
 
+        val transitions = itemTransitions(state.workspace, result)
+
         if (progress != state.progress) store.save(progress)
         state = state.copy(
             combinationEffect = effect ?: state.combinationEffect,
+            // Transitions pile up until Home takes them, so none is lost between frames.
+            itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
             progress = progress,
             workspace = result.workspace,
             newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
@@ -78,6 +83,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun consumeCombinationEffect() {
         state = state.copy(combinationEffect = null)
+    }
+
+    fun consumeItemTransitions() {
+        state = state.copy(itemTransitions = emptyList())
     }
 
     fun selectTab(tab: AppTab) {

@@ -39,10 +39,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -65,6 +68,7 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
+import com.artt.alchemy.ui.ItemTransition
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
@@ -79,6 +83,7 @@ import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
 
 private const val EFFECT_DURATION_MILLIS = 700
+private const val TRANSITION_DURATION_MILLIS = 450L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
 
 // Keeps the frame border thin; unscaled corners would eat into the item area.
@@ -91,6 +96,7 @@ fun HomeScreen(
     onDismissNewElement: () -> Unit,
     onFeedbackHandled: () -> Unit,
     onEffectConsumed: () -> Unit,
+    onTransitionsConsumed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlocked = AlchemyCatalog.elements.filter { it.id in state.progress.unlockedIds }
@@ -116,6 +122,26 @@ fun HomeScreen(
             effectProgress.snapTo(0f)
             effectProgress.animateTo(1f, tween(EFFECT_DURATION_MILLIS, easing = LinearOutSlowInEasing))
             playingEffect = null
+        }
+    }
+
+    // Appear and vanish effects run side by side, each timed from the frame it started on.
+    val playingTransitions = remember { mutableStateListOf<PlayingTransition>() }
+    var transitionClock by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(state.itemTransitions) {
+        if (state.itemTransitions.isNotEmpty()) {
+            val now = withFrameMillis { it }
+            playingTransitions += state.itemTransitions.map { PlayingTransition(it, now) }
+            onTransitionsConsumed()
+        }
+    }
+    val hasPlayingTransitions = playingTransitions.isNotEmpty()
+    LaunchedEffect(hasPlayingTransitions) {
+        while (playingTransitions.isNotEmpty()) {
+            withFrameMillis { now ->
+                transitionClock = now
+                playingTransitions.removeAll { now - it.startMillis >= TRANSITION_DURATION_MILLIS }
+            }
         }
     }
 
@@ -175,7 +201,12 @@ fun HomeScreen(
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
                     onBoundsChanged = { workspaceBounds = it },
                     effect = playingEffect,
-                    effectProgress = { effectProgress.value }
+                    effectProgress = { effectProgress.value },
+                    transitions = {
+                        playingTransitions.map {
+                            it.transition to ((transitionClock - it.startMillis).toFloat() / TRANSITION_DURATION_MILLIS).coerceIn(0f, 1f)
+                        }
+                    }
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -270,6 +301,8 @@ fun HomeScreen(
         }
     }
 }
+
+private data class PlayingTransition(val transition: ItemTransition, val startMillis: Long)
 
 @Composable
 private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier) {

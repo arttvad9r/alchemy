@@ -34,6 +34,7 @@ import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.recipeKey
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.FramedElementIcon
+import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 
@@ -50,6 +51,7 @@ fun RecipesScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
         }
 
     Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(12.dp)) {
+        ScreenBanner(stringResource(R.string.tab_recipes), Modifier.padding(bottom = 8.dp))
         AlchemySearchField(
             value = query,
             onValueChange = { query = it },

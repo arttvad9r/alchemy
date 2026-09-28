@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,13 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,6 +28,8 @@ import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementGroup
+import com.artt.alchemy.ui.components.AlchemyProgressBar
+import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -59,6 +60,7 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
         contentPadding = PaddingValues(12.dp),
         modifier = modifier.fillMaxSize().testTag("screen_achievements")
     ) {
+        item { ScreenBanner(stringResource(R.string.tab_achievements)) }
         items(achievements, key = AchievementDefinition::id) { achievement ->
             val current = achievement.current(progress).coerceAtMost(achievement.target)
             val completed = current == achievement.target
@@ -72,20 +74,14 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
                     .padding(14.dp)
                     .testTag("achievement_${achievement.id}")
             ) {
-                Image(
-                    painter = painterResource(R.drawable.nav_achievements),
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp).alpha(if (completed) 1f else 0.45f)
-                )
+                AchievementBadge(completed)
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(achievement.title) + ": $current / ${achievement.target}",
                         style = MaterialTheme.typography.titleMedium
                     )
-                    LinearProgressIndicator(
-                        progress = { current.toFloat() / achievement.target },
-                        color = if (completed) Gold else MaterialTheme.colorScheme.tertiary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    AlchemyProgressBar(
+                        progress = current.toFloat() / achievement.target,
                         modifier = Modifier.fillMaxWidth()
                     )
                     if (completed) {
@@ -96,6 +92,21 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
         }
     }
 }
+
+/** A trophy in the gold wreath once earned, a chained lock until then. */
+@Composable
+private fun AchievementBadge(completed: Boolean) {
+    if (completed) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(BADGE_SIZE)) {
+            Image(painter = painterResource(R.drawable.achievement_wreath), contentDescription = null, modifier = Modifier.fillMaxSize())
+            Image(painter = painterResource(R.drawable.nav_achievements), contentDescription = null, modifier = Modifier.size(BADGE_SIZE * 0.5f))
+        }
+    } else {
+        Image(painter = painterResource(R.drawable.achievement_locked), contentDescription = null, modifier = Modifier.size(BADGE_SIZE))
+    }
+}
+
+private val BADGE_SIZE = 56.dp
 
 private val ElementGroup.achievementTitleRes: Int
     get() = when (this) {

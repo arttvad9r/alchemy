@@ -9,7 +9,7 @@ Usage: python3 tools/build_ui_assets.py  (requires pillow)
 
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
@@ -49,23 +49,60 @@ UI_ASSETS = {
     "ui/buttons/input_field.png": ("field", 512),
     "ui/panels_states/dialog_panel_gold.png": ("dialog_gold", 512),
     "ui/panels_states/dialog_panel_blue.png": ("dialog_blue", 512),
+    "ui/panels_states/achievement_wreath_gold.png": ("achievement_wreath", 256),
+    "ui/panels_states/locked_chain_panel.png": ("achievement_locked", 256),
+    "ui/panels_states/banner_wide.png": ("banner_wide", 512),
+    "effects/sparkles_blue.png": ("fx_sparkles_blue", 512),
+    "effects/smoke_puff.png": ("fx_smoke_puff", 512),
 }
+
+PROGRESS_BAR = "ui/buttons/progress_bar.png"
+# The bar art is drawn half full; its empty right end becomes both ends of the track.
+PROGRESS_TRACK_CAP = 60
+PROGRESS_TRACK_MIDDLE_COLUMN = 230
+# Bounds of the fill in the trimmed art, matched by PROGRESS_* insets in AlchemyControls.kt.
+PROGRESS_FILL_BOX = (6, 7, 155, 45)
+PROGRESS_FILL_RADIUS = 11
+
+
+def trimmed(source: Path) -> Image.Image:
+    image = Image.open(source).convert("RGBA")
+    visible = image.getchannel("A").point(lambda value: 255 if value > VISIBLE_ALPHA else 0)
+    return image.crop(visible.getbbox())
 
 
 def convert(source: Path, name: str, max_side: int) -> None:
-    image = Image.open(source).convert("RGBA")
-    visible = image.getchannel("A").point(lambda value: 255 if value > VISIBLE_ALPHA else 0)
-    image = image.crop(visible.getbbox())
+    image = trimmed(source)
     scale = min(1.0, max_side / max(image.size))
     if scale < 1.0:
         image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
     image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
+def convert_progress_bar() -> None:
+    """Split the half-filled bar art into an empty track and a pill-shaped fill."""
+    bar = trimmed(ASSETS / PROGRESS_BAR)
+    width, height = bar.size
+    cap = bar.crop((width - PROGRESS_TRACK_CAP, 0, width, height))
+    middle = bar.crop((PROGRESS_TRACK_MIDDLE_COLUMN, 0, PROGRESS_TRACK_MIDDLE_COLUMN + 1, height))
+    track = Image.new("RGBA", bar.size)
+    track.paste(cap.transpose(Image.FLIP_LEFT_RIGHT), (0, 0))
+    track.paste(middle.resize((width - 2 * PROGRESS_TRACK_CAP, height)), (PROGRESS_TRACK_CAP, 0))
+    track.paste(cap, (width - PROGRESS_TRACK_CAP, 0))
+    track.save(RES_DIR / "progress_track.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+    fill = bar.crop(PROGRESS_FILL_BOX)
+    mask = Image.new("L", fill.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, fill.width - 1, fill.height - 1), radius=PROGRESS_FILL_RADIUS, fill=255)
+    fill.putalpha(ImageChops.multiply(fill.getchannel("A"), mask))
+    fill.save(RES_DIR / "progress_fill.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
 def main() -> None:
     RES_DIR.mkdir(parents=True, exist_ok=True)
     for source, (name, max_side) in UI_ASSETS.items():
         convert(ASSETS / source, name, max_side)
+    convert_progress_bar()
 
 
 if __name__ == "__main__":

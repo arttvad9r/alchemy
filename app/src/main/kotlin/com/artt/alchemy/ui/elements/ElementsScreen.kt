@@ -35,6 +35,7 @@ import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -53,6 +54,9 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxSize().testTag("screen_elements"),
         contentPadding = PaddingValues(12.dp)
     ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            ScreenBanner(stringResource(R.string.tab_elements), Modifier.padding(bottom = 8.dp))
+        }
         item(span = { GridItemSpan(maxLineSpan) }) {
             AlchemySearchField(
                 value = query,
