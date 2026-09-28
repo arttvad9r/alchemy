@@ -103,7 +103,8 @@ fun HomeScreen(
     onTransitionsConsumed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val unlocked = AlchemyCatalog.elements.filter { it.id in state.progress.unlockedIds }
+    val unlockedIds = state.progress.unlockedIds
+    val unlocked = remember(unlockedIds) { AlchemyCatalog.elements.filter { it.id in unlockedIds } }
     var workspaceBounds by remember { mutableStateOf<Rect?>(null) }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
@@ -199,7 +200,7 @@ fun HomeScreen(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
                     Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.weight(1f))
-                    ProgressCounter(unlocked = state.progress.unlockedIds.size)
+                    ProgressCounter(unlocked = unlockedIds.size)
                 }
                 val paletteState = rememberLazyGridState()
                 Box(
