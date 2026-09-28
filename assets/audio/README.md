@@ -4,12 +4,12 @@
 
 ## Эффекты — Kenney, CC0
 
-Из паков [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Music Jingles](https://kenney.nl/assets/music-jingles) и [RPG Audio](https://kenney.nl/assets/rpg-audio). Лицензия CC0 (`kenney/License.txt`), указание автора не требуется.
+Из паков [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Impact Sounds](https://kenney.nl/assets/impact-sounds), [Music Jingles](https://kenney.nl/assets/music-jingles) и [RPG Audio](https://kenney.nl/assets/rpg-audio). Лицензия CC0 (`kenney/License.txt`), указание автора не требуется.
 
 | Файл | Где звучит |
 | --- | --- |
-| `maximize_006.ogg` | элемент поставлен на поле |
-| `confirmation_004.ogg` | известное сочетание |
+| `impactSoft_medium_003.ogg` | элемент поставлен на поле |
+| `maximize_006.ogg` | известное сочетание |
 | `jingles_STEEL02.ogg` | открыт новый элемент |
 | `bong_001.ogg` | пара не сочетается |
 | `minimize_002.ogg` | элемент убран за край поля |

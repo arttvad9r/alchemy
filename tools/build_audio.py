@@ -15,8 +15,8 @@ AUDIO = ROOT / "assets/audio"
 RAW_DIR = ROOT / "app/src/main/res/raw"
 
 EFFECTS = {
-    "kenney/maximize_006.ogg": "sfx_place",
-    "kenney/confirmation_004.ogg": "sfx_combine",
+    "kenney/impactSoft_medium_003.ogg": "sfx_place",
+    "kenney/maximize_006.ogg": "sfx_combine",
     "kenney/jingles_STEEL02.ogg": "sfx_discover",
     "kenney/bong_001.ogg": "sfx_no_match",
     "kenney/minimize_002.ogg": "sfx_remove",
