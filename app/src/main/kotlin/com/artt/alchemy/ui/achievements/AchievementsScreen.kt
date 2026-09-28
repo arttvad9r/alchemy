@@ -1,8 +1,6 @@
 package com.artt.alchemy.ui.achievements
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,9 +25,8 @@ import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.ui.components.AlchemyProgressBar
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelBorderColor
-import com.artt.alchemy.ui.theme.PanelColor
 
 @Composable
 fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
@@ -48,9 +44,8 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PanelColor, RoundedCornerShape(16.dp))
-                    .border(1.dp, if (completed) Gold else PanelBorderColor, RoundedCornerShape(16.dp))
-                    .padding(14.dp)
+                    .rowPanel()
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
                     .testTag("achievement_${achievement.id}")
             ) {
                 AchievementBadge(completed)

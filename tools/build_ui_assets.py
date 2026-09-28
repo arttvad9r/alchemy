@@ -62,6 +62,9 @@ UI_ASSETS = {
     "effects/glow_purple_orb.png": ("fx_glow_purple_orb", 512),
     "effects/glow_gold_orb.png": ("fx_glow_gold_orb", 512),
     "effects/stars_cluster.png": ("fx_stars_cluster", 512),
+    "ui/buttons/input_field.png": ("field_row", 512),
+    "ui/icons/plus.png": ("ic_plus", 96),
+    "ui/icons/forward.png": ("ic_forward", 96),
 }
 
 PROGRESS_BAR = "ui/buttons/progress_bar.png"

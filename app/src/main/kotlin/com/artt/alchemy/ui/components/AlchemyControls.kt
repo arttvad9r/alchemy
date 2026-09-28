@@ -82,6 +82,7 @@ private val PanelRows = listOf(Segment(0f, 0.3f, false), Segment(0.3f, 0.7f, tru
 
 // The search field art has the magnifier and a divider drawn into its left end, so that end stays whole.
 private val SearchFieldSegments = listOf(Segment(0f, 0.33f, false), Segment(0.33f, 0.75f, true), Segment(0.75f, 1f, false))
+private val RowSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.85f, true), Segment(0.85f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
 
 // Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
@@ -277,6 +278,13 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
     return drawBehind {
         drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height, maxScale), alpha)
     }
+}
+
+/** A single-line row panel: the art's height follows the row, so the trim keeps its thickness. */
+@Composable
+fun Modifier.rowPanel(): Modifier {
+    val art = ImageBitmap.imageResource(R.drawable.field_row)
+    return drawBehind { drawSliced(art, RowSegments, WholeHeight, size.height / art.height) }
 }
 
 private fun DrawScope.drawSliced(

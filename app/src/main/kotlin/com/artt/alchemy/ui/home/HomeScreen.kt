@@ -80,6 +80,7 @@ import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.panelBackground
+import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -328,9 +329,8 @@ private fun ProgressCounter(unlocked: Int) {
                 scaleX = bounce.value
                 scaleY = bounce.value
             }
-            .background(PanelColor, RoundedCornerShape(12.dp))
-            .border(1.dp, PanelBorderColor, RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
+            .rowPanel()
+            .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
         Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
         Text(
