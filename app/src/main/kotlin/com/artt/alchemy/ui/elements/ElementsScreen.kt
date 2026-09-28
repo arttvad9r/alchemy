@@ -1,7 +1,5 @@
 package com.artt.alchemy.ui.elements
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +11,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items as lazyRowItems
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,8 +20,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
@@ -36,9 +35,8 @@ import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
-import com.artt.alchemy.ui.theme.PanelBorderColor
-import com.artt.alchemy.ui.theme.PanelColor
 
 @Composable
 fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
@@ -92,9 +90,9 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .padding(6.dp)
                     .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
-                    .background(PanelColor, RoundedCornerShape(16.dp))
-                    .border(1.dp, PanelBorderColor, RoundedCornerShape(16.dp))
-                    .padding(8.dp)
+                    .panelBackground(R.drawable.card_base)
+                    // Clears the ornament on the top edge of the card art.
+                    .padding(start = 10.dp, top = 14.dp, end = 10.dp, bottom = 10.dp)
             ) {
                 FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
                 Text(
@@ -106,7 +104,13 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
                     color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp)
                 )
-                if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 4.dp))
+                // A locked card keeps the badge's room, hidden, so every card in a row has the same height.
+                RarityBadge(
+                    element.rarity,
+                    Modifier
+                        .padding(top = 4.dp)
+                        .then(if (unlocked) Modifier else Modifier.alpha(0f).clearAndSetSemantics {})
+                )
             }
         }
     }

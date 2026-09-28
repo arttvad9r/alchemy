@@ -25,7 +25,6 @@ UI_ASSETS = {
     "ui/icons/recipes_book.png": ("nav_recipes", 128),
     "ui/icons/achievements_trophy.png": ("nav_achievements", 128),
     "ui/icons/settings_gear.png": ("nav_settings", 128),
-    "ui/icons/search.png": ("ic_search", 96),
     "ui/icons/audio.png": ("ic_audio", 96),
     "ui/icons/haptics.png": ("ic_haptics", 96),
     "ui/icons/help.png": ("ic_help", 96),
@@ -46,7 +45,6 @@ UI_ASSETS = {
     "ui/buttons/toggle_off.png": ("toggle_off", 512),
     "ui/buttons/tab_active.png": ("tab_active", 512),
     "ui/buttons/tab_inactive.png": ("tab_inactive", 512),
-    "ui/buttons/input_field.png": ("field", 512),
     "ui/panels_states/dialog_panel_gold.png": ("dialog_gold", 512),
     "ui/panels_states/dialog_panel_blue.png": ("dialog_blue", 512),
     "ui/panels_states/achievement_wreath_gold.png": ("achievement_wreath", 256),
@@ -54,6 +52,9 @@ UI_ASSETS = {
     "ui/panels_states/banner_wide.png": ("banner_wide", 512),
     "effects/sparkles_blue.png": ("fx_sparkles_blue", 512),
     "effects/smoke_puff.png": ("fx_smoke_puff", 512),
+    "ui/buttons/search_field.png": ("field_search", 512),
+    "ui/panels_states/undiscovered_question_panel.png": ("element_unknown", 256),
+    "ui/panels_states/card_base.png": ("card_base", 512),
 }
 
 PROGRESS_BAR = "ui/buttons/progress_bar.png"

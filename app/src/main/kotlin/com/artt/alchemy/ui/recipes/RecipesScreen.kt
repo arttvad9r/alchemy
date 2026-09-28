@@ -59,7 +59,11 @@ fun RecipesScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().testTag("recipes_filter")
         )
         if (recipes.isEmpty()) {
-            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 Text(text = stringResource(R.string.no_known_recipes), modifier = Modifier.padding(24.dp))
             }
         } else {

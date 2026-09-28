@@ -6,11 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
@@ -58,11 +60,16 @@ private val PanelColumns = listOf(
     Segment(0.7f, 1f, false)
 )
 private val PanelRows = listOf(Segment(0f, 0.3f, false), Segment(0.3f, 0.7f, true), Segment(0.7f, 1f, false))
+
+// The search field art has the magnifier and a divider drawn into its left end, so that end stays whole.
+private val SearchFieldSegments = listOf(Segment(0f, 0.33f, false), Segment(0.33f, 0.75f, true), Segment(0.75f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
 
 // Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
 private const val PROGRESS_INSET_X = 6f
 private const val PROGRESS_INSET_Y = 7f
+
+private val SEARCH_ICON_SPACE = 60.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
     BLUE(R.drawable.btn_blue, Color.White),
@@ -117,15 +124,16 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
     )
 }
 
-/** Single-line Material text field drawn over the field art, with the search icon in front. */
+/** Single-line Material text field drawn over the search field art, which has the magnifier drawn in. */
 @Composable
 fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(R.drawable.field)
+    val art = ImageBitmap.imageResource(R.drawable.field_search)
     TextField(
         value = value,
         onValueChange = onValueChange,
         placeholder = { Text(placeholder) },
-        leadingIcon = { Image(painterResource(R.drawable.ic_search), contentDescription = null, modifier = Modifier.size(24.dp)) },
+        // Keeps the text clear of the drawn magnifier.
+        leadingIcon = { Spacer(Modifier.width(SEARCH_ICON_SPACE)) },
         singleLine = true,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
@@ -133,7 +141,7 @@ fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placehold
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         ),
-        modifier = modifier.drawBehind { drawSliced(art, CapSegments, WholeHeight, size.height / art.height) }
+        modifier = modifier.drawBehind { drawSliced(art, SearchFieldSegments, WholeHeight, size.height / art.height) }
     )
 }
 
