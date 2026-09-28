@@ -78,11 +78,6 @@ fun SettingsScreen(
                 tag = "settings_music",
                 onChanged = onMusicChanged
             )
-            Text(
-                stringResource(R.string.music_credit),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
         SettingsPanel {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

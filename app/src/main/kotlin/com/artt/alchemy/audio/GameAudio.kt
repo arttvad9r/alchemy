@@ -17,10 +17,7 @@ enum class Sound(@param:RawRes val res: Int) {
     DISCOVER(R.raw.sfx_discover),
     NO_MATCH(R.raw.sfx_no_match),
     REMOVE(R.raw.sfx_remove),
-    CLEAR(R.raw.sfx_clear),
     CLICK(R.raw.sfx_click),
-    TOGGLE_ON(R.raw.sfx_toggle_on),
-    TOGGLE_OFF(R.raw.sfx_toggle_off),
     PAGE(R.raw.sfx_page)
 }
 
@@ -51,7 +48,7 @@ class BackgroundMusic(private val context: Context) {
     private var player: MediaPlayer? = null
 
     fun start() {
-        val current = player ?: MediaPlayer.create(context, R.raw.music_crystal_cave, GameAudioAttributes, 0)?.apply {
+        val current = player ?: MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)?.apply {
             isLooping = true
             setVolume(MUSIC_VOLUME, MUSIC_VOLUME)
         }?.also { player = it } ?: return

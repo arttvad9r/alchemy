@@ -1,23 +1,23 @@
 # Звуки и музыка
 
-`tools/build_audio.py` (нужен ffmpeg) перегоняет эти файлы в `app/src/main/res/raw`.
+`tools/build_audio.py` (нужен ffmpeg) кладёт эти файлы в `app/src/main/res/raw`.
 
-## Эффекты — Kenney, CC0
+## Эффекты и музыка — Stable Audio 3
 
-Из паков [Interface Sounds](https://kenney.nl/assets/interface-sounds), [Impact Sounds](https://kenney.nl/assets/impact-sounds), [Music Jingles](https://kenney.nl/assets/music-jingles) и [RPG Audio](https://kenney.nl/assets/rpg-audio). Лицензия CC0 (`kenney/License.txt`), указание автора не требуется.
+Сгенерированы локально моделями Stable Audio 3 (`medium` и `small-sfx`) от Stability AI и выбраны на слух из нескольких вариантов. Файлы уже обрезаны, выровнены по громкости, а музыка склеена в петлю, поэтому скрипт копирует их без перекодирования. Модели распространяются под [Stability AI Community License](https://stability.ai/community-license-agreement): права на результат генерации остаются у автора, коммерческое использование разрешено.
 
 | Файл | Где звучит |
 | --- | --- |
-| `impactSoft_medium_003.ogg` | элемент поставлен на поле |
-| `maximize_006.ogg` | известное сочетание |
-| `jingles_STEEL02.ogg` | открыт новый элемент |
-| `bong_001.ogg` | пара не сочетается |
-| `minimize_002.ogg` | элемент убран за край поля |
-| `minimize_004.ogg` | поле очищено |
-| `click_001.ogg` | вкладки и кнопки |
-| `toggle_001.ogg`, `toggle_002.ogg` | переключатели вкл/выкл |
-| `bookFlip3.ogg` | переход на экран рецептов |
+| `stable-audio/place.ogg` | элемент поставлен на поле |
+| `stable-audio/discover.ogg` | открыт новый элемент |
+| `stable-audio/no_match.ogg` | пара не сочетается |
+| `stable-audio/remove.ogg` | элемент убран за край поля |
+| `stable-audio/click.ogg` | вкладки и кнопки |
+| `stable-audio/page.ogg` | переход на экран рецептов |
+| `stable-audio/music.ogg` | фоновая музыка, по кругу |
 
-## Музыка — cynicmusic, CC0
+Очистка поля, сброс прогресса и переключатели в настройках звука не издают — только вибрацию, где она была.
 
-«Crystal Cave (song18)», автор cynicmusic, [pixelsphere.org](https://pixelsphere.org), с [OpenGameArt](https://opengameart.org/content/crystal-cave-song18). Лицензия CC0; автор просит упомянуть pixelsphere.org / The Cynic Project, поэтому строка об авторе есть в настройках игры.
+## Известное сочетание — Kenney, CC0
+
+`kenney/maximize_006.ogg` из пака [Interface Sounds](https://kenney.nl/assets/interface-sounds). Лицензия CC0 (`kenney/License.txt`), указание автора не требуется.

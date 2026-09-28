@@ -57,7 +57,6 @@ ALCHEMY_RELEASE_KEY_PASSWORD=...
 Код и графика распространяются под лицензией [MIT](LICENSE).
 
 - Графика (иллюстрации элементов, фоны, интерфейс) сгенерирована с помощью ChatGPT.
-- Звуковые эффекты — [Kenney](https://kenney.nl), CC0.
-- Музыка — «Crystal Cave» от cynicmusic, [pixelsphere.org](https://pixelsphere.org), CC0.
+- Звуковые эффекты и музыка сгенерированы моделью Stable Audio 3 (Stability AI); один эффект — от [Kenney](https://kenney.nl), CC0.
 
 Подробности о звуках — в [assets/audio/README.md](assets/audio/README.md).

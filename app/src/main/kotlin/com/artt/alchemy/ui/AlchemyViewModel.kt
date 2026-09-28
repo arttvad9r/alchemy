@@ -126,7 +126,6 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun confirmReset() {
-        playSound(Sound.CLEAR)
         store.clear()
         state = AlchemyUiState(progress = initialPlayerProgress(), selectedTab = AppTab.SETTINGS)
         resumeMusic()
@@ -134,18 +133,14 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun setSoundEnabled(enabled: Boolean) {
         updateProgress { copy(soundEnabled = enabled) }
-        // Heard only when turning sound on, as a sample of it.
-        playSound(Sound.TOGGLE_ON)
     }
 
     fun setVibrationEnabled(enabled: Boolean) {
-        playSound(if (enabled) Sound.TOGGLE_ON else Sound.TOGGLE_OFF)
         updateProgress { copy(vibrationEnabled = enabled) }
         vibrate(Haptic.CLICK)
     }
 
     fun setMusicEnabled(enabled: Boolean) {
-        playSound(if (enabled) Sound.TOGGLE_ON else Sound.TOGGLE_OFF)
         updateProgress { copy(musicEnabled = enabled) }
         if (enabled) resumeMusic() else music.pause()
     }
@@ -171,9 +166,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
             GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
             GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
-            GameFeedback.CLEAR -> Sound.CLEAR to Haptic.CLICK
+            GameFeedback.CLEAR -> null to Haptic.CLICK
         }
-        playSound(sound)
+        sound?.let(::playSound)
         vibrate(haptic)
     }
 
