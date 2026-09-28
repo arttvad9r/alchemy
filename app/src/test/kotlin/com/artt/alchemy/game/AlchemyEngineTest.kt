@@ -9,11 +9,11 @@ class AlchemyEngineTest {
     private val engine = AlchemyEngine(AlchemyCatalog)
 
     @Test
-    fun catalog_has_120_unique_elements_and_180_unique_pair_keys() {
-        assertEquals(120, AlchemyCatalog.elements.size)
-        assertEquals(120, AlchemyCatalog.elements.map(ElementDefinition::id).toSet().size)
-        assertEquals(180, AlchemyCatalog.recipes.size)
-        assertEquals(180, AlchemyCatalog.recipes.map { recipeKey(it.firstId, it.secondId) }.toSet().size)
+    fun catalog_has_180_unique_elements_and_176_unique_recipe_pairs() {
+        assertEquals(180, AlchemyCatalog.elements.size)
+        assertEquals(180, AlchemyCatalog.elements.map(ElementDefinition::id).toSet().size)
+        assertEquals(176, AlchemyCatalog.recipes.size)
+        assertEquals(176, AlchemyCatalog.recipes.map { recipeKey(it.firstId, it.secondId) }.toSet().size)
     }
 
     @Test
@@ -39,15 +39,13 @@ class AlchemyEngineTest {
     }
 
     @Test
-    fun curatedProgressionContainsIntentionalRecipesAcrossAllTiers() {
-        assertEquals("stone", engine.combine("lava", "water"))
-        assertEquals("wood", engine.combine("tree", "stone"))
-        assertEquals("tool", engine.combine("metal", "wood"))
-        assertEquals("life", engine.combine("bacteria", "water"))
-        assertEquals("village", engine.combine("human", "house"))
-        assertEquals("book", engine.combine("paper", "ink"))
-        assertEquals("science", engine.combine("book", "energy"))
-        assertEquals("space", engine.combine("sky", "star"))
+    fun importedProgressionContainsRecipesAcrossAllTiers() {
+        assertEquals("stone", engine.combine("earth", "earth"))
+        assertEquals("life", engine.combine("energy", "swamp"))
+        assertEquals("city", engine.combine("settlement", "stone"))
+        assertEquals("ship", engine.combine("boat", "sail"))
+        assertEquals("alchemy", engine.combine("metal", "magic"))
+        assertEquals("philosopher_stone", engine.combine("stone", "alchemy"))
     }
 
     @Test
