@@ -16,6 +16,7 @@ import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.reduce
@@ -34,6 +35,7 @@ data class CombinationEffect(
     val xFraction: Float,
     val yFraction: Float,
     val isDiscovery: Boolean,
+    val rarity: ElementRarity,
     val resultInstanceId: Long,
     val sources: List<EffectSource>
 )
@@ -74,13 +76,14 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
                 xFraction = item.xFraction,
                 yFraction = item.yFraction,
                 isDiscovery = newlyUnlockedId != null,
+                rarity = AlchemyCatalog.rarityById.getValue(it.resultId),
                 resultInstanceId = item.instanceId,
                 sources = effectSources(state.workspace, result)
             )
         }
 
         val transitions = itemTransitions(state.workspace, result, event)
-        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId != null)?.let(::play)
+        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let(::play)
 
         if (progress != state.progress) store.save(progress)
         state = state.copy(
@@ -168,6 +171,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             GameFeedback.PLACE -> Sound.PLACE to Haptic.TICK
             GameFeedback.COMBINE -> Sound.COMBINE to Haptic.CLICK
             GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
+            GameFeedback.DISCOVER_GRAND -> Sound.DISCOVER to Haptic.HEAVY
             GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
             GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
             GameFeedback.CLEAR -> null to Haptic.CLICK

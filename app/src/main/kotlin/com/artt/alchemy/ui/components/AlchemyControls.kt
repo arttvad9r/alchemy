@@ -1,6 +1,9 @@
 package com.artt.alchemy.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -30,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -73,6 +79,8 @@ private const val PROGRESS_INSET_Y = 7f
 private val SEARCH_ICON_SPACE = 60.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
+private const val DIALOG_ENTRANCE_MILLIS = 200
+private const val DIALOG_START_SCALE = 0.9f
 private val DIALOG_MAX_WIDTH = 480.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
@@ -158,9 +166,17 @@ fun AlchemyDialog(
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val art = ImageBitmap.imageResource(panelRes)
+        val entrance = remember { Animatable(0f) }
+        LaunchedEffect(Unit) { entrance.animateTo(1f, tween(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing)) }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .graphicsLayer {
+                    val value = entrance.value
+                    alpha = value
+                    scaleX = DIALOG_START_SCALE + (1f - DIALOG_START_SCALE) * value
+                    scaleY = scaleX
+                }
                 .fillMaxWidth(DIALOG_WIDTH_FRACTION)
                 .widthIn(max = DIALOG_MAX_WIDTH)
                 .drawBehind { drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height)) }

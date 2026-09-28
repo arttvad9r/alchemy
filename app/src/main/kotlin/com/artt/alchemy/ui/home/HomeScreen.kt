@@ -32,9 +32,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,21 +66,15 @@ import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
-import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.ItemTransition
 import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
-import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
-import com.artt.alchemy.ui.components.FactText
-import com.artt.alchemy.ui.components.FramedElementIcon
-import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.panelBackground
-import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -310,20 +302,7 @@ fun HomeScreen(
     val effectShown by remember { derivedStateOf { LinearOutSlowInEasing.transform(effectTime.value) >= DISCOVERY_CARD_AFTER_EFFECT } }
     state.newlyUnlockedId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
-        AlchemyDialog(onDismissRequest = onDismissNewElement, panelRes = R.drawable.dialog_gold) {
-            // Scrolls on small screens with large text, so the button is never pushed out of reach.
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.verticalScroll(rememberScrollState())) {
-                Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
-                FramedElementIcon(element, Modifier.padding(top = 16.dp).width(140.dp))
-                RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
-                Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
-                FactText(elementFacts.getValue(elementId), Modifier.padding(top = 8.dp, bottom = 16.dp))
-                AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
-                    onClick()
-                    onDismissNewElement()
-                })
-            }
-        }
+        NewElementDialog(element, onDismiss = onDismissNewElement, onClick = onClick)
     }
 }
 

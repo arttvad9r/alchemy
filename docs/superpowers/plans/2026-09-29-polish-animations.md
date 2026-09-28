@@ -27,7 +27,7 @@
 
 ## Этап 2. Эффекты открытия по редкости
 - [ ] Добавить нужные `fx_*` из `assets/effects/` через `tools/build_ui_assets.py` (webp), следить за размером APK.
-- [ ] common: как сейчас; rare: + `shockwave_ring`; epic: + `sparkles_purple`, `glow_purple_orb`; legendary: + `light_burst`, `stars_cluster`, золотой `beam_up`.
+- [ ] common: как сейчас; rare: + `shockwave_ring`; epic: + `sparkles_purple`, `glow_purple_orb`; legendary: + `stars_cluster`, `glow_gold_orb`. `light_burst` (47 px) и `beam_up` (синий) не подошли по арту.
 - [ ] Вибрация открытия зависит от редкости (epic/legendary сильнее); `workspaceFeedback` получает редкость, дополнить `GameFeedbackTest`.
 - [ ] `AlchemyDialog`: вход с масштабом и fade; в окне «Новый элемент» иконка выезжает пружиной, золотое свечение `glow_gold_orb`, бейдж редкости чуть позже.
 

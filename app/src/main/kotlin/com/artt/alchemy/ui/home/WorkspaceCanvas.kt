@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.lerp
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.overlapTarget
 import com.artt.alchemy.ui.CombinationEffect
@@ -74,6 +75,8 @@ private const val APPEAR_START_SCALE = 0.5f
 private const val FLY_IN_SPEED = 1.5f
 private const val SHAKE_WAVES = 2.5f
 private const val SHAKE_AMPLITUDE_SHARE = 0.1f
+private const val AURA_ALPHA = 0.9f
+private const val STARS_TURN_DEGREES = 40f
 
 // Where the merge plays inside the effect's time: the sources close in first, then the result pops out.
 private const val MERGE_SPAN = 0.25f
@@ -110,7 +113,12 @@ fun WorkspaceCanvas(
         appearSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_blue),
         smoke = ImageBitmap.imageResource(R.drawable.fx_smoke_puff),
         heldRing = ImageBitmap.imageResource(R.drawable.fx_selected_ring),
-        energyRing = ImageBitmap.imageResource(R.drawable.fx_energy_ring)
+        energyRing = ImageBitmap.imageResource(R.drawable.fx_energy_ring),
+        shockwave = ImageBitmap.imageResource(R.drawable.fx_shockwave_ring),
+        purpleSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_purple),
+        purpleOrb = ImageBitmap.imageResource(R.drawable.fx_glow_purple_orb),
+        goldOrb = ImageBitmap.imageResource(R.drawable.fx_glow_gold_orb),
+        stars = ImageBitmap.imageResource(R.drawable.fx_stars_cluster)
     )
 
     // Only one item is in hand at a time; it stays the lifted one while it settles back after being let go.
@@ -230,7 +238,12 @@ private class WorkspaceArt(
     val appearSparkles: ImageBitmap,
     val smoke: ImageBitmap,
     val heldRing: ImageBitmap,
-    val energyRing: ImageBitmap
+    val energyRing: ImageBitmap,
+    val shockwave: ImageBitmap,
+    val purpleSparkles: ImageBitmap,
+    val purpleOrb: ImageBitmap,
+    val goldOrb: ImageBitmap,
+    val stars: ImageBitmap
 )
 
 private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPaint: android.graphics.Paint, radius: Float, motion: ItemMotion) {
@@ -315,12 +328,30 @@ private fun DrawScope.drawEffect(effect: CombinationEffect, time: Float, art: Wo
         )
     }
     if (effect.isDiscovery) {
-        drawCentered(art.burst, center, radius * (2.4f + 1.6f * progress), fade)
-        drawCentered(art.sparkles, center, radius * 3.2f, fade)
+        drawDiscovery(effect.rarity, center, time, art, radius)
     } else {
         drawCentered(art.energyRing, center, radius * (1.4f + 2.2f * progress), fade)
     }
     drawCentered(art.flash, center, radius * (1.6f + 2f * progress), fade)
+}
+
+// A first discovery grows with its rarity: rare adds a shockwave, epic a purple aura, legendary a golden one with turning stars.
+private fun DrawScope.drawDiscovery(rarity: ElementRarity, center: Offset, time: Float, art: WorkspaceArt, radius: Float) {
+    val progress = LinearOutSlowInEasing.transform(time)
+    val fade = 1f - progress
+    val grand = rarity == ElementRarity.EPIC || rarity == ElementRarity.LEGENDARY
+    if (grand) {
+        val orb = if (rarity == ElementRarity.EPIC) art.purpleOrb else art.goldOrb
+        drawCentered(orb, center, radius * (2.2f + progress), fade * AURA_ALPHA)
+    }
+    drawCentered(art.burst, center, radius * (2.4f + 1.6f * progress), fade)
+    if (rarity >= ElementRarity.RARE) drawCentered(art.shockwave, center, radius * (1.5f + 5f * progress), fade)
+    drawCentered(if (rarity == ElementRarity.EPIC) art.purpleSparkles else art.sparkles, center, radius * 3.2f, fade)
+    if (rarity == ElementRarity.LEGENDARY) {
+        withTransform({ rotate(STARS_TURN_DEGREES * time, center) }) {
+            drawCentered(art.stars, center, radius * (4f + 1.5f * progress), fade)
+        }
+    }
 }
 
 // The icon sits at the top of the item's square, with its label beneath.
