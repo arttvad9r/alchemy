@@ -50,10 +50,7 @@ private fun automaticSpawnPosition(items: List<WorkspaceItem>): Pair<Float, Floa
 
 private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveOverlap, engine: AlchemyEngine): WorkspaceResult {
     val dragged = state.items.find { it.instanceId == event.draggedInstanceId } ?: return WorkspaceResult(state)
-    val target = state.items.firstOrNull { item ->
-        item.instanceId != dragged.instanceId &&
-            squaredDistance(item.xFraction, item.yFraction, event.xFraction, event.yFraction) <= OVERLAP_DISTANCE_SQUARED
-    } ?: return WorkspaceResult(state)
+    val target = overlapTarget(state.items, dragged.instanceId, event.xFraction, event.yFraction) ?: return WorkspaceResult(state)
     val resultId = engine.combine(dragged.elementId, target.elementId) ?: return WorkspaceResult(state, attemptedMix = true)
     val result = WorkspaceItem(state.nextInstanceId, resultId, event.xFraction, event.yFraction)
 
@@ -65,6 +62,12 @@ private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveO
         combination = Combination(target.elementId, dragged.elementId, resultId),
         attemptedMix = true
     )
+}
+
+/** The item a dragged one dropped at this position would mix with, by the same rule the reducer applies. */
+fun overlapTarget(items: List<WorkspaceItem>, draggedInstanceId: Long, xFraction: Float, yFraction: Float): WorkspaceItem? = items.firstOrNull { item ->
+    item.instanceId != draggedInstanceId &&
+        squaredDistance(item.xFraction, item.yFraction, xFraction, yFraction) <= OVERLAP_DISTANCE_SQUARED
 }
 
 private fun squaredDistance(firstX: Float, firstY: Float, secondX: Float, secondY: Float): Float = (firstX - secondX) * (firstX - secondX) + (firstY - secondY) * (firstY - secondY)

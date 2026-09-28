@@ -108,4 +108,13 @@ class WorkspaceReducerTest {
 
         assertEquals(WorkspaceState(nextInstanceId = 2), result.workspace)
     }
+
+    @Test
+    fun overlap_target_is_the_other_item_within_reach_of_the_position() {
+        val items = listOf(WorkspaceItem(1, "fire", 0.5f, 0.5f), WorkspaceItem(2, "water", 0.9f, 0.9f))
+
+        assertEquals(items[0], overlapTarget(items, draggedInstanceId = 2, xFraction = 0.55f, yFraction = 0.5f))
+        assertEquals(null, overlapTarget(items, draggedInstanceId = 2, xFraction = 0.9f, yFraction = 0.9f))
+        assertEquals(null, overlapTarget(items, draggedInstanceId = 1, xFraction = 0.5f, yFraction = 0.5f))
+    }
 }

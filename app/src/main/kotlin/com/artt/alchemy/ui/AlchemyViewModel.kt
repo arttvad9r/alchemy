@@ -33,7 +33,9 @@ data class CombinationEffect(
     val id: Long,
     val xFraction: Float,
     val yFraction: Float,
-    val isDiscovery: Boolean
+    val isDiscovery: Boolean,
+    val resultInstanceId: Long,
+    val sources: List<EffectSource>
 )
 
 data class AlchemyUiState(
@@ -71,11 +73,13 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
                 id = ++combinationEffectCount,
                 xFraction = item.xFraction,
                 yFraction = item.yFraction,
-                isDiscovery = newlyUnlockedId != null
+                isDiscovery = newlyUnlockedId != null,
+                resultInstanceId = item.instanceId,
+                sources = effectSources(state.workspace, result)
             )
         }
 
-        val transitions = itemTransitions(state.workspace, result)
+        val transitions = itemTransitions(state.workspace, result, event)
         workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId != null)?.let(::play)
 
         if (progress != state.progress) store.save(progress)
