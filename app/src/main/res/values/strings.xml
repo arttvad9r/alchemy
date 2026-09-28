@@ -11,12 +11,12 @@
     <string name="tab_recipes">Рецепты</string>
     <string name="tab_achievements">Достижения</string>
     <string name="tab_settings">Настройки</string>
-    <string name="tab_home_short">Д</string>
-    <string name="tab_elements_short">Э</string>
-    <string name="tab_recipes_short">Р</string>
-    <string name="tab_achievements_short">★</string>
-    <string name="tab_settings_short">Н</string>
     <string name="locked_element">Не открыт</string>
+    <string name="rarity_base">Базовый</string>
+    <string name="rarity_common">Обычный</string>
+    <string name="rarity_rare">Редкий</string>
+    <string name="rarity_epic">Эпический</string>
+    <string name="rarity_legendary">Легендарный</string>
     <string name="element_search">Поиск открытых элементов</string>
     <string name="recipe_filter">Фильтр по элементу</string>
     <string name="group_all">Все</string>

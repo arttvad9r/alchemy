@@ -37,6 +37,7 @@ private const val ITEM_RADIUS_FRACTION = 0.11f
 private const val LABEL_SIZE_FRACTION = 0.042f
 private const val ICON_SHARE = 0.66f
 private const val ICON_TOP_SHARE = 0.85f
+private const val LABEL_SHADOW_RADIUS = 6f
 
 @Composable
 fun WorkspaceCanvas(
@@ -59,6 +60,8 @@ fun WorkspaceCanvas(
             textAlign = android.graphics.Paint.Align.CENTER
             isFakeBoldText = true
             isAntiAlias = true
+            // Keeps labels readable over the bright scene background.
+            setShadowLayer(LABEL_SHADOW_RADIUS, 0f, 2f, android.graphics.Color.BLACK)
         }
     }
 

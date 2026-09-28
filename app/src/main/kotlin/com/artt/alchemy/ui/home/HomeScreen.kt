@@ -3,7 +3,9 @@ package com.artt.alchemy.ui.home
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.draggable
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -29,8 +32,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,6 +46,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -52,6 +56,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -61,8 +66,13 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.ui.AlchemyUiState
-import com.artt.alchemy.ui.components.ElementIcon
 import com.artt.alchemy.ui.components.ElementTile
+import com.artt.alchemy.ui.components.FramedElementIcon
+import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.rarity
+import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.theme.PanelBorderColor
+import com.artt.alchemy.ui.theme.PanelColor
 import kotlin.math.roundToInt
 
 @Composable
@@ -96,77 +106,108 @@ fun HomeScreen(
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+                Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium, color = Gold)
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = stringResource(R.string.progress, state.progress.unlockedIds.size, AlchemyCatalog.elements.size))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .background(PanelColor, RoundedCornerShape(14.dp))
+                        .border(1.dp, PanelBorderColor, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(22.dp))
+                    Text(
+                        text = stringResource(R.string.progress, state.progress.unlockedIds.size, AlchemyCatalog.elements.size),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Gold
+                    )
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(R.string.workspace_title), style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = { onEvent(WorkspaceEvent.Clear) }, modifier = Modifier.testTag("clear_workspace")) {
+                TextButton(
+                    onClick = { onEvent(WorkspaceEvent.Clear) },
+                    colors = ButtonDefaults.textButtonColors(containerColor = PanelColor),
+                    border = BorderStroke(1.dp, PanelBorderColor),
+                    modifier = Modifier.testTag("clear_workspace")
+                ) {
                     Text(stringResource(R.string.clear_workspace))
                 }
             }
-            OutlinedCard(
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant),
-                shape = RoundedCornerShape(20.dp),
+            // The scene background shows through the workspace, like the altar in the reference.
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .border(1.dp, PanelBorderColor.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
                     .testTag("home_workspace")
             ) {
                 WorkspaceCanvas(
                     items = state.workspace.items,
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
-                    onBoundsChanged = { workspaceBounds = it },
-                    modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+                    onBoundsChanged = { workspaceBounds = it }
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
-            Text(text = stringResource(R.string.palette_hint), style = MaterialTheme.typography.bodySmall)
-            val paletteState = rememberLazyGridState()
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(152.dp)
-                    .testTag("palette_grid")
+                    .background(PanelColor, RoundedCornerShape(20.dp))
+                    .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
+                    .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
-                LazyVerticalGrid(
-                    state = paletteState,
-                    columns = GridCells.Fixed(5),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(top = 12.dp, end = 16.dp, bottom = 12.dp),
-                    modifier = Modifier.fillMaxSize()
+                Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(R.string.palette_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                val paletteState = rememberLazyGridState()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(152.dp)
+                        .testTag("palette_grid")
                 ) {
-                    items(unlocked, key = { it.id }) { element ->
-                        DraggablePaletteElement(
-                            element = element,
-                            modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
-                            onDragPosition = { position ->
-                                draggedElement = position?.let { element }
-                                dragPosition = position
-                            },
-                            onDrop = { drop ->
-                                workspaceBounds
-                                    ?.takeIf { it.contains(drop) }
-                                    ?.let { bounds ->
-                                        onEvent(
-                                            WorkspaceEvent.Spawn(
-                                                element.id,
-                                                (drop.x - bounds.left) / bounds.width,
-                                                (drop.y - bounds.top) / bounds.height
+                    LazyVerticalGrid(
+                        state = paletteState,
+                        columns = GridCells.Fixed(5),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(top = 12.dp, end = 16.dp, bottom = 12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(unlocked, key = { it.id }) { element ->
+                            DraggablePaletteElement(
+                                element = element,
+                                modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
+                                onDragPosition = { position ->
+                                    draggedElement = position?.let { element }
+                                    dragPosition = position
+                                },
+                                onDrop = { drop ->
+                                    workspaceBounds
+                                        ?.takeIf { it.contains(drop) }
+                                        ?.let { bounds ->
+                                            onEvent(
+                                                WorkspaceEvent.Spawn(
+                                                    element.id,
+                                                    (drop.x - bounds.left) / bounds.width,
+                                                    (drop.y - bounds.top) / bounds.height
+                                                )
                                             )
-                                        )
-                                    }
-                            },
-                            onTap = { onEvent(WorkspaceEvent.SpawnAutomatically(element.id)) }
-                        )
+                                        }
+                                },
+                                onTap = { onEvent(WorkspaceEvent.SpawnAutomatically(element.id)) }
+                            )
+                        }
                     }
+                    PaletteScrollbar(state = paletteState, modifier = Modifier.align(Alignment.CenterEnd).padding(vertical = 12.dp))
                 }
-                PaletteScrollbar(state = paletteState, modifier = Modifier.align(Alignment.CenterEnd))
             }
         }
 
@@ -198,7 +239,8 @@ fun HomeScreen(
             text = {
                 val element = AlchemyCatalog.elementsById.getValue(elementId)
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    ElementIcon(element, Modifier.width(120.dp))
+                    FramedElementIcon(element, Modifier.width(140.dp))
+                    RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp))
                     Text(stringResource(R.string.new_element_message, element.name))
                 }
             },

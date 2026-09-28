@@ -1,27 +1,46 @@
 package com.artt.alchemy.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.artt.alchemy.R
+import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementRarity
+import com.artt.alchemy.ui.theme.color
 
-private val SilhouetteFilter = ColorFilter.tint(Color(0xFF2B2B33))
+private val SilhouetteFilter = ColorFilter.tint(Color(0xFF46528F))
+
+// Share of the frame taken by its ornamental border on each side.
+private const val FRAME_INSET = 0.16f
+
+val ElementDefinition.rarity: ElementRarity
+    get() = AlchemyCatalog.rarityById.getValue(id)
 
 @Composable
 fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silhouette: Boolean = false) {
@@ -30,6 +49,40 @@ fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silho
         contentDescription = null,
         colorFilter = if (silhouette) SilhouetteFilter else null,
         modifier = modifier.aspectRatio(1f)
+    )
+}
+
+/** Square rarity frame; [rarity] null draws the neutral frame used for locked elements. */
+@Composable
+fun ElementFrame(rarity: ElementRarity?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier.aspectRatio(1f)) {
+        Image(
+            painter = painterResource(rarity.frameRes),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize().then(if (rarity == null) Modifier.alpha(0.7f) else Modifier)
+        )
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize(1f - 2 * FRAME_INSET), content = content)
+    }
+}
+
+@Composable
+fun FramedElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, locked: Boolean = false) {
+    ElementFrame(rarity = if (locked) null else element.rarity, modifier = modifier) {
+        ElementIcon(element, Modifier.fillMaxSize(), silhouette = locked)
+    }
+}
+
+@Composable
+fun RarityBadge(rarity: ElementRarity, modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(rarity.labelRes),
+        style = MaterialTheme.typography.labelSmall,
+        color = Color.White,
+        maxLines = 1,
+        modifier = modifier
+            .background(rarity.color.copy(alpha = 0.55f), RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 1.dp)
     )
 }
 
@@ -42,7 +95,7 @@ fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onCli
             .semantics { contentDescription = element.name }
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
     ) {
-        ElementIcon(element, Modifier.fillMaxWidth())
+        FramedElementIcon(element, Modifier.fillMaxWidth())
         Text(
             text = element.name,
             style = MaterialTheme.typography.labelSmall,
@@ -53,3 +106,21 @@ fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onCli
         )
     }
 }
+
+private val ElementRarity?.frameRes: Int
+    get() = when (this) {
+        null, ElementRarity.BASE -> R.drawable.frame_base
+        ElementRarity.COMMON -> R.drawable.frame_common
+        ElementRarity.RARE -> R.drawable.frame_rare
+        ElementRarity.EPIC -> R.drawable.frame_epic
+        ElementRarity.LEGENDARY -> R.drawable.frame_legendary
+    }
+
+val ElementRarity.labelRes: Int
+    get() = when (this) {
+        ElementRarity.BASE -> R.string.rarity_base
+        ElementRarity.COMMON -> R.string.rarity_common
+        ElementRarity.RARE -> R.string.rarity_rare
+        ElementRarity.EPIC -> R.string.rarity_epic
+        ElementRarity.LEGENDARY -> R.string.rarity_legendary
+    }

@@ -1,18 +1,23 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items as lazyRowItems
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -30,7 +36,11 @@ import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementGroup
-import com.artt.alchemy.ui.components.ElementIcon
+import com.artt.alchemy.ui.components.FramedElementIcon
+import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.rarity
+import com.artt.alchemy.ui.theme.PanelBorderColor
+import com.artt.alchemy.ui.theme.PanelColor
 
 @Composable
 fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
@@ -42,7 +52,7 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
     }
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(3),
         modifier = modifier.fillMaxSize().testTag("screen_elements"),
         contentPadding = PaddingValues(12.dp)
     ) {
@@ -51,8 +61,9 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
                 value = query,
                 onValueChange = { query = it },
                 label = { Text(stringResource(R.string.element_search)) },
+                leadingIcon = { Image(painterResource(R.drawable.ic_search), contentDescription = null, modifier = Modifier.size(24.dp)) },
                 singleLine = true,
-                modifier = Modifier.testTag("elements_search")
+                modifier = Modifier.fillMaxWidth().testTag("elements_search")
             )
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -76,20 +87,27 @@ fun ElementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
             }
         }
         items(entries, key = { it.id }) { element ->
-            Card(
+            val unlocked = element.id in progress.unlockedIds
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(6.dp)
-                    .testTag(if (element.id in progress.unlockedIds) "element_${element.id}" else "element_locked_${element.id}")
+                    .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
+                    .background(PanelColor, RoundedCornerShape(16.dp))
+                    .border(1.dp, PanelBorderColor, RoundedCornerShape(16.dp))
+                    .padding(8.dp)
             ) {
-                val unlocked = element.id in progress.unlockedIds
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-                    ElementIcon(element, Modifier.fillMaxWidth(0.6f), silhouette = !unlocked)
-                    Text(
-                        text = if (unlocked) element.name else stringResource(R.string.locked_element),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
+                FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
+                Text(
+                    text = if (unlocked) element.name else stringResource(R.string.locked_element),
+                    style = MaterialTheme.typography.labelLarge,
+                    textAlign = TextAlign.Center,
+                    minLines = 2,
+                    maxLines = 2,
+                    color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+                if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 4.dp))
             }
         }
     }

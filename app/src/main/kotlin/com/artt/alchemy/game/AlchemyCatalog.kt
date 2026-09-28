@@ -208,5 +208,10 @@ object AlchemyCatalog {
             ) { "Recipes may only reference catalog elements" }
         }
 
+    val rarityById: Map<String, ElementRarity> =
+        recipeDepths(baseElementIds, recipes).also { depths ->
+            check(depths.keys == elementsById.keys) { "Every element must be reachable from the base elements" }
+        }.mapValues { (_, depth) -> rarityForDepth(depth) }
+
     private fun element(id: String, name: String, group: ElementGroup, color: Long = group.color): ElementDefinition = ElementDefinition(id = id, name = name, group = group, color = color)
 }
