@@ -3,6 +3,7 @@ package com.artt.alchemy.game
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.reset
+import com.artt.alchemy.data.sanitized
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -37,5 +38,46 @@ class ProgressRulesTest {
         val changed = initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam"))
 
         assertEquals(initialPlayerProgress(), changed.reset())
+    }
+
+    @Test
+    fun discovery_order_lists_base_elements_first_then_results_as_found() {
+        val progress = initialPlayerProgress()
+            .recordAttempt(Combination("fire", "water", "steam"))
+            .recordAttempt(Combination("earth", "water", "mud"))
+            .recordAttempt(Combination("water", "fire", "steam"))
+
+        assertEquals(listOf("fire", "water", "earth", "air", "steam", "mud"), progress.discoveryOrder)
+    }
+
+    @Test
+    fun save_from_before_the_order_was_kept_gets_catalog_order() {
+        val old = initialPlayerProgress().copy(
+            unlockedIds = AlchemyCatalog.baseElementIds + setOf("mud", "steam"),
+            discoveryOrder = emptyList()
+        )
+
+        assertEquals(listOf("fire", "water", "earth", "air", "steam", "mud"), old.sanitized().discoveryOrder)
+    }
+
+    @Test
+    fun sanitizing_keeps_known_order_and_drops_unknown_entries() {
+        val dirty = initialPlayerProgress().copy(
+            unlockedIds = AlchemyCatalog.baseElementIds + setOf("mud", "steam", "no_such_element"),
+            discoveryOrder = listOf("mud", "no_such_element", "fire", "mud"),
+            knownRecipeKeys = setOf(recipeKey("fire", "water"), "no|such"),
+            musicVolume = 3f,
+            effectsVolume = -1f,
+            mixAttemptCount = -5
+        )
+
+        val clean = dirty.sanitized()
+
+        assertEquals(listOf("mud", "fire", "water", "earth", "air", "steam"), clean.discoveryOrder)
+        assertEquals(AlchemyCatalog.baseElementIds + setOf("mud", "steam"), clean.unlockedIds)
+        assertEquals(setOf(recipeKey("fire", "water")), clean.knownRecipeKeys)
+        assertEquals(1f, clean.musicVolume, 0f)
+        assertEquals(0f, clean.effectsVolume, 0f)
+        assertEquals(0, clean.mixAttemptCount)
     }
 }
