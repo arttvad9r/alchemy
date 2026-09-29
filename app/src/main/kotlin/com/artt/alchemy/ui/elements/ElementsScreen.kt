@@ -18,9 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.items as lazyRowItems
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,10 +52,10 @@ import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.components.AlchemySearchField
-import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.ElementIcon
 import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.FinalMark
+import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.panelBackground
@@ -105,24 +103,12 @@ fun ElementsScreen(
                 )
             }
             item {
-                LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(start = ScreenPadding, end = ScreenPadding)) {
-                    item {
-                        AlchemyTab(
-                            text = stringResource(R.string.group_all),
-                            selected = selectedGroup == null,
-                            onClick = { selectedGroup = null },
-                            modifier = Modifier.testTag("elements_group_all")
-                        )
-                    }
-                    lazyRowItems(ElementGroup.entries) { group ->
-                        AlchemyTab(
-                            text = stringResource(group.labelRes),
-                            selected = selectedGroup == group,
-                            onClick = { selectedGroup = group },
-                            modifier = Modifier.padding(start = 8.dp).testTag("elements_group_${group.name.lowercase()}")
-                        )
-                    }
-                }
+                GroupTabs(
+                    selected = selectedGroup,
+                    onSelect = { selectedGroup = it },
+                    tagPrefix = "elements_group",
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.
@@ -257,15 +243,6 @@ private val ElementRarity.cardRes: Int
         ElementRarity.RARE -> R.drawable.card_rare
         ElementRarity.EPIC -> R.drawable.card_epic
         ElementRarity.LEGENDARY -> R.drawable.card_legendary
-    }
-
-private val ElementGroup.labelRes: Int
-    get() = when (this) {
-        ElementGroup.NATURE -> R.string.group_nature
-        ElementGroup.MATERIAL -> R.string.group_material
-        ElementGroup.LIFE -> R.string.group_life
-        ElementGroup.CIVILIZATION -> R.string.group_civilization
-        ElementGroup.COSMOS -> R.string.group_cosmos
     }
 
 private const val REVEAL_DELAY_MILLIS = 250L

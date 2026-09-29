@@ -20,6 +20,7 @@ class ProgressJsonTest {
             effectsVolume = 0.5f,
             reducedMotion = true,
             onboardingSeen = true,
+            paletteSort = ElementSort.GROUP,
             activeHint = ActiveHint(recipeKey("earth", "water"), step = 2)
         )
 
