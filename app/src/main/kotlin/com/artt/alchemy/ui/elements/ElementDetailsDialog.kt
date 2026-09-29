@@ -58,7 +58,7 @@ fun ElementDetailsDialog(
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.verticalScroll(scroll).testTag("element_details")
+            modifier = Modifier.weight(1f, fill = false).verticalScroll(scroll).testTag("element_details")
         ) {
             FramedElementIcon(element, Modifier.width(120.dp))
             Text(element.name, style = MaterialTheme.typography.headlineSmall, color = Gold, modifier = Modifier.padding(top = 8.dp))
@@ -104,8 +104,9 @@ fun ElementDetailsDialog(
                     modifier = Modifier.padding(top = 12.dp).testTag("element_links_note")
                 )
             }
-            AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 16.dp).testTag("element_details_close"))
         }
+        // Outside the scroll, so the way out is always on screen however long the card is.
+        AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 16.dp).testTag("element_details_close"))
     }
 }
 

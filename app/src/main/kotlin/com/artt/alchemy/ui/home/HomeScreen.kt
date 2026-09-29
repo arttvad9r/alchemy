@@ -67,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
@@ -80,6 +81,7 @@ import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
+import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
@@ -225,8 +227,14 @@ fun HomeScreen(
                     .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
-                    Text(text = stringResource(R.string.palette_title), style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.weight(1f))
+                    val titleStyle = MaterialTheme.typography.titleMedium
+                    Text(
+                        text = stringResource(R.string.palette_title),
+                        style = titleStyle,
+                        maxLines = 1,
+                        autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
                     ProgressCounter(unlocked = unlockedIds.size)
                 }
                 val paletteState = rememberLazyGridState()
@@ -337,7 +345,9 @@ private fun ProgressCounter(unlocked: Int) {
         Text(
             text = stringResource(R.string.progress, unlocked, AlchemyCatalog.elements.size),
             style = MaterialTheme.typography.titleSmall.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal),
-            color = Gold
+            color = Gold,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
@@ -442,3 +452,5 @@ private fun DraggablePaletteElement(
         onClick = { onTap(coordinates?.boundsInRoot()?.center) }
     )
 }
+
+private val PALETTE_TITLE_MIN_SIZE = 12.sp

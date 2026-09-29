@@ -65,8 +65,8 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
         badgeIn.animateTo(1f, tween(BADGE_FADE_MILLIS))
     }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
-        // Scrolls on small screens with large text, so the button is never pushed out of reach.
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.verticalScroll(rememberScrollState())) {
+        // Scrolls on small screens with large text; the button stays below it, always in reach.
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
             Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
             Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 16.dp).fillMaxWidth()) {
                 Image(
@@ -93,10 +93,10 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
             }
             Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
             FactText(elementFacts.getValue(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
-            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
-                onClick()
-                onDismiss()
-            })
         }
+        AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
+            onClick()
+            onDismiss()
+        })
     }
 }

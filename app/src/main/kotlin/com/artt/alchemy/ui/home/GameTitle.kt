@@ -17,16 +17,18 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.components.WholeWordsAutoSize
 
 private val TitleGradient = Brush.verticalGradient(listOf(Color(0xFFFFEFB8), Color(0xFFF3C35B), Color(0xFFD08A26)))
 private val TitleShadow = Shadow(color = Color(0xFF1A0E3D), offset = Offset(0f, 3f), blurRadius = 8f)
 private val LOGO_SIZE = 64.dp
 private val TITLE_SIZE = 38.sp
 private val TAGLINE_SIZE = 13.sp
+private val TITLE_MIN_SIZE = 24.sp
+private val TAGLINE_MIN_SIZE = 9.sp
 
 /** The game's name as on the concept: a golden serif wordmark beside the spell book, with a tagline under it. */
 @Composable
@@ -42,14 +44,15 @@ fun GameTitle(modifier: Modifier = Modifier) {
                     fontSize = TITLE_SIZE,
                     lineHeight = TITLE_SIZE
                 ),
-                maxLines = 1
+                maxLines = 1,
+                autoSize = WholeWordsAutoSize(min = TITLE_MIN_SIZE, max = TITLE_SIZE)
             )
             Text(
                 text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = TAGLINE_SIZE, fontWeight = FontWeight.Medium, shadow = TitleShadow),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                autoSize = WholeWordsAutoSize(min = TAGLINE_MIN_SIZE, max = TAGLINE_SIZE)
             )
         }
     }

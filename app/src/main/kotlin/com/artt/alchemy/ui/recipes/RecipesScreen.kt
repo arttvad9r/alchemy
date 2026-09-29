@@ -2,6 +2,7 @@ package com.artt.alchemy.ui.recipes
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
@@ -34,6 +36,7 @@ import com.artt.alchemy.game.recipeKey
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.rowPanel
 
 @Composable
@@ -81,31 +84,45 @@ private fun RecipeRow(recipe: Recipe) {
     val first = AlchemyCatalog.elementsById.getValue(recipe.firstId)
     val second = AlchemyCatalog.elementsById.getValue(recipe.secondId)
     val result = AlchemyCatalog.elementsById.getValue(recipe.resultId)
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .rowPanel()
             .padding(horizontal = 14.dp, vertical = 12.dp)
             .semantics(mergeDescendants = true) { contentDescription = "${first.name} + ${second.name} = ${result.name}" }
     ) {
-        FramedElementIcon(first, Modifier.size(RECIPE_ICON_SIZE))
-        Image(painterResource(R.drawable.ic_plus), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
-        FramedElementIcon(second, Modifier.size(RECIPE_ICON_SIZE))
-        Image(painterResource(R.drawable.ic_forward), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
-        FramedElementIcon(result, Modifier.size(RECIPE_ICON_SIZE))
-        Column(modifier = Modifier.weight(1f).padding(start = 4.dp)) {
-            Text(result.name, style = MaterialTheme.typography.titleMedium, maxLines = 2)
-            Text(
-                "${first.name} + ${second.name}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2
-            )
+        // Icons give up size before the names do, so a narrow screen keeps the names readable.
+        val iconSize = ((maxWidth - OPERATOR_ICON_SIZE * 2 - ROW_GAP * 5 - NAMES_MIN_WIDTH) / 3).coerceIn(RECIPE_ICON_MIN_SIZE, RECIPE_ICON_SIZE)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(ROW_GAP)) {
+            FramedElementIcon(first, Modifier.size(iconSize))
+            Image(painterResource(R.drawable.ic_plus), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
+            FramedElementIcon(second, Modifier.size(iconSize))
+            Image(painterResource(R.drawable.ic_forward), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
+            FramedElementIcon(result, Modifier.size(iconSize))
+            Column(modifier = Modifier.weight(1f)) {
+                val nameStyle = MaterialTheme.typography.titleMedium
+                val ingredientsStyle = MaterialTheme.typography.bodySmall
+                Text(
+                    result.name,
+                    style = nameStyle,
+                    maxLines = 2,
+                    autoSize = WholeWordsAutoSize(min = NAME_MIN_SIZE, max = nameStyle.fontSize)
+                )
+                Text(
+                    "${first.name} + ${second.name}",
+                    style = ingredientsStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    autoSize = WholeWordsAutoSize(min = NAME_MIN_SIZE, max = ingredientsStyle.fontSize)
+                )
+            }
         }
     }
 }
 
 private val RECIPE_ICON_SIZE = 52.dp
 private val OPERATOR_ICON_SIZE = 22.dp
+private val RECIPE_ICON_MIN_SIZE = 38.dp
+private val ROW_GAP = 6.dp
+private val NAMES_MIN_WIDTH = 116.dp
+private val NAME_MIN_SIZE = 10.sp
