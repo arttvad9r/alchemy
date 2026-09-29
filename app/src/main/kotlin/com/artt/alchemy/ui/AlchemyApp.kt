@@ -113,7 +113,13 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                             onClick = viewModel::onButtonClick,
                             modifier = Modifier.padding(padding)
                         )
-                        AppTab.RECIPES -> RecipesScreen(state.progress, onPlaceRecipe = viewModel::placeRecipe, modifier = Modifier.padding(padding))
+                        AppTab.RECIPES -> RecipesScreen(
+                            progress = state.progress,
+                            onPlaceRecipe = viewModel::placeRecipe,
+                            onRequestHint = viewModel::requestHint,
+                            onPlaceHint = viewModel::placeHint,
+                            modifier = Modifier.padding(padding)
+                        )
                         AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
                         AppTab.SETTINGS -> SettingsScreen(
                             state = state,

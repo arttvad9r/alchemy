@@ -27,6 +27,9 @@
     <string name="sort_recent">Недавние</string>
     <string name="sort_alphabet">По алфавиту</string>
     <string name="sort_group">По группам</string>
+    <string name="hint_request">Подсказка</string>
+    <string name="hint_more">Показать второй элемент</string>
+    <string name="hint_place">Подсказка: %1$s и %2$s. Положить на плиту</string>
     <string name="no_known_recipes">Нет открытых рецептов</string>
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>
