@@ -69,6 +69,7 @@ UI_ASSETS = {
     "ui/buttons/dropdown_field.png": ("field_dropdown", 512),
     "ui/icons/recent_clock.png": ("ic_recent", 96),
     "ui/icons/hint_bulb.png": ("ic_hint", 96),
+    "ui/panels_states/discovery_burst_gold.png": ("fx_discovery_burst_gold", 256),
 }
 
 CLOSE_ICON = "ui/icons/close.png"

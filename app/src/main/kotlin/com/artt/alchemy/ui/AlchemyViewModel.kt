@@ -13,6 +13,7 @@ import com.artt.alchemy.audio.SoundEffects
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
+import com.artt.alchemy.data.isComplete
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.requestHint
 import com.artt.alchemy.game.AlchemyCatalog
@@ -56,7 +57,9 @@ data class AlchemyUiState(
     // Ids of achievements earned and not yet announced; the first one is on screen.
     val achievementQueue: List<String> = emptyList(),
     // Elements found this session that the catalog has not shown yet.
-    val freshElementIds: Set<String> = emptySet()
+    val freshElementIds: Set<String> = emptySet(),
+    // The finished-collection card: raised by the mix that opens the last element, or from the achievements screen.
+    val isCompletionVisible: Boolean = false
 )
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
@@ -103,7 +106,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             workspace = result.workspace,
             newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
             freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
-            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress)
+            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress),
+            isCompletionVisible = state.isCompletionVisible || (progress.isComplete && !state.progress.isComplete)
         )
     }
 
@@ -165,6 +169,15 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun dismissAchievement() {
         state = state.copy(achievementQueue = state.achievementQueue.drop(1))
+    }
+
+    fun showCompletion() {
+        playSound(Sound.CLICK)
+        state = state.copy(isCompletionVisible = true)
+    }
+
+    fun dismissCompletion() {
+        state = state.copy(isCompletionVisible = false)
     }
 
     fun markElementsSeen() {

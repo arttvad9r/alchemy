@@ -1,6 +1,7 @@
 package com.artt.alchemy.ui.achievements
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
+import com.artt.alchemy.data.isComplete
 import com.artt.alchemy.ui.components.AlchemyProgressBar
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
@@ -32,13 +35,14 @@ import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 
 @Composable
-fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
+fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, modifier: Modifier = Modifier) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         contentPadding = PaddingValues(ScreenPadding),
         modifier = modifier.fillMaxSize().testTag("screen_achievements")
     ) {
         item { ScreenBanner(stringResource(R.string.tab_achievements)) }
+        if (progress.isComplete) item { CompletionCard(onOpenCompletion) }
         items(achievements, key = AchievementDefinition::id) { achievement ->
             val current = achievement.progressOf(progress)
             val completed = achievement.isCompleted(progress)
@@ -75,6 +79,31 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CompletionCard(onClick: () -> Unit) {
+    val description = stringResource(R.string.completion_card)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .rowPanel()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .testTag("achievement_completion")
+            .clearAndSetSemantics { contentDescription = description }
+    ) {
+        AchievementBadge(completed = true)
+        Text(
+            text = stringResource(R.string.completion_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = Gold,
+            maxLines = 2,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
