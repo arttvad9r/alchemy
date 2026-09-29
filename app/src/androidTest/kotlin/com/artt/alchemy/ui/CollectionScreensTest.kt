@@ -22,7 +22,7 @@ class CollectionScreensTest {
     fun elementsGridStartsWithFirstCardOnLeft() {
         composeRule.onNodeWithTag("nav_elements").performClick()
 
-        composeRule.onNodeWithTag("element_fire").assertLeftPositionInRootIsEqualTo(15.dp)
+        composeRule.onNodeWithTag("element_fire").assertLeftPositionInRootIsEqualTo(4.dp)
     }
 
     @Test
@@ -52,7 +52,7 @@ class CollectionScreensTest {
 
         composeRule.onNodeWithText(elementFacts.getValue("fire")).assertIsDisplayed()
 
-        composeRule.onNodeWithTag("element_details_close").performClick()
+        composeRule.onNodeWithTag("dialog_close").performClick()
         composeRule.onNodeWithTag("element_details").assertDoesNotExist()
     }
 }

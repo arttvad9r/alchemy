@@ -1,20 +1,28 @@
 package com.artt.alchemy.ui
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +39,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -41,6 +50,7 @@ import com.artt.alchemy.R
 import com.artt.alchemy.ui.achievements.AchievementToast
 import com.artt.alchemy.ui.achievements.AchievementsScreen
 import com.artt.alchemy.ui.achievements.achievementsById
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
@@ -54,6 +64,8 @@ private const val HOME_DIM = 0.2f
 private const val LIST_DIM = 0.7f
 private const val UNSELECTED_ICON_ALPHA = 0.6f
 private const val TAB_FADE_MILLIS = 180
+private val NAV_BAR_HEIGHT = 58.dp
+private val NAV_ICON_SIZE = 26.dp
 
 @Composable
 fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
@@ -130,7 +142,7 @@ private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: Alchemy
                 achievement = achievement,
                 onShown = viewModel::onAchievementShown,
                 onDismiss = viewModel::dismissAchievement,
-                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp)
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(ScreenPadding)
             )
         }
     }
@@ -139,28 +151,50 @@ private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: Alchemy
 @Composable
 private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit) {
     val labelStyle = navigationLabelStyle(AppTab.entries.map { stringResource(it.labelRes) })
-    NavigationBar(containerColor = PanelColor, tonalElevation = 0.dp) {
+    // Lower than the Material bar: the icon, its selection pill and the label sit close together.
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(PanelColor)
+            .navigationBarsPadding()
+            .height(NAV_BAR_HEIGHT)
+            .selectableGroup()
+    ) {
         AppTab.entries.forEach { tab ->
             val selected = selectedTab == tab
             val iconAlpha by animateFloatAsState(if (selected) 1f else UNSELECTED_ICON_ALPHA, tween(TAB_FADE_MILLIS), label = "navIcon")
-            NavigationBarItem(
-                selected = selected,
-                onClick = { onSelect(tab) },
-                icon = {
-                    Image(
-                        painter = painterResource(tab.iconRes),
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp).alpha(iconAlpha)
-                    )
-                },
-                label = { Text(stringResource(tab.labelRes), style = labelStyle, maxLines = 1, softWrap = false) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedTextColor = Gold,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                modifier = Modifier.testTag(tab.testTag)
+            val indicator by animateColorAsState(
+                if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                tween(TAB_FADE_MILLIS),
+                label = "navIndicator"
             )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .selectable(selected = selected, role = Role.Tab, onClick = { onSelect(tab) })
+                    .testTag(tab.testTag)
+            ) {
+                Image(
+                    painter = painterResource(tab.iconRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .background(indicator, RoundedCornerShape(50))
+                        .padding(horizontal = 14.dp, vertical = 2.dp)
+                        .size(NAV_ICON_SIZE)
+                        .alpha(iconAlpha)
+                )
+                Text(
+                    stringResource(tab.labelRes),
+                    style = labelStyle,
+                    color = if (selected) Gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
     }
 }

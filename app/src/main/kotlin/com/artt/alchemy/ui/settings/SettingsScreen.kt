@@ -33,6 +33,8 @@ import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 
@@ -51,7 +53,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .testTag("screen_settings")
-            .padding(16.dp)
+            .padding(ScreenPadding)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -82,9 +84,9 @@ fun SettingsScreen(
         SettingsPanel {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Image(painterResource(R.drawable.ic_help), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
-                Text(stringResource(R.string.help), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.help), style = MaterialTheme.typography.titleMedium)
             }
-            Text(stringResource(R.string.help_text), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.help_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         AlchemyButton(
             text = stringResource(R.string.reset_progress),
@@ -95,7 +97,7 @@ fun SettingsScreen(
     }
     if (state.isResetConfirmationVisible) {
         AlchemyDialog(onDismissRequest = onDismissReset, panelRes = R.drawable.dialog_blue) {
-            Text(stringResource(R.string.reset_confirmation_title), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.reset_confirmation_title), style = MaterialTheme.typography.titleLarge, color = Gold, textAlign = TextAlign.Center)
             Text(
                 stringResource(R.string.reset_confirmation_message),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -116,8 +118,8 @@ private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(PanelColor, RoundedCornerShape(16.dp))
-            .border(1.dp, PanelBorderColor, RoundedCornerShape(16.dp))
+            .background(PanelColor, RoundedCornerShape(20.dp))
+            .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
             .padding(16.dp),
         content = content
     )
