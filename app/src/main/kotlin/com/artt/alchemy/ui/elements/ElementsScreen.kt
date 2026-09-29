@@ -56,8 +56,10 @@ import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.ElementIcon
+import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
@@ -85,25 +87,25 @@ fun ElementsScreen(
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // Four columns on a compact phone; long names shrink to whole words, wider screens get more.
-        val columns = maxOf(1, ((maxWidth - SCREEN_PADDING * 2) / CARD_MIN_WIDTH).toInt())
-        val nameStyle = catalogNameStyle((maxWidth - SCREEN_PADDING * 2) / columns - CARD_GAP - CARD_SIDE_PADDING * 2)
+        val columns = maxOf(1, ((maxWidth - ROW_INSET * 2) / CARD_MIN_WIDTH).toInt())
+        val nameStyle = catalogNameStyle((maxWidth - ROW_INSET * 2) / columns - CARD_GAP - CARD_SIDE_PADDING * 2)
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag("screen_elements"),
-            contentPadding = PaddingValues(SCREEN_PADDING)
+            contentPadding = PaddingValues(top = ScreenPadding, bottom = ROW_INSET)
         ) {
             item {
-                ScreenBanner(stringResource(R.string.tab_elements), Modifier.padding(bottom = 8.dp))
+                ScreenBanner(stringResource(R.string.tab_elements), Modifier.padding(start = ScreenPadding, end = ScreenPadding, bottom = 8.dp))
             }
             item {
                 AlchemySearchField(
                     value = query,
                     onValueChange = { query = it },
                     placeholder = stringResource(R.string.element_search),
-                    modifier = Modifier.fillMaxWidth().testTag("elements_search")
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenPadding).testTag("elements_search")
                 )
             }
             item {
-                LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+                LazyRow(modifier = Modifier.padding(vertical = 8.dp), contentPadding = PaddingValues(start = ScreenPadding, end = ScreenPadding)) {
                     item {
                         AlchemyTab(
                             text = stringResource(R.string.group_all),
@@ -125,7 +127,7 @@ fun ElementsScreen(
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.
             items(entries.chunked(columns), key = { row -> row.first().id }) { row ->
-                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).animateItem()) {
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = ROW_INSET).height(IntrinsicSize.Min).animateItem()) {
                     row.forEach { element ->
                         val unlocked = element.id in progress.unlockedIds
                         ElementCard(
@@ -176,7 +178,7 @@ private fun ElementCard(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             // Clears the ornament on the top edge of the card art.
-            modifier = Modifier.fillMaxSize().padding(start = CARD_SIDE_PADDING, top = 8.dp, end = CARD_SIDE_PADDING, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
+            modifier = Modifier.fillMaxSize().padding(start = CARD_SIDE_PADDING, top = 8.dp, end = CARD_SIDE_PADDING, bottom = ElementTextGap + CARD_BOTTOM_BORDER)
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
                 // The card art is the only frame; the icon sits straight on it.
@@ -197,7 +199,7 @@ private fun ElementCard(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
-                modifier = Modifier.weight(1f).padding(top = CARD_TEXT_GAP)
+                modifier = Modifier.weight(1f).padding(top = ElementTextGap)
             ) {
                 Text(
                     text = if (unlocked) element.name else stringResource(R.string.locked_element),
@@ -277,13 +279,12 @@ private val NAME_MIN_SIZE = 10.sp
 private const val NAME_SIZE_STEP = 0.5f
 private const val NAME_LINE_HEIGHT = 1.1f
 private val CARD_SIDE_PADDING = 4.dp
-private val SCREEN_PADDING = 6.dp
 
 // Between neighbouring cards: enough that their trims never touch.
 private val CARD_GAP = 4.dp
 
-// Space between the icon and the name, and under the name.
-private val CARD_TEXT_GAP = 2.dp
+// Cards carry half a gap each, so their rows sit that much closer to the edge to keep the cards themselves ScreenPadding away.
+private val ROW_INSET = ScreenPadding - CARD_GAP / 2
 
 // The card art's bottom border, which the gap under the name is measured from.
 private val CARD_BOTTOM_BORDER = 4.dp

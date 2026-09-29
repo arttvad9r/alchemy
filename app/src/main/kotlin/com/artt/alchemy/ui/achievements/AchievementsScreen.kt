@@ -27,6 +27,7 @@ import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.ui.components.AlchemyProgressBar
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 
@@ -34,7 +35,7 @@ import com.artt.alchemy.ui.theme.Gold
 fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(12.dp),
+        contentPadding = PaddingValues(ScreenPadding),
         modifier = modifier.fillMaxSize().testTag("screen_achievements")
     ) {
         item { ScreenBanner(stringResource(R.string.tab_achievements)) }

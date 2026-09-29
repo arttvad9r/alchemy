@@ -50,6 +50,7 @@ import com.artt.alchemy.R
 import com.artt.alchemy.ui.achievements.AchievementToast
 import com.artt.alchemy.ui.achievements.AchievementsScreen
 import com.artt.alchemy.ui.achievements.achievementsById
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
@@ -141,7 +142,7 @@ private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: Alchemy
                 achievement = achievement,
                 onShown = viewModel::onAchievementShown,
                 onDismiss = viewModel::dismissAchievement,
-                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp)
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(ScreenPadding)
             )
         }
     }

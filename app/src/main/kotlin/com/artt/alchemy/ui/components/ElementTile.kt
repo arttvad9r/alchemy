@@ -129,7 +129,7 @@ fun FinalMark(modifier: Modifier = Modifier) {
 fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(ElementTextGap),
         modifier = modifier
             .semantics { contentDescription = element.name }
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -145,6 +145,9 @@ fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onCli
         )
     }
 }
+
+/** Space between an element's icon and its name, in every tile and card. */
+val ElementTextGap = 4.dp
 
 private val ElementRarity?.frameRes: Int
     get() = when (this) {

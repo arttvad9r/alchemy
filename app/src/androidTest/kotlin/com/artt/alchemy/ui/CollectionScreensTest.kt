@@ -22,7 +22,7 @@ class CollectionScreensTest {
     fun elementsGridStartsWithFirstCardOnLeft() {
         composeRule.onNodeWithTag("nav_elements").performClick()
 
-        composeRule.onNodeWithTag("element_fire").assertLeftPositionInRootIsEqualTo(8.dp)
+        composeRule.onNodeWithTag("element_fire").assertLeftPositionInRootIsEqualTo(4.dp)
     }
 
     @Test

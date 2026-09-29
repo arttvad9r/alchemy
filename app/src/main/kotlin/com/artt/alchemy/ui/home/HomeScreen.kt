@@ -83,7 +83,9 @@ import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.ButtonStyle
+import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.ElementTile
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rowPanel
@@ -168,7 +170,7 @@ fun HomeScreen(
     }
 
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(ScreenPadding)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 GameTitle(modifier = Modifier.weight(1f))
                 AlchemyButton(
@@ -178,7 +180,7 @@ fun HomeScreen(
                     modifier = Modifier.testTag("clear_workspace")
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(ScreenPadding))
             // A distinct slab over the scene: the background only faintly shows through.
             Box(
                 modifier = Modifier
@@ -221,7 +223,7 @@ fun HomeScreen(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(ScreenPadding))
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -245,7 +247,7 @@ fun HomeScreen(
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                     // Exactly two whole rows, labels included, so no row is ever cut through its names.
                     val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (PALETTE_COLUMNS - 1)) / PALETTE_COLUMNS
-                    val rowHeight = tileWidth + PALETTE_TILE_TEXT_GAP + labelHeight
+                    val rowHeight = tileWidth + ElementTextGap + labelHeight
                     val paletteHeight = rowHeight * PALETTE_ROWS + PALETTE_GAP * (PALETTE_ROWS - 1) + PALETTE_VERTICAL_PADDING * 2
                     Box(modifier = Modifier.fillMaxWidth().height(paletteHeight).testTag("palette_grid")) {
                         LazyVerticalGrid(
@@ -465,6 +467,3 @@ private const val PALETTE_ROWS = 2
 private val PALETTE_GAP = 10.dp
 private val PALETTE_END_PADDING = 16.dp
 private val PALETTE_VERTICAL_PADDING = 12.dp
-
-// Matches the spacing between icon and name inside ElementTile.
-private val PALETTE_TILE_TEXT_GAP = 2.dp

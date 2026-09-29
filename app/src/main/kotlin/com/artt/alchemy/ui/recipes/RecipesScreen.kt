@@ -36,6 +36,7 @@ import com.artt.alchemy.game.recipeKey
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.rowPanel
 
@@ -51,7 +52,7 @@ fun RecipesScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
                     .any { it.contains(query, ignoreCase = true) }
         }
 
-    Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(12.dp)) {
+    Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(ScreenPadding)) {
         ScreenBanner(stringResource(R.string.tab_recipes), Modifier.padding(bottom = 8.dp))
         AlchemySearchField(
             value = query,

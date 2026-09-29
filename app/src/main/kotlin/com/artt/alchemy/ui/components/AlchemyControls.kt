@@ -360,6 +360,9 @@ private fun layout(segments: List<Segment>, sourceLength: Int, targetLength: Flo
 }
 
 private val DIALOG_SIDE_PADDING = 32.dp
+
+/** Distance from the screen edge (and from the top of the content area) to a screen's content, the same everywhere. */
+val ScreenPadding = 4.dp
 private val CLOSE_SIZE = 36.dp
 
 // Below the corner ornament and level with the top of the card's content.

@@ -33,6 +33,7 @@ import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -52,7 +53,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .testTag("screen_settings")
-            .padding(16.dp)
+            .padding(ScreenPadding)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
