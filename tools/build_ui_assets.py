@@ -10,7 +10,7 @@ Usage: python3 tools/build_ui_assets.py  (requires pillow)
 import colorsys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
@@ -100,6 +100,12 @@ PROGRESS_TRACK_MIDDLE_COLUMN = 230
 PROGRESS_FILL_BOX = (6, 7, 155, 45)
 PROGRESS_FILL_RADIUS = 11
 
+SLIDER = "ui/buttons/slider.png"
+SLIDER_KNOB_CENTER = (173, 52)
+SLIDER_KNOB_RADIUS = 42
+SLIDER_KNOB_FEATHER = 6
+SLIDER_KNOB_SIZE = 96
+
 
 def trimmed(source: Path) -> Image.Image:
     image = Image.open(source).convert("RGBA")
@@ -171,11 +177,27 @@ def convert_progress_bar() -> None:
     fill.save(RES_DIR / "progress_fill.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
+def convert_slider_knob() -> None:
+    """Cut the glowing knob out of the composite slider art with a softly feathered round edge."""
+    source = Image.open(ASSETS / SLIDER).convert("RGBA")
+    cx, cy = SLIDER_KNOB_CENTER
+    box = (cx - SLIDER_KNOB_RADIUS, cy - SLIDER_KNOB_RADIUS, cx + SLIDER_KNOB_RADIUS, cy + SLIDER_KNOB_RADIUS)
+    knob = source.crop(box)
+    mask = Image.new("L", knob.size, 0)
+    inset = SLIDER_KNOB_FEATHER
+    ImageDraw.Draw(mask).ellipse((inset, inset, knob.width - inset, knob.height - inset), fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(SLIDER_KNOB_FEATHER / 2))
+    knob.putalpha(ImageChops.multiply(knob.getchannel("A"), mask))
+    knob = knob.resize((SLIDER_KNOB_SIZE, SLIDER_KNOB_SIZE), Image.LANCZOS)
+    knob.save(RES_DIR / "slider_knob.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
 def main() -> None:
     RES_DIR.mkdir(parents=True, exist_ok=True)
     for source, (name, max_side) in UI_ASSETS.items():
         convert(ASSETS / source, name, max_side)
     convert_progress_bar()
+    convert_slider_knob()
     convert_close_icon()
     convert_card_rarities()
 

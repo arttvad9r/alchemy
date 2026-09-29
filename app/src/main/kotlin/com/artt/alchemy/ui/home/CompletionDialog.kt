@@ -32,6 +32,7 @@ import com.artt.alchemy.ui.achievements.AchievementBadge
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.theme.Gold
 
 private const val BURST_SIZE = 240
@@ -42,8 +43,9 @@ private const val BURST_START_SCALE = 0.4f
 @Composable
 fun CompletionDialog(progress: PlayerProgress, onDismiss: () -> Unit, onClick: () -> Unit) {
     val entrance = remember { Animatable(0f) }
+    val entranceSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     LaunchedEffect(Unit) {
-        entrance.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        entrance.animateTo(1f, entranceSpec)
     }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).testTag("completion_dialog")) {

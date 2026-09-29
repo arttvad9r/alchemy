@@ -23,8 +23,8 @@ class SettingsScreenTest {
         composeRule.onNodeWithText("Сбросить прогресс?").assertIsDisplayed()
         composeRule.onNodeWithText("Сбросить").performClick()
 
-        composeRule.onNodeWithTag("settings_sound").performClick()
-        composeRule.onNodeWithTag("settings_sound").assertIsOff()
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().assertIsOff()
 
         composeRule.onNodeWithTag("nav_home").performClick()
         composeRule.onNodeWithText("4 / 180").assertIsDisplayed()
@@ -40,17 +40,17 @@ class SettingsScreenTest {
         composeRule.onNodeWithTag("settings_reset").performScrollTo().performClick()
         composeRule.onNodeWithText("Сбросить").performClick()
 
-        composeRule.onNodeWithTag("settings_sound").performClick()
-        composeRule.onNodeWithTag("settings_vibration").performClick()
-        composeRule.onNodeWithTag("settings_music").performClick()
-        composeRule.onNodeWithTag("settings_sound").assertIsOff()
-        composeRule.onNodeWithTag("settings_vibration").assertIsOff()
-        composeRule.onNodeWithTag("settings_music").assertIsOff()
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_vibration").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_music").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().assertIsOff()
+        composeRule.onNodeWithTag("settings_vibration").performScrollTo().assertIsOff()
+        composeRule.onNodeWithTag("settings_music").performScrollTo().assertIsOff()
 
         composeRule.activityRule.scenario.recreate()
         composeRule.onNodeWithTag("nav_settings").performClick()
-        composeRule.onNodeWithTag("settings_sound").assertIsOff()
-        composeRule.onNodeWithTag("settings_vibration").assertIsOff()
-        composeRule.onNodeWithTag("settings_music").assertIsOff()
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().assertIsOff()
+        composeRule.onNodeWithTag("settings_vibration").performScrollTo().assertIsOff()
+        composeRule.onNodeWithTag("settings_music").performScrollTo().assertIsOff()
     }
 }

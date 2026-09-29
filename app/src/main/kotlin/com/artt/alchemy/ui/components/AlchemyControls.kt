@@ -8,6 +8,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -38,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +53,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
@@ -59,6 +63,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -103,6 +108,8 @@ private const val PROGRESS_INSET_Y = 7f
 
 private val SEARCH_ICON_SPACE = 60.dp
 private val DROPDOWN_HEIGHT = 40.dp
+private val SLIDER_HEIGHT = 36.dp
+private const val SLIDER_TRACK_SHARE = 0.5f
 private val DROPDOWN_CHEVRON_SPACE = 34.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
@@ -123,7 +130,7 @@ fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifie
     val art = ImageBitmap.imageResource(style.res)
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
-    val press by animateFloatAsState(if (pressed) 1f else 0f, tween(PRESS_MILLIS), label = "buttonPress")
+    val press by animateFloatAsState(if (pressed) 1f else 0f, motion(tween(PRESS_MILLIS)), label = "buttonPress")
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -170,7 +177,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
             .size(width = 64.dp, height = 34.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
     ) {
-        Crossfade(targetState = checked, animationSpec = tween(PRESS_MILLIS * 2), label = "toggle") { on ->
+        Crossfade(targetState = checked, animationSpec = motion(tween(PRESS_MILLIS * 2)), label = "toggle") { on ->
             Image(
                 painter = painterResource(if (on) R.drawable.toggle_on else R.drawable.toggle_off),
                 contentDescription = null,
@@ -260,7 +267,8 @@ fun AlchemyDialog(
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val art = ImageBitmap.imageResource(panelRes)
         val entrance = remember { Animatable(0f) }
-        LaunchedEffect(Unit) { entrance.animateTo(1f, tween(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing)) }
+        val entranceSpec = motion(tween<Float>(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+        LaunchedEffect(Unit) { entrance.animateTo(1f, entranceSpec) }
         Box(
             modifier = Modifier
                 .graphicsLayer {
@@ -306,7 +314,7 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
     // Starts empty so the fill grows to its value when the bar first appears, then follows changes.
     var target by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(fraction) { target = fraction }
-    val shown by animateFloatAsState(target, tween(PROGRESS_FILL_MILLIS), label = "progressFill")
+    val shown by animateFloatAsState(target, motion(tween(PROGRESS_FILL_MILLIS)), label = "progressFill")
     Box(
         modifier = modifier
             .height(16.dp)
@@ -330,6 +338,80 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
                 }
             }
     )
+}
+
+/** A volume-style slider on the bar art: [value] from 0 to 1, set by tapping or dragging, or by an accessibility service. */
+@Composable
+fun AlchemySlider(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+    onValueChangeFinished: () -> Unit = {}
+) {
+    val track = ImageBitmap.imageResource(R.drawable.progress_track)
+    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
+    val knob = ImageBitmap.imageResource(R.drawable.slider_knob)
+    val fraction = value.coerceIn(0f, 1f)
+    val currentChange by rememberUpdatedState(onValueChange)
+    val currentFinished by rememberUpdatedState(onValueChangeFinished)
+    Box(
+        modifier = modifier
+            .height(SLIDER_HEIGHT)
+            .semantics {
+                progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f)
+                setProgress {
+                    currentChange(it.coerceIn(0f, 1f))
+                    currentFinished()
+                    true
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    currentChange(sliderValueAt(it.x, size.width.toFloat(), size.height / 2f))
+                    currentFinished()
+                }
+            }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures(onDragEnd = { currentFinished() }, onDragCancel = { currentFinished() }) { change, _ ->
+                    change.consume()
+                    currentChange(sliderValueAt(change.position.x, size.width.toFloat(), size.height / 2f))
+                }
+            }
+            .drawBehind {
+                val knobRadius = size.height / 2f
+                val trackHeight = size.height * SLIDER_TRACK_SHARE
+                val trackTop = (size.height - trackHeight) / 2f
+                val scale = trackHeight / track.height
+                drawSliced(track, CapSegments, WholeHeight, scale, topLeft = Offset(0f, trackTop), target = Size(size.width, trackHeight))
+                val knobCenterX = knobRadius + (size.width - 2 * knobRadius) * fraction
+                val insetX = PROGRESS_INSET_X * scale
+                val insetY = PROGRESS_INSET_Y * scale
+                val fillWidth = knobCenterX - insetX
+                if (fillWidth >= 1f) {
+                    val fillHeight = trackHeight - 2 * insetY
+                    drawSliced(
+                        fill,
+                        CapSegments,
+                        WholeHeight,
+                        fillHeight / fill.height,
+                        topLeft = Offset(insetX, trackTop + insetY),
+                        target = Size(fillWidth, fillHeight)
+                    )
+                }
+                val knobSize = (knobRadius * 2).roundToInt()
+                drawImage(
+                    image = knob,
+                    dstOffset = IntOffset((knobCenterX - knobRadius).roundToInt(), 0),
+                    dstSize = IntSize(knobSize, knobSize),
+                    filterQuality = FilterQuality.Medium
+                )
+            }
+    )
+}
+
+private fun sliderValueAt(x: Float, width: Float, knobRadius: Float): Float {
+    val travel = width - 2 * knobRadius
+    return if (travel <= 0f) 0f else ((x - knobRadius) / travel).coerceIn(0f, 1f)
 }
 
 /** Screen title on the ribbon banner, centered at the top of a screen. */

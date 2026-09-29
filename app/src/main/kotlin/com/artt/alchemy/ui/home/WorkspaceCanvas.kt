@@ -61,7 +61,9 @@ import com.artt.alchemy.game.overlapTarget
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
+import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.elementIconRes
+import com.artt.alchemy.ui.components.motion
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -132,21 +134,23 @@ fun WorkspaceCanvas(
     // Only one item is in hand at a time; it stays the lifted one while it settles back after being let go.
     val lift = remember { Animatable(0f) }
     var liftedId by remember { mutableStateOf<Long?>(null) }
+    val liftSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
     LaunchedEffect(heldId) {
         if (heldId != null) {
             liftedId = heldId
-            lift.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            lift.animateTo(1f, liftSpec)
         } else {
-            lift.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            lift.animateTo(0f, liftSpec)
             liftedId = null
         }
     }
-    val targetPulse by rememberInfiniteTransition(label = "target").animateFloat(
+    val animatedPulse by rememberInfiniteTransition(label = "target").animateFloat(
         initialValue = 0.55f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(TARGET_PULSE_MILLIS), RepeatMode.Reverse),
         label = "targetPulse"
     )
+    val targetPulse = if (LocalReducedMotion.current) 1f else animatedPulse
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val context = LocalContext.current

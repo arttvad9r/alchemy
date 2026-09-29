@@ -64,4 +64,12 @@ class ProgressJsonTest {
 
         assertEquals(initialPlayerProgress(), progress)
     }
+
+    @Test
+    fun volumes_from_a_file_are_kept_within_range() {
+        val progress = parsePlayerProgress("""{"version":1,"unlockedIds":["fire"],"musicVolume":7,"effectsVolume":-2}""")!!
+
+        assertEquals(1f, progress.musicVolume, 0f)
+        assertEquals(0f, progress.effectsVolume, 0f)
+    }
 }

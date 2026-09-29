@@ -1,6 +1,7 @@
 package com.artt.alchemy.ui.elements
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
@@ -168,7 +170,7 @@ private fun ElementCard(
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
                 // The card art is the only frame; the icon sits straight on it.
-                Crossfade(targetState = unlocked && revealed, label = "reveal") { shown ->
+                Crossfade(targetState = unlocked && revealed, animationSpec = motion(tween()), label = "reveal") { shown ->
                     ElementIcon(element, Modifier.fillMaxWidth().padding(ICON_INSET), silhouette = !shown)
                 }
                 if (fresh) {

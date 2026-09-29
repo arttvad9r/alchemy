@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelColor
 import com.artt.alchemy.ui.theme.TitleFontFamily
@@ -49,15 +50,17 @@ private const val OFFSCREEN_MARGIN = 100f
 fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val shown = remember { Animatable(0f) }
     var leaving by remember { mutableStateOf(false) }
+    val enterSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
+    val leaveSpec = motion(tween<Float>(LEAVE_MILLIS))
     LaunchedEffect(Unit) {
         onShown()
-        shown.animateTo(1f, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
+        shown.animateTo(1f, enterSpec)
         delay(SHOWN_MILLIS)
         leaving = true
     }
     LaunchedEffect(leaving) {
         if (leaving) {
-            shown.animateTo(0f, tween(LEAVE_MILLIS))
+            shown.animateTo(0f, leaveSpec)
             onDismiss()
         }
     }

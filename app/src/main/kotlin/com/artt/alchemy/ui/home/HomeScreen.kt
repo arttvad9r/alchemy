@@ -88,8 +88,10 @@ import com.artt.alchemy.ui.components.AlchemyDropdown
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.ElementTile
+import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
@@ -139,9 +141,11 @@ fun HomeScreen(
     var playingEffect by remember { mutableStateOf<CombinationEffect?>(null) }
     // Linear time of the effect; each part of it applies its own easing.
     val effectTime = remember { Animatable(0f) }
+    val reducedMotion = LocalReducedMotion.current
     LaunchedEffect(state.combinationEffect) {
         state.combinationEffect?.let { effect ->
-            playingEffect = effect
+            // With reduced motion the result simply appears, and the discovery card follows at once.
+            playingEffect = effect.takeUnless { reducedMotion }
             onEffectConsumed()
         }
     }
@@ -167,7 +171,7 @@ fun HomeScreen(
     LaunchedEffect(state.itemTransitions) {
         if (state.itemTransitions.isNotEmpty()) {
             val now = withFrameMillis { it }
-            playingTransitions += state.itemTransitions.map { PlayingTransition(it, now, originFraction.takeIf { _ -> it.kind == TransitionKind.APPEAR }) }
+            playingTransitions += state.itemTransitions.takeUnless { reducedMotion }.orEmpty().map { PlayingTransition(it, now, originFraction.takeIf { _ -> it.kind == TransitionKind.APPEAR }) }
             tapOrigin = null
             onTransitionsConsumed()
         }
@@ -220,7 +224,7 @@ fun HomeScreen(
                             }
                     }
                 )
-                val hintAlpha by animateFloatAsState(if (state.workspace.items.isEmpty()) 1f else 0f, tween(HINT_FADE_MILLIS), label = "hintAlpha")
+                val hintAlpha by animateFloatAsState(if (state.workspace.items.isEmpty()) 1f else 0f, motion(tween(HINT_FADE_MILLIS)), label = "hintAlpha")
                 if (hintAlpha > 0f) {
                     Text(
                         text = stringResource(R.string.workspace_hint),
@@ -346,11 +350,12 @@ fun HomeScreen(
 @Composable
 private fun ProgressCounter(unlocked: Int) {
     val bounce = remember { Animatable(1f) }
+    val bounceSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
     var previous by remember { mutableIntStateOf(unlocked) }
     LaunchedEffect(unlocked) {
         if (unlocked > previous) {
             bounce.snapTo(COUNTER_BOUNCE_SCALE)
-            bounce.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            bounce.animateTo(1f, bounceSpec)
         }
         previous = unlocked
     }
@@ -445,7 +450,7 @@ private fun DraggablePaletteElement(
     val currentOnDrop by rememberUpdatedState(onDrop)
     val currentOnPickUp by rememberUpdatedState(onPickUp)
 
-    val alpha by animateFloatAsState(if (dimmed) DRAGGED_TILE_ALPHA else 1f, tween(DRAGGED_TILE_FADE_MILLIS), label = "tileAlpha")
+    val alpha by animateFloatAsState(if (dimmed) DRAGGED_TILE_ALPHA else 1f, motion(tween(DRAGGED_TILE_FADE_MILLIS)), label = "tileAlpha")
     ElementTile(
         element = element,
         modifier = modifier.alpha(alpha).onGloballyPositioned { coordinates = it }
