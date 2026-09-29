@@ -21,7 +21,6 @@ val Gold = Color(0xFFF3C35B)
 
 private const val REGULAR_WEIGHT = 400
 private const val MEDIUM_WEIGHT = 500
-private const val SEMIBOLD_WEIGHT = 600
 private const val BOLD_WEIGHT = 700
 private const val TITLE_LINE_GAP = 6
 private const val LINING_NUMERALS = "lnum"
@@ -74,20 +73,17 @@ private val AlchemyColors = darkColorScheme(
 )
 
 @OptIn(ExperimentalTextApi::class)
-private fun cormorant(weight: Int) = Font(R.font.cormorant_garamond, FontWeight(weight), variationSettings = FontVariation.Settings(FontVariation.weight(weight)))
-
-@OptIn(ExperimentalTextApi::class)
 private fun alegreya(weight: Int) = Font(R.font.alegreya, FontWeight(weight), variationSettings = FontVariation.Settings(FontVariation.weight(weight)))
 
-/** Display serif for the game name and screen headings, close to the concept art. */
-val TitleFontFamily = FontFamily(cormorant(MEDIUM_WEIGHT), cormorant(SEMIBOLD_WEIGHT), cormorant(BOLD_WEIGHT))
+/** Single-weight display face shared by every gold heading, so none of them is synthesized bold. */
+val TitleFontFamily = FontFamily(Font(R.font.underdog))
 
 /** Readable serif for labels, buttons and running text; Cormorant's Cyrillic is too fanciful at small sizes. */
 val BodyFontFamily = FontFamily(alegreya(REGULAR_WEIGHT), alegreya(MEDIUM_WEIGHT), alegreya(BOLD_WEIGHT))
 
 private fun TextStyle.display(size: Int) = copy(
     fontFamily = TitleFontFamily,
-    fontWeight = FontWeight.Bold,
+    fontWeight = FontWeight.Normal,
     fontSize = size.sp,
     lineHeight = (size + TITLE_LINE_GAP).sp,
     letterSpacing = 0.sp,

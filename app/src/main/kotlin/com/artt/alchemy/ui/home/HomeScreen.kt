@@ -63,6 +63,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -84,6 +85,7 @@ import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
+import com.artt.alchemy.ui.theme.TitleFontFamily
 import kotlin.math.roundToInt
 import kotlinx.coroutines.currentCoroutineContext
 
@@ -334,7 +336,7 @@ private fun ProgressCounter(unlocked: Int) {
         Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
         Text(
             text = stringResource(R.string.progress, unlocked, AlchemyCatalog.elements.size),
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleSmall.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal),
             color = Gold
         )
     }

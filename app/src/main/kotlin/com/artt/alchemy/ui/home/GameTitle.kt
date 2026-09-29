@@ -21,7 +21,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
-import com.artt.alchemy.ui.theme.TitleFontFamily
 
 private val TitleGradient = Brush.verticalGradient(listOf(Color(0xFFFFEFB8), Color(0xFFF3C35B), Color(0xFFD08A26)))
 private val TitleShadow = Shadow(color = Color(0xFF1A0E3D), offset = Offset(0f, 3f), blurRadius = 8f)
@@ -47,7 +46,7 @@ fun GameTitle(modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.app_tagline),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = TAGLINE_SIZE, fontFamily = TitleFontFamily, fontWeight = FontWeight.SemiBold, shadow = TitleShadow),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = TAGLINE_SIZE, fontWeight = FontWeight.Medium, shadow = TitleShadow),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

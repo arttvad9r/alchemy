@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelColor
+import com.artt.alchemy.ui.theme.TitleFontFamily
 import kotlinx.coroutines.delay
 
 private const val SHOWN_MILLIS = 3000L
@@ -78,7 +80,7 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
         AchievementBadge(completed = true)
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(R.string.achievement_unlocked), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(stringResource(achievement.title), style = MaterialTheme.typography.titleMedium, color = Gold)
+            Text(stringResource(achievement.title), style = MaterialTheme.typography.titleMedium.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal), color = Gold)
         }
     }
 }
