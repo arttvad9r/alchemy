@@ -32,9 +32,7 @@ import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.game.partnerOf
 import com.artt.alchemy.game.recipeKey
-import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
-import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.FactText
 import com.artt.alchemy.ui.components.FinalBadge
@@ -57,9 +55,16 @@ fun ElementDetailsDialog(
     val knownUses = allUses.filter { it.isKnown(progress) }
     // A link swaps the element in place, so each one starts from the top.
     val scroll = remember(element.id) { ScrollState(0) }
-    AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
-        Column(modifier = Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(scroll).testTag("element_details")) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+    AlchemyDialog(
+        onDismissRequest = onDismiss,
+        panelRes = R.drawable.dialog_blue,
+        sidePadding = CARD_SIDE_PADDING,
+        height = CARD_HEIGHT,
+        onClose = onDismiss
+    ) {
+        Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("element_details")) {
+            // Leaves the top right corner to the close cross.
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = HEADER_END_GAP)) {
                 FramedElementIcon(element, Modifier.size(HEADER_ICON_SIZE))
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f).padding(start = 14.dp)) {
                     val nameStyle = MaterialTheme.typography.headlineSmall
@@ -76,7 +81,7 @@ fun ElementDetailsDialog(
                     }
                 }
             }
-            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 14.dp))
+            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 10.dp))
             if (madeFrom.isNotEmpty()) {
                 LinkSection(R.string.element_made_from) {
                     madeFrom.forEach { recipe ->
@@ -114,8 +119,6 @@ fun ElementDetailsDialog(
                 )
             }
         }
-        // Outside the scroll, so the way out is always on screen however long the card is.
-        AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 14.dp).testTag("element_details_close"))
     }
 }
 
@@ -156,4 +159,9 @@ private fun OperatorIcon(res: Int) {
 
 private val LINK_TILE_WIDTH = 60.dp
 private val HEADER_ICON_SIZE = 84.dp
+private val HEADER_END_GAP = 36.dp
+private val CARD_SIDE_PADDING = 16.dp
+
+// Fits a fact, one recipe and the note on a compact phone; longer cards scroll.
+private val CARD_HEIGHT = 470.dp
 private val NAME_MIN_SIZE = 18.sp

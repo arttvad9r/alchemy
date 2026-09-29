@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -44,13 +46,16 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -191,6 +196,11 @@ fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placehold
 fun AlchemyDialog(
     onDismissRequest: () -> Unit,
     @DrawableRes panelRes: Int,
+    sidePadding: Dp = DIALOG_SIDE_PADDING,
+    // A set height keeps every card the same size; its content scrolls inside.
+    height: Dp? = null,
+    // Shows a close cross in the top right corner.
+    onClose: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
@@ -198,8 +208,7 @@ fun AlchemyDialog(
         val art = ImageBitmap.imageResource(panelRes)
         val entrance = remember { Animatable(0f) }
         LaunchedEffect(Unit) { entrance.animateTo(1f, tween(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing)) }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
             modifier = Modifier
                 .graphicsLayer {
                     val value = entrance.value
@@ -209,11 +218,29 @@ fun AlchemyDialog(
                 }
                 .fillMaxWidth(DIALOG_WIDTH_FRACTION)
                 .widthIn(max = DIALOG_MAX_WIDTH)
+                .then(if (height != null) Modifier.height(height) else Modifier)
                 .drawBehind { drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height)) }
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 // Clears the ornaments on the top and bottom edges of the panel art.
-                .padding(start = 32.dp, top = 52.dp, end = 32.dp, bottom = 44.dp),
-            content = content
-        )
+                modifier = Modifier.padding(start = sidePadding, top = 52.dp, end = sidePadding, bottom = 44.dp),
+                content = content
+            )
+            if (onClose != null) {
+                Image(
+                    painter = painterResource(R.drawable.ic_close),
+                    contentDescription = stringResource(R.string.close),
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = CLOSE_TOP_INSET, end = CLOSE_END_INSET)
+                        .size(CLOSE_SIZE)
+                        .clip(CircleShape)
+                        .clickable(onClick = onClose)
+                        .testTag("dialog_close")
+                )
+            }
+        }
     }
 }
 
@@ -330,3 +357,10 @@ private fun layout(segments: List<Segment>, sourceLength: Int, targetLength: Flo
         position + if (segment.stretch) stretchTarget * length / stretchSource else length * sourceLength * scale
     }
 }
+
+private val DIALOG_SIDE_PADDING = 32.dp
+private val CLOSE_SIZE = 36.dp
+
+// Below the corner ornament and level with the top of the card's content.
+private val CLOSE_TOP_INSET = 40.dp
+private val CLOSE_END_INSET = 14.dp

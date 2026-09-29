@@ -52,7 +52,7 @@ class CollectionScreensTest {
 
         composeRule.onNodeWithText(elementFacts.getValue("fire")).assertIsDisplayed()
 
-        composeRule.onNodeWithTag("element_details_close").performClick()
+        composeRule.onNodeWithTag("dialog_close").performClick()
         composeRule.onNodeWithTag("element_details").assertDoesNotExist()
     }
 }
