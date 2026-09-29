@@ -163,8 +163,7 @@ fun HomeScreen(
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium, color = Gold)
-                Spacer(modifier = Modifier.weight(1f))
+                GameTitle(modifier = Modifier.weight(1f))
                 AlchemyButton(
                     text = stringResource(R.string.clear_workspace),
                     style = ButtonStyle.BLUE,

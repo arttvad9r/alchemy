@@ -7,11 +7,40 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.artt.alchemy.R
 import com.artt.alchemy.game.ElementRarity
 
 val Gold = Color(0xFFF3C35B)
+
+private const val REGULAR_WEIGHT = 400
+private const val MEDIUM_WEIGHT = 500
+private const val SEMIBOLD_WEIGHT = 600
+private const val BOLD_WEIGHT = 700
+private const val TITLE_LINE_GAP = 6
+private const val LINING_NUMERALS = "lnum"
+private const val BODY_LINE_GAP = 8
+private const val DISPLAY_LARGE_SP = 57
+private const val DISPLAY_MEDIUM_SP = 45
+private const val DISPLAY_SMALL_SP = 36
+private const val HEADLINE_LARGE_SP = 36
+private const val HEADLINE_MEDIUM_SP = 32
+private const val HEADLINE_SMALL_SP = 28
+private const val TITLE_LARGE_SP = 26
+private const val TITLE_MEDIUM_SP = 20
+private const val TITLE_SMALL_SP = 17
+private const val BODY_LARGE_SP = 17
+private const val BODY_MEDIUM_SP = 15
+private const val BODY_SMALL_SP = 13
+private const val LABEL_LARGE_SP = 17
+private const val LABEL_MEDIUM_SP = 14
+private const val LABEL_SMALL_SP = 12
 
 /** Translucent panel color that lets the scene background show through. */
 val PanelColor = Color(0xD90D1433)
@@ -44,13 +73,53 @@ private val AlchemyColors = darkColorScheme(
     onError = Color(0xFF2D0006)
 )
 
+@OptIn(ExperimentalTextApi::class)
+private fun cormorant(weight: Int) = Font(R.font.cormorant_garamond, FontWeight(weight), variationSettings = FontVariation.Settings(FontVariation.weight(weight)))
+
+@OptIn(ExperimentalTextApi::class)
+private fun alegreya(weight: Int) = Font(R.font.alegreya, FontWeight(weight), variationSettings = FontVariation.Settings(FontVariation.weight(weight)))
+
+/** Display serif for the game name and screen headings, close to the concept art. */
+val TitleFontFamily = FontFamily(cormorant(MEDIUM_WEIGHT), cormorant(SEMIBOLD_WEIGHT), cormorant(BOLD_WEIGHT))
+
+/** Readable serif for labels, buttons and running text; Cormorant's Cyrillic is too fanciful at small sizes. */
+val BodyFontFamily = FontFamily(alegreya(REGULAR_WEIGHT), alegreya(MEDIUM_WEIGHT), alegreya(BOLD_WEIGHT))
+
+private fun TextStyle.display(size: Int) = copy(
+    fontFamily = TitleFontFamily,
+    fontWeight = FontWeight.Bold,
+    fontSize = size.sp,
+    lineHeight = (size + TITLE_LINE_GAP).sp,
+    letterSpacing = 0.sp,
+    fontFeatureSettings = LINING_NUMERALS
+)
+
+private fun TextStyle.text(size: Int, weight: FontWeight, lineGap: Int = BODY_LINE_GAP) = copy(
+    fontFamily = BodyFontFamily,
+    fontWeight = weight,
+    fontSize = size.sp,
+    lineHeight = (size + lineGap).sp,
+    letterSpacing = 0.sp,
+    fontFeatureSettings = LINING_NUMERALS
+)
+
 private val AlchemyTypography = Typography().let { base ->
     base.copy(
-        headlineLarge = base.headlineLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
-        headlineMedium = base.headlineMedium.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
-        headlineSmall = base.headlineSmall.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
-        titleLarge = base.titleLarge.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold),
-        titleMedium = base.titleMedium.copy(fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold)
+        displayLarge = base.displayLarge.display(DISPLAY_LARGE_SP),
+        displayMedium = base.displayMedium.display(DISPLAY_MEDIUM_SP),
+        displaySmall = base.displaySmall.display(DISPLAY_SMALL_SP),
+        headlineLarge = base.headlineLarge.display(HEADLINE_LARGE_SP),
+        headlineMedium = base.headlineMedium.display(HEADLINE_MEDIUM_SP),
+        headlineSmall = base.headlineSmall.display(HEADLINE_SMALL_SP),
+        titleLarge = base.titleLarge.display(TITLE_LARGE_SP),
+        titleMedium = base.titleMedium.text(TITLE_MEDIUM_SP, FontWeight.Bold),
+        titleSmall = base.titleSmall.text(TITLE_SMALL_SP, FontWeight.Bold),
+        bodyLarge = base.bodyLarge.text(BODY_LARGE_SP, FontWeight.Normal),
+        bodyMedium = base.bodyMedium.text(BODY_MEDIUM_SP, FontWeight.Normal),
+        bodySmall = base.bodySmall.text(BODY_SMALL_SP, FontWeight.Normal),
+        labelLarge = base.labelLarge.text(LABEL_LARGE_SP, FontWeight.Bold),
+        labelMedium = base.labelMedium.text(LABEL_MEDIUM_SP, FontWeight.Medium),
+        labelSmall = base.labelSmall.text(LABEL_SMALL_SP, FontWeight.Medium)
     )
 }
 
