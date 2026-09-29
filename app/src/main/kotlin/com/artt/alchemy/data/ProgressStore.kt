@@ -4,6 +4,8 @@ import android.content.Context
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Combination
 import com.artt.alchemy.game.ElementSort
+import com.artt.alchemy.game.nextHintRecipe
+import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.recipeKey
 
 enum class AppTheme {
@@ -63,7 +65,23 @@ fun PlayerProgress.sanitized(): PlayerProgress {
         musicVolume = musicVolume.coerceIn(0f, 1f),
         effectsVolume = effectsVolume.coerceIn(0f, 1f),
         activeHint = activeHint?.takeIf { it.recipeKey in AlchemyCatalog.recipeResultsByKey && it.step in 1..2 }
-    )
+    ).withoutSolvedHint()
+}
+
+private fun PlayerProgress.withoutSolvedHint(): PlayerProgress {
+    val hinted = activeHint?.let { recipeForKey(it.recipeKey) } ?: return this
+    return if (hinted.resultId in unlockedIds) copy(activeHint = null) else this
+}
+
+/** Starts a hint, or moves the running one to its second step; the same hint stays until its element is found. */
+fun PlayerProgress.requestHint(): PlayerProgress {
+    val hint = activeHint
+    val next = when {
+        hint == null -> nextHintRecipe(unlockedIds)?.let { ActiveHint(recipeKey(it.firstId, it.secondId), step = 1) }
+        hint.step == 1 -> hint.copy(step = 2)
+        else -> hint
+    }
+    return copy(activeHint = next)
 }
 
 fun PlayerProgress.recordAttempt(combination: Combination?): PlayerProgress = if (combination == null) {
@@ -75,7 +93,7 @@ fun PlayerProgress.recordAttempt(combination: Combination?): PlayerProgress = if
         knownRecipeKeys = knownRecipeKeys + recipeKey(combination.firstId, combination.secondId),
         successfulMixCount = successfulMixCount + 1,
         mixAttemptCount = mixAttemptCount + 1
-    )
+    ).withoutSolvedHint()
 }
 
 fun PlayerProgress.reset(): PlayerProgress = initialPlayerProgress()

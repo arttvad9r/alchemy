@@ -14,6 +14,7 @@ import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
+import com.artt.alchemy.data.requestHint
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
 import com.artt.alchemy.game.ElementRarity
@@ -21,6 +22,7 @@ import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.WorkspaceState
+import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
@@ -107,8 +109,24 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** Puts both ingredients of a known recipe on the workspace and shows it, as if each had been tapped in the palette. */
     fun placeRecipe(recipe: Recipe) {
-        onWorkspaceEvent(WorkspaceEvent.SpawnAutomatically(recipe.firstId))
-        onWorkspaceEvent(WorkspaceEvent.SpawnAutomatically(recipe.secondId))
+        placeElements(listOf(recipe.firstId, recipe.secondId))
+    }
+
+    /** Asks for a hint, or for the next step of the one already shown. */
+    fun requestHint() {
+        playSound(Sound.CLICK)
+        updateProgress { requestHint() }
+    }
+
+    /** Puts the ingredients the hint has revealed so far on the workspace. */
+    fun placeHint() {
+        val hint = state.progress.activeHint ?: return
+        val recipe = recipeForKey(hint.recipeKey) ?: return
+        placeElements(if (hint.step == 1) listOf(recipe.firstId) else listOf(recipe.firstId, recipe.secondId))
+    }
+
+    private fun placeElements(elementIds: List<String>) {
+        elementIds.forEach { onWorkspaceEvent(WorkspaceEvent.SpawnAutomatically(it)) }
         selectTab(AppTab.HOME)
     }
 

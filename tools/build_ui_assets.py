@@ -68,6 +68,7 @@ UI_ASSETS = {
     "ui/icons/forward.png": ("ic_forward", 96),
     "ui/buttons/dropdown_field.png": ("field_dropdown", 512),
     "ui/icons/recent_clock.png": ("ic_recent", 96),
+    "ui/icons/hint_bulb.png": ("ic_hint", 96),
 }
 
 CLOSE_ICON = "ui/icons/close.png"

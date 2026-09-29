@@ -50,7 +50,13 @@ import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.rowPanel
 
 @Composable
-fun RecipesScreen(progress: PlayerProgress, onPlaceRecipe: (Recipe) -> Unit, modifier: Modifier = Modifier) {
+fun RecipesScreen(
+    progress: PlayerProgress,
+    onPlaceRecipe: (Recipe) -> Unit,
+    onRequestHint: () -> Unit,
+    onPlaceHint: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var query by remember { mutableStateOf("") }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
     var sort by remember { mutableStateOf(RecipeSort.RECENT) }
@@ -66,6 +72,7 @@ fun RecipesScreen(progress: PlayerProgress, onPlaceRecipe: (Recipe) -> Unit, mod
 
     Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(ScreenPadding)) {
         ScreenBanner(stringResource(R.string.tab_recipes), Modifier.padding(bottom = 8.dp))
+        HintCard(progress, onRequestHint, onPlaceHint, Modifier.padding(bottom = 8.dp))
         AlchemySearchField(
             value = query,
             onValueChange = { query = it },
