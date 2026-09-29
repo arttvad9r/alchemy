@@ -38,6 +38,10 @@ data class PlayerProgress(
     val paletteSort: ElementSort = ElementSort.RECENT
 )
 
+/** Every element of the catalog is open. */
+val PlayerProgress.isComplete: Boolean
+    get() = unlockedIds.size == AlchemyCatalog.elements.size
+
 fun initialPlayerProgress(): PlayerProgress = PlayerProgress(
     unlockedIds = AlchemyCatalog.baseElementIds,
     discoveryOrder = AlchemyCatalog.baseElementIds.toList(),

@@ -52,6 +52,7 @@ import com.artt.alchemy.ui.achievements.AchievementsScreen
 import com.artt.alchemy.ui.achievements.achievementsById
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.elements.ElementsScreen
+import com.artt.alchemy.ui.home.CompletionDialog
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
 import com.artt.alchemy.ui.settings.SettingsScreen
@@ -120,7 +121,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                             onPlaceHint = viewModel::placeHint,
                             modifier = Modifier.padding(padding)
                         )
-                        AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
+                        AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, onOpenCompletion = viewModel::showCompletion, modifier = Modifier.padding(padding))
                         AppTab.SETTINGS -> SettingsScreen(
                             state = state,
                             onSoundChanged = viewModel::setSoundEnabled,
@@ -134,6 +135,9 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                     }
                 }
             }
+            if (state.isCompletionVisible && state.newlyUnlockedId == null && state.combinationEffect == null) {
+                CompletionDialog(state.progress, onDismiss = viewModel::dismissCompletion, onClick = viewModel::onButtonClick)
+            }
             AchievementBanner(state, viewModel)
         }
     }
@@ -143,7 +147,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
 @Composable
 private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: AlchemyViewModel) {
     val achievement = state.achievementQueue.firstOrNull()?.let(achievementsById::getValue)
-    if (achievement != null && state.newlyUnlockedId == null && state.combinationEffect == null) {
+    if (achievement != null && state.newlyUnlockedId == null && state.combinationEffect == null && !state.isCompletionVisible) {
         key(achievement.id) {
             AchievementToast(
                 achievement = achievement,

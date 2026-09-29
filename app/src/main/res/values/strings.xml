@@ -34,6 +34,12 @@
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>
     <string name="achievement_experiments">Эксперименты</string>
+    <string name="achievement_discovered_50">Полсотни открытий</string>
+    <string name="achievement_discovered_100">Сотня открытий</string>
+    <string name="achievement_first_epic">Эпическая находка</string>
+    <string name="achievement_first_legendary">Легендарная находка</string>
+    <string name="achievement_all_final">Конечные звенья</string>
+    <string name="achievement_discovered_all">Великий алхимик</string>
     <string name="achievement_nature">Исследователь природы</string>
     <string name="achievement_material">Мастер материалов</string>
     <string name="achievement_life">Знаток жизни</string>
@@ -55,6 +61,11 @@
     <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
     <string name="element_new_badge">Новое</string>
+    <string name="completion_title">Алхимия завершена</string>
+    <string name="completion_message">Открыты все %1$d элементов</string>
+    <string name="completion_attempts">Попыток смешать: %1$d</string>
+    <string name="completion_mixes">Удачных сочетаний: %1$d</string>
+    <string name="completion_card">Алхимия завершена: все элементы открыты. Открыть итоги</string>
     <string name="new_element_title">Новый элемент</string>
     <string name="new_element_message">Открыт элемент: %1$s</string>
     <string name="element_final">Конечный</string>
