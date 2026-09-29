@@ -5,8 +5,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,12 +30,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.FactText
+import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.rarity
@@ -80,7 +84,13 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                         .graphicsLayer { alpha = iconIn.value.coerceIn(0f, 1f) }
                 )
             }
-            RarityBadge(element.rarity, Modifier.padding(vertical = 8.dp).graphicsLayer { alpha = badgeIn.value })
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(vertical = 8.dp).graphicsLayer { alpha = badgeIn.value }
+            ) {
+                RarityBadge(element.rarity)
+                if (element.id in ElementLinks.finalElementIds) FinalBadge()
+            }
             Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
             FactText(elementFacts.getValue(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
             AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {

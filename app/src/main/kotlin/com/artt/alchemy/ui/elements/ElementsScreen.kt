@@ -42,8 +42,10 @@ import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementGroup
+import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
+import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.ScreenBanner
@@ -133,7 +135,7 @@ fun ElementsScreen(
         }
     }
     openedElement?.let { element ->
-        ElementDetailsDialog(element, onDismiss = { openedElement = null })
+        ElementDetailsDialog(element, progress, onOpenElement = { openedElement = it }, onDismiss = { openedElement = null })
     }
 }
 
@@ -188,7 +190,10 @@ private fun ElementCard(
                 maxLines = 2,
                 color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (unlocked) RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
+            if (unlocked) {
+                RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
+                if (element.id in ElementLinks.finalElementIds) FinalBadge(Modifier.padding(top = 2.dp))
+            }
         }
     }
 }

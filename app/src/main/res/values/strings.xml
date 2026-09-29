@@ -51,4 +51,14 @@
     <string name="element_new_badge">Новое</string>
     <string name="new_element_title">Новый элемент</string>
     <string name="new_element_message">Открыт элемент: %1$s</string>
+    <string name="element_final">Конечный</string>
+    <string name="element_made_from">Получен из</string>
+    <string name="element_used_in">Участвует в</string>
+    <string name="element_final_note">Больше ни с чем не сочетается</string>
+    <plurals name="element_unknown_combinations">
+        <item quantity="one">Ещё %d неизвестное сочетание</item>
+        <item quantity="few">Ещё %d неизвестных сочетания</item>
+        <item quantity="many">Ещё %d неизвестных сочетаний</item>
+        <item quantity="other">Ещё %d неизвестных сочетаний</item>
+    </plurals>
 </resources>

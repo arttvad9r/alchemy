@@ -1,43 +1,147 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
+import com.artt.alchemy.data.PlayerProgress
+import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementLinks
+import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.elementFacts
+import com.artt.alchemy.game.partnerOf
+import com.artt.alchemy.game.recipeKey
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
+import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.FactText
+import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 
-/** An open element up close, with its interesting fact. */
+/** An open element up close: its fact, the recipe it came from and the known recipes it is part of. */
 @Composable
-fun ElementDetailsDialog(element: ElementDefinition, onDismiss: () -> Unit) {
+fun ElementDetailsDialog(
+    element: ElementDefinition,
+    progress: PlayerProgress,
+    onOpenElement: (ElementDefinition) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val madeFrom = ElementLinks.recipesByResult[element.id].orEmpty().filter { it.isKnown(progress) }
+    val allUses = ElementLinks.recipesByIngredient[element.id].orEmpty()
+    val knownUses = allUses.filter { it.isKnown(progress) }
+    // A link swaps the element in place, so each one starts from the top.
+    val scroll = remember(element.id) { ScrollState(0) }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.verticalScroll(rememberScrollState()).testTag("element_details")
+            modifier = Modifier.verticalScroll(scroll).testTag("element_details")
         ) {
             FramedElementIcon(element, Modifier.width(120.dp))
             Text(element.name, style = MaterialTheme.typography.headlineSmall, color = Gold, modifier = Modifier.padding(top = 8.dp))
-            RarityBadge(element.rarity, Modifier.padding(top = 4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
+                RarityBadge(element.rarity)
+                if (element.id in ElementLinks.finalElementIds) FinalBadge()
+            }
             FactText(elementFacts.getValue(element.id), Modifier.padding(top = 12.dp))
+            if (madeFrom.isNotEmpty()) {
+                LinkSection(R.string.element_made_from) {
+                    madeFrom.forEach { recipe ->
+                        LinkRow {
+                            LinkTile(recipe.firstId, onOpenElement)
+                            OperatorIcon(R.drawable.ic_plus)
+                            LinkTile(recipe.secondId, onOpenElement)
+                        }
+                    }
+                }
+            }
+            if (knownUses.isNotEmpty()) {
+                LinkSection(R.string.element_used_in) {
+                    knownUses.forEach { recipe ->
+                        LinkRow {
+                            OperatorIcon(R.drawable.ic_plus)
+                            LinkTile(recipe.partnerOf(element.id), onOpenElement)
+                            OperatorIcon(R.drawable.ic_forward)
+                            LinkTile(recipe.resultId, onOpenElement)
+                        }
+                    }
+                }
+            }
+            val note = when {
+                allUses.isEmpty() -> stringResource(R.string.element_final_note)
+                allUses.size > knownUses.size -> pluralStringResource(R.plurals.element_unknown_combinations, allUses.size - knownUses.size, allUses.size - knownUses.size)
+                else -> null
+            }
+            note?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 12.dp).testTag("element_links_note")
+                )
+            }
             AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 16.dp).testTag("element_details_close"))
         }
     }
 }
+
+private fun Recipe.isKnown(progress: PlayerProgress): Boolean = recipeKey(firstId, secondId) in progress.knownRecipeKeys
+
+@Composable
+private fun LinkSection(titleRes: Int, content: @Composable () -> Unit) {
+    Text(
+        stringResource(titleRes),
+        style = MaterialTheme.typography.titleSmall,
+        color = Gold,
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)
+    )
+    content()
+}
+
+@Composable
+private fun LinkRow(content: @Composable () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun LinkTile(elementId: String, onOpen: (ElementDefinition) -> Unit) {
+    val element = AlchemyCatalog.elementsById.getValue(elementId)
+    ElementTile(element, Modifier.width(LINK_TILE_WIDTH).testTag("link_$elementId"), onClick = { onOpen(element) })
+}
+
+@Composable
+private fun OperatorIcon(res: Int) {
+    Image(painterResource(res), contentDescription = null, modifier = Modifier.size(18.dp))
+}
+
+private val LINK_TILE_WIDTH = 64.dp

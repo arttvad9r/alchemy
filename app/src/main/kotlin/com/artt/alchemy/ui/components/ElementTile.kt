@@ -2,6 +2,7 @@ package com.artt.alchemy.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +40,9 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.theme.color
+
+// An outline, not a fill, so it never reads as one of the filled rarity badges.
+private val FinalBadgeColor = Color(0xFFD5DCF5)
 
 private val SilhouetteFilter = ColorFilter.tint(Color(0xFF46528F))
 
@@ -88,6 +92,20 @@ fun RarityBadge(rarity: ElementRarity, modifier: Modifier = Modifier) {
         maxLines = 1,
         modifier = modifier
             .background(rarity.color.copy(alpha = 0.55f), RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 1.dp)
+    )
+}
+
+/** Marks an open element that no recipe uses. */
+@Composable
+fun FinalBadge(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.element_final),
+        style = MaterialTheme.typography.labelSmall,
+        color = FinalBadgeColor,
+        maxLines = 1,
+        modifier = modifier
+            .border(1.dp, FinalBadgeColor, RoundedCornerShape(50))
             .padding(horizontal = 8.dp, vertical = 1.dp)
     )
 }
