@@ -195,7 +195,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             GameFeedback.DISCOVER_GRAND -> Sound.DISCOVER to Haptic.HEAVY
             GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
             GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
-            GameFeedback.CLEAR -> null to Haptic.CLICK
+            GameFeedback.CLEAR -> Sound.REMOVE to Haptic.CLICK
         }
         sound?.let(::playSound)
         vibrate(haptic)

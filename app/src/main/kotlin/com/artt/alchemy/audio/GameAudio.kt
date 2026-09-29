@@ -48,39 +48,59 @@ class SoundEffects(context: Context) {
 
 /** The looping background track, created on first start and kept paused while the app is hidden. */
 class BackgroundMusic(private val context: Context) {
-    private var player: MediaPlayer? = null
+    private var current: MediaPlayer? = null
+    private var upcoming: MediaPlayer? = null
     private var fade: ValueAnimator? = null
-    private var currentVolume = 0f
+    private var volume = 0f
 
     fun start() {
-        val current = player ?: MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)?.apply {
-            isLooping = true
-            setVolume(0f, 0f)
-        }?.also { player = it } ?: return
-        if (!current.isPlaying) current.start()
-        fadeTo(current, MUSIC_VOLUME) {}
+        val playing = current ?: newPlayer()?.also { first ->
+            current = first
+            chain(first)
+        } ?: return
+        if (!playing.isPlaying) playing.start()
+        fadeTo(MUSIC_VOLUME) {}
     }
 
     fun pause() {
-        val current = player?.takeIf { it.isPlaying } ?: return
-        fadeTo(current, 0f) { current.pause() }
+        val playing = current?.takeIf { it.isPlaying } ?: return
+        fadeTo(0f) { playing.pause() }
     }
 
     fun release() {
         fade?.cancel()
         fade = null
-        player?.release()
-        player = null
+        current?.release()
+        upcoming?.release()
+        current = null
+        upcoming = null
     }
 
-    private fun fadeTo(target: MediaPlayer, volume: Float, onEnd: () -> Unit) {
+    // Looping a single MediaPlayer leaves an audible gap at the loop point. A second player, already
+    // prepared, takes over the moment the first ends, so the track repeats without a break.
+    private fun chain(player: MediaPlayer) {
+        val next = newPlayer()
+        upcoming = next
+        next?.let(player::setNextMediaPlayer)
+        player.setOnCompletionListener { finished ->
+            finished.release()
+            current = upcoming
+            upcoming = null
+            current?.let(::chain)
+        }
+    }
+
+    private fun newPlayer(): MediaPlayer? = MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)
+        ?.apply { setVolume(volume, volume) }
+
+    private fun fadeTo(target: Float, onEnd: () -> Unit) {
         fade?.cancel()
-        val from = currentVolume
-        fade = ValueAnimator.ofFloat(from, volume).apply {
+        fade = ValueAnimator.ofFloat(volume, target).apply {
             duration = FADE_MILLIS
             addUpdateListener { animator ->
-                currentVolume = animator.animatedValue as Float
-                target.setVolume(currentVolume, currentVolume)
+                volume = animator.animatedValue as Float
+                current?.setVolume(volume, volume)
+                upcoming?.setVolume(volume, volume)
             }
             addListener(object : AnimatorListenerAdapter() {
                 private var cancelled = false
