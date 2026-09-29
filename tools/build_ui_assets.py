@@ -75,6 +75,19 @@ CLOSE_HUE = 0.6
 CLOSE_WHITE_LIGHTNESS = 0.6
 CLOSE_WHITE_SATURATION = 0.35
 
+CARD = "ui/panels_states/card_base.png"
+# The card's silver trim, recoloured per rarity: (drawable, hue, saturation).
+CARD_RARITIES = (
+    ("card_common", 0.61, 0.75),
+    ("card_rare", 0.37, 0.6),
+    ("card_epic", 0.75, 0.75),
+    ("card_legendary", 0.115, 0.75),
+)
+# The trim is light and nearly grey; the card's blue face is saturated and stays as it is.
+CARD_TRIM_MAX_SATURATION = 0.35
+CARD_TRIM_MIN_LIGHTNESS = 0.35
+CARD_TRIM_LIGHTNESS = 0.9
+
 PROGRESS_BAR = "ui/buttons/progress_bar.png"
 # The bar art is drawn half full; its empty right end becomes both ends of the track.
 PROGRESS_TRACK_CAP = 60
@@ -116,6 +129,25 @@ def convert_close_icon() -> None:
     image.save(RES_DIR / "ic_close.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
+def convert_card_rarities() -> None:
+    """One copy of the element card per rarity, with only its silver trim recoloured."""
+    source = trimmed(ASSETS / CARD)
+    source.thumbnail((512, 512), Image.LANCZOS)
+    for name, hue, saturation in CARD_RARITIES:
+        image = source.copy()
+        pixels = image.load()
+        for y in range(image.height):
+            for x in range(image.width):
+                red, green, blue, alpha = pixels[x, y]
+                if alpha == 0:
+                    continue
+                _, lightness, trim_saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+                if trim_saturation < CARD_TRIM_MAX_SATURATION and lightness > CARD_TRIM_MIN_LIGHTNESS:
+                    r, g, b = colorsys.hls_to_rgb(hue, lightness * CARD_TRIM_LIGHTNESS, saturation)
+                    pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
+        image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
 def convert_progress_bar() -> None:
     """Split the half-filled bar art into an empty track and a pill-shaped fill."""
     bar = trimmed(ASSETS / PROGRESS_BAR)
@@ -141,6 +173,7 @@ def main() -> None:
         convert(ASSETS / source, name, max_side)
     convert_progress_bar()
     convert_close_icon()
+    convert_card_rarities()
 
 
 if __name__ == "__main__":

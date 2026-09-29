@@ -47,6 +47,7 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.game.ElementLinks
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
 import com.artt.alchemy.ui.components.ElementIcon
@@ -54,6 +55,7 @@ import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.panelBackground
+import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
 
@@ -162,7 +164,8 @@ private fun ElementCard(
             .padding(3.dp)
             .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
             .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
-            .panelBackground(R.drawable.card_base)
+            // The trim takes the rarity colour once the element is open.
+            .panelBackground(if (unlocked) element.rarity.cardRes else R.drawable.card_base)
             // Clears the ornament on the top edge of the card art.
             .padding(start = 6.dp, top = 8.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
     ) {
@@ -209,6 +212,15 @@ private fun ElementCard(
         }
     }
 }
+
+private val ElementRarity.cardRes: Int
+    get() = when (this) {
+        ElementRarity.BASE -> R.drawable.card_base
+        ElementRarity.COMMON -> R.drawable.card_common
+        ElementRarity.RARE -> R.drawable.card_rare
+        ElementRarity.EPIC -> R.drawable.card_epic
+        ElementRarity.LEGENDARY -> R.drawable.card_legendary
+    }
 
 private val ElementGroup.labelRes: Int
     get() = when (this) {
