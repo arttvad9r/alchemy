@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -88,6 +92,9 @@ private val PanelRows = listOf(Segment(0f, 0.3f, false), Segment(0.3f, 0.7f, tru
 // The search field art has the magnifier and a divider drawn into its left end, so that end stays whole.
 private val SearchFieldSegments = listOf(Segment(0f, 0.33f, false), Segment(0.33f, 0.75f, true), Segment(0.75f, 1f, false))
 private val RowSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.85f, true), Segment(0.85f, 1f, false))
+
+// The chevron is drawn into the right end of the dropdown art, so that end stays whole.
+private val DropdownSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.72f, true), Segment(0.72f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
 
 // Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
@@ -95,6 +102,8 @@ private const val PROGRESS_INSET_X = 6f
 private const val PROGRESS_INSET_Y = 7f
 
 private val SEARCH_ICON_SPACE = 60.dp
+private val DROPDOWN_HEIGHT = 40.dp
+private val DROPDOWN_CHEVRON_SPACE = 34.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
 private const val DIALOG_ENTRANCE_MILLIS = 200
@@ -190,6 +199,49 @@ fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placehold
         ),
         modifier = modifier.drawBehind { drawSliced(art, SearchFieldSegments, WholeHeight, size.height / art.height) }
     )
+}
+
+/** A closed field showing the [selected] option that opens a menu of all [options]; tags are `<tag>` and `<tag>_<option name>`. */
+@Composable
+fun <T : Enum<T>> AlchemyDropdown(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    tag: String,
+    modifier: Modifier = Modifier,
+    @DrawableRes iconRes: Int? = null
+) {
+    val art = ImageBitmap.imageResource(R.drawable.field_dropdown)
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(DROPDOWN_HEIGHT)
+                .drawBehind { drawSliced(art, DropdownSegments, WholeHeight, size.height / art.height) }
+                .clickable(role = Role.DropdownList) { expanded = true }
+                .padding(start = 10.dp, end = DROPDOWN_CHEVRON_SPACE)
+                .testTag(tag)
+        ) {
+            iconRes?.let {
+                Image(painterResource(it), contentDescription = null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
+            }
+            Text(label(selected), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(label(option), color = if (option == selected) Gold else Color.Unspecified) },
+                    onClick = {
+                        expanded = false
+                        onSelect(option)
+                    },
+                    modifier = Modifier.testTag("${tag}_${option.name.lowercase()}")
+                )
+            }
+        }
+    }
 }
 
 @Composable

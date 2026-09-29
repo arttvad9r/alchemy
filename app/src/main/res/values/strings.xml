@@ -24,6 +24,9 @@
     <string name="group_life">Жизнь</string>
     <string name="group_civilization">Цивилизация</string>
     <string name="group_cosmos">Космос</string>
+    <string name="sort_recent">Недавние</string>
+    <string name="sort_alphabet">По алфавиту</string>
+    <string name="sort_group">По группам</string>
     <string name="no_known_recipes">Нет открытых рецептов</string>
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>

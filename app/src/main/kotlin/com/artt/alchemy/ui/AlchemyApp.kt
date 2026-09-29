@@ -101,6 +101,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                             onDismissNewElement = viewModel::dismissNewElement,
                             onPickUp = viewModel::onPickUp,
                             onClick = viewModel::onButtonClick,
+                            onPaletteSort = viewModel::setPaletteSort,
                             onEffectConsumed = viewModel::consumeCombinationEffect,
                             onTransitionsConsumed = viewModel::consumeItemTransitions,
                             modifier = Modifier.padding(padding)
@@ -112,7 +113,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                             onClick = viewModel::onButtonClick,
                             modifier = Modifier.padding(padding)
                         )
-                        AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
+                        AppTab.RECIPES -> RecipesScreen(state.progress, onPlaceRecipe = viewModel::placeRecipe, modifier = Modifier.padding(padding))
                         AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
                         AppTab.SETTINGS -> SettingsScreen(
                             state = state,

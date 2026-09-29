@@ -17,6 +17,8 @@ import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
 import com.artt.alchemy.game.ElementRarity
+import com.artt.alchemy.game.ElementSort
+import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.reduce
@@ -101,6 +103,18 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
             achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress)
         )
+    }
+
+    /** Puts both ingredients of a known recipe on the workspace and shows it, as if each had been tapped in the palette. */
+    fun placeRecipe(recipe: Recipe) {
+        onWorkspaceEvent(WorkspaceEvent.SpawnAutomatically(recipe.firstId))
+        onWorkspaceEvent(WorkspaceEvent.SpawnAutomatically(recipe.secondId))
+        selectTab(AppTab.HOME)
+    }
+
+    fun setPaletteSort(sort: ElementSort) {
+        playSound(Sound.CLICK)
+        updateProgress { copy(paletteSort = sort) }
     }
 
     fun consumeCombinationEffect() {

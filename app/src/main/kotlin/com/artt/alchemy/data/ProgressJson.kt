@@ -1,5 +1,6 @@
 package com.artt.alchemy.data
 
+import com.artt.alchemy.game.ElementSort
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -21,6 +22,7 @@ fun PlayerProgress.toJson(): String = JSONObject().apply {
     reducedMotion?.let { put("reducedMotion", it) }
     put("theme", theme.name)
     put("onboardingSeen", onboardingSeen)
+    put("paletteSort", paletteSort.name)
     activeHint?.let { put("activeHint", JSONObject().put("recipeKey", it.recipeKey).put("step", it.step)) }
 }.toString()
 
@@ -46,6 +48,7 @@ fun parsePlayerProgress(text: String): PlayerProgress? = try {
             reducedMotion = if (json.has("reducedMotion")) json.optBoolean("reducedMotion") else null,
             theme = AppTheme.entries.firstOrNull { it.name == json.optString("theme") } ?: AppTheme.AETHER,
             onboardingSeen = json.optBoolean("onboardingSeen"),
+            paletteSort = ElementSort.entries.firstOrNull { it.name == json.optString("paletteSort") } ?: defaults.paletteSort,
             activeHint = json.optJSONObject("activeHint")?.let {
                 ActiveHint(recipeKey = it.optString("recipeKey"), step = it.optInt("step"))
             }

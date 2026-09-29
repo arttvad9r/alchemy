@@ -3,6 +3,7 @@ package com.artt.alchemy.data
 import android.content.Context
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Combination
+import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.recipeKey
 
 enum class AppTheme {
@@ -31,7 +32,8 @@ data class PlayerProgress(
     val reducedMotion: Boolean? = null,
     val theme: AppTheme = AppTheme.AETHER,
     val onboardingSeen: Boolean = false,
-    val activeHint: ActiveHint? = null
+    val activeHint: ActiveHint? = null,
+    val paletteSort: ElementSort = ElementSort.RECENT
 )
 
 fun initialPlayerProgress(): PlayerProgress = PlayerProgress(
@@ -95,7 +97,8 @@ class ProgressStore(context: Context) {
         reducedMotion = if (preferences.contains(KEY_REDUCED_MOTION)) preferences.getBoolean(KEY_REDUCED_MOTION, false) else null,
         theme = AppTheme.entries.firstOrNull { it.name == preferences.getString(KEY_THEME, null) } ?: AppTheme.AETHER,
         onboardingSeen = preferences.getBoolean(KEY_ONBOARDING_SEEN, false),
-        activeHint = preferences.getString(KEY_ACTIVE_HINT, null)?.let(::decodeHint)
+        activeHint = preferences.getString(KEY_ACTIVE_HINT, null)?.let(::decodeHint),
+        paletteSort = ElementSort.entries.firstOrNull { it.name == preferences.getString(KEY_PALETTE_SORT, null) } ?: ElementSort.RECENT
     ).sanitized()
 
     fun save(progress: PlayerProgress) {
@@ -116,6 +119,7 @@ class ProgressStore(context: Context) {
             }
             .putString(KEY_THEME, progress.theme.name)
             .putBoolean(KEY_ONBOARDING_SEEN, progress.onboardingSeen)
+            .putString(KEY_PALETTE_SORT, progress.paletteSort.name)
             .apply()
     }
 
@@ -145,5 +149,6 @@ class ProgressStore(context: Context) {
         const val KEY_THEME = "theme"
         const val KEY_ONBOARDING_SEEN = "onboarding_seen"
         const val KEY_ACTIVE_HINT = "active_hint"
+        const val KEY_PALETTE_SORT = "palette_sort"
     }
 }

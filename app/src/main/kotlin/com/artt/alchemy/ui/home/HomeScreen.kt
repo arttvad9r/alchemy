@@ -75,13 +75,16 @@ import androidx.compose.ui.zIndex
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.WorkspaceEvent
+import com.artt.alchemy.game.sortElements
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.ItemTransition
 import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
+import com.artt.alchemy.ui.components.AlchemyDropdown
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.ElementTile
@@ -115,12 +118,17 @@ fun HomeScreen(
     onDismissNewElement: () -> Unit,
     onPickUp: () -> Unit,
     onClick: () -> Unit,
+    onPaletteSort: (ElementSort) -> Unit,
     onEffectConsumed: () -> Unit,
     onTransitionsConsumed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlockedIds = state.progress.unlockedIds
-    val unlocked = remember(unlockedIds) { AlchemyCatalog.elements.filter { it.id in unlockedIds } }
+    val paletteSort = state.progress.paletteSort
+    val discoveryOrder = state.progress.discoveryOrder
+    val unlocked = remember(unlockedIds, discoveryOrder, paletteSort) {
+        sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort)
+    }
     var workspaceBounds by remember { mutableStateOf<Rect?>(null) }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
@@ -239,6 +247,14 @@ fun HomeScreen(
                         maxLines = 1,
                         autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
                         modifier = Modifier.weight(1f).padding(end = 8.dp)
+                    )
+                    AlchemyDropdown(
+                        options = ElementSort.entries,
+                        selected = paletteSort,
+                        label = { stringResource(it.labelRes) },
+                        onSelect = onPaletteSort,
+                        tag = "palette_sort",
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                     ProgressCounter(unlocked = unlockedIds.size)
                 }
@@ -460,6 +476,13 @@ private fun DraggablePaletteElement(
         onClick = { onTap(coordinates?.boundsInRoot()?.center) }
     )
 }
+
+private val ElementSort.labelRes: Int
+    get() = when (this) {
+        ElementSort.RECENT -> R.string.sort_recent
+        ElementSort.ALPHABET -> R.string.sort_alphabet
+        ElementSort.GROUP -> R.string.sort_group
+    }
 
 private val PALETTE_TITLE_MIN_SIZE = 12.sp
 private const val PALETTE_COLUMNS = 5
