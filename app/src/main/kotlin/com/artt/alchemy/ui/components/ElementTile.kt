@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -30,7 +33,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -39,10 +41,11 @@ import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
+import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.color
 
-// An outline, not a fill, so it never reads as one of the filled rarity badges.
-private val FinalBadgeColor = Color(0xFFD5DCF5)
+private val FinalBadgeColor = Color(0xFF2A3160)
+private val FinalMarkEdge = Color(0xFF3B2A06)
 
 private val SilhouetteFilter = ColorFilter.tint(Color(0xFF46528F))
 
@@ -96,17 +99,29 @@ fun RarityBadge(rarity: ElementRarity, modifier: Modifier = Modifier) {
     )
 }
 
-/** Marks an open element that no recipe uses. */
+/** Marks an open element that no recipe uses: the same pill as the rarity, led by the final mark. */
 @Composable
 fun FinalBadge(modifier: Modifier = Modifier) {
-    Text(
-        text = stringResource(R.string.element_final),
-        style = MaterialTheme.typography.labelSmall,
-        color = FinalBadgeColor,
-        maxLines = 1,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
         modifier = modifier
-            .border(1.dp, FinalBadgeColor, RoundedCornerShape(50))
+            .background(FinalBadgeColor, RoundedCornerShape(50))
             .padding(horizontal = 8.dp, vertical = 1.dp)
+    ) {
+        FinalMark(Modifier.size(8.dp))
+        Text(text = stringResource(R.string.element_final), style = MaterialTheme.typography.labelSmall, color = Color.White, maxLines = 1)
+    }
+}
+
+/** A small gold diamond: the sign of a final element wherever there is no room for the word. */
+@Composable
+fun FinalMark(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .rotate(45f)
+            .background(Gold, RoundedCornerShape(2.dp))
+            .border(1.dp, FinalMarkEdge, RoundedCornerShape(2.dp))
     )
 }
 
@@ -150,8 +165,8 @@ val ElementRarity.labelRes: Int
     }
 
 /**
- * An element's fact set as a short piece of reading text: body size, medium weight, single line spacing
- * and a paragraph indent, justified without hyphenation.
+ * An element's fact set as a short piece of reading text: body size, medium weight, single line spacing,
+ * no hyphenation.
  */
 @Composable
 fun FactText(text: String, modifier: Modifier = Modifier) {
@@ -161,12 +176,12 @@ fun FactText(text: String, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Medium,
             // Single spacing: the font's own line height.
             lineHeight = TextUnit.Unspecified,
-            textIndent = TextIndent(firstLine = FACT_FONT_SIZE * FACT_INDENT),
             lineBreak = LineBreak.Paragraph
         ),
         fontSize = FACT_FONT_SIZE,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Justify,
+        // Ragged right: justifying is ignored on some phones and leaves wide gaps on narrow ones.
+        textAlign = TextAlign.Start,
         modifier = modifier
     )
 }
@@ -185,4 +200,3 @@ internal fun withTypographicBinding(text: String): String = text
     .replace(NUMBER_BEFORE_WORD, "$1$NO_BREAK_SPACE")
     .replace(" —", "$NO_BREAK_SPACE—")
     .replace("/", "/$WORD_JOINER")
-private const val FACT_INDENT = 1.5f

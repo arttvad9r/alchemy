@@ -3,6 +3,7 @@ package com.artt.alchemy.ui
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -30,7 +31,7 @@ class SettingsScreenTest {
 
         // The four base elements come for free and do not count towards achievements.
         composeRule.onNodeWithTag("nav_achievements").performClick()
-        composeRule.onNodeWithText("Первые открытия: 0 / 10").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Первые открытия: 0 / 10").assertIsDisplayed()
     }
 
     @Test

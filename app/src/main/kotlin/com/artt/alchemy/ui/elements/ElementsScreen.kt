@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -35,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
@@ -45,12 +48,10 @@ import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
-import com.artt.alchemy.ui.components.FinalBadge
+import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.FramedElementIcon
-import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.panelBackground
-import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
 
@@ -167,6 +168,16 @@ private fun ElementCard(
             Crossfade(targetState = unlocked && revealed, label = "reveal") { shown ->
                 FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !shown)
             }
+            if (unlocked && element.id in ElementLinks.finalElementIds) {
+                val finalLabel = stringResource(R.string.element_final)
+                FinalMark(
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(FINAL_MARK_INSET)
+                        .size(FINAL_MARK_SIZE)
+                        .semantics { contentDescription = finalLabel }
+                )
+            }
             if (fresh) {
                 Text(
                     text = stringResource(R.string.element_new_badge),
@@ -177,7 +188,7 @@ private fun ElementCard(
                 )
             }
         }
-        // The name and badge sit in the middle of what is left when a neighbour's name takes two lines.
+        // The name sits in the middle of what is left when a neighbour's name takes two lines.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -190,10 +201,6 @@ private fun ElementCard(
                 maxLines = 2,
                 color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
-            if (unlocked) {
-                RarityBadge(element.rarity, Modifier.padding(top = 2.dp))
-                if (element.id in ElementLinks.finalElementIds) FinalBadge(Modifier.padding(top = 2.dp))
-            }
         }
     }
 }
@@ -208,11 +215,15 @@ private val ElementGroup.labelRes: Int
     }
 
 private const val REVEAL_DELAY_MILLIS = 250L
+private val FINAL_MARK_SIZE = 11.dp
+
+// Sits on the frame's corner ornament, clear of the icon art.
+private val FINAL_MARK_INSET = 7.dp
 private val CARD_MIN_WIDTH = 104.dp
 private val SCREEN_PADDING = 12.dp
 
-// Space above the name and below the badge, kept equal so the text sits evenly in the card.
+// Space above and below the name, kept equal so the text sits evenly in the card.
 private val CARD_TEXT_GAP = 6.dp
 
-// The card art's bottom border, which the gap under the badge is measured from.
+// The card art's bottom border, which the gap under the name is measured from.
 private val CARD_BOTTOM_BORDER = 4.dp

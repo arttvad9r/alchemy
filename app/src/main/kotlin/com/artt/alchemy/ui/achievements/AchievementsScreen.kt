@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
@@ -45,21 +47,29 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
                 modifier = Modifier
                     .fillMaxWidth()
                     .rowPanel()
-                    .padding(horizontal = 20.dp, vertical = 14.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
                     .testTag("achievement_${achievement.id}")
             ) {
                 AchievementBadge(completed)
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(achievement.title) + ": $current / ${achievement.target}",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    AlchemyProgressBar(
-                        progress = current.toFloat() / achievement.target,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (completed) {
-                        Text(text = stringResource(R.string.achievement_completed), color = Gold)
+                val title = stringResource(achievement.title)
+                val count = "$current / ${achievement.target}"
+                val status = if (completed) stringResource(R.string.achievement_completed) else count
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clearAndSetSemantics { contentDescription = "$title: $status" }
+                ) {
+                    Text(text = title, style = MaterialTheme.typography.titleMedium, maxLines = 2)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        AlchemyProgressBar(progress = current.toFloat() / achievement.target, modifier = Modifier.weight(1f))
+                        Text(
+                            text = count,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (completed) Gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false
+                        )
                     }
                 }
             }
@@ -80,4 +90,4 @@ fun AchievementBadge(completed: Boolean, modifier: Modifier = Modifier) {
     }
 }
 
-private val BADGE_SIZE = 56.dp
+private val BADGE_SIZE = 48.dp

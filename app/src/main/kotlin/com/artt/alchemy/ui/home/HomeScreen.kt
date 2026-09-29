@@ -14,6 +14,8 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -60,6 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -238,52 +241,55 @@ fun HomeScreen(
                     ProgressCounter(unlocked = unlockedIds.size)
                 }
                 val paletteState = rememberLazyGridState()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(152.dp)
-                        .testTag("palette_grid")
-                ) {
-                    LazyVerticalGrid(
-                        state = paletteState,
-                        columns = GridCells.Fixed(5),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        contentPadding = PaddingValues(top = 12.dp, end = 16.dp, bottom = 12.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(unlocked, key = { it.id }) { element ->
-                            DraggablePaletteElement(
-                                element = element,
-                                dimmed = draggedElement?.id == element.id,
-                                modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
-                                onDragPosition = { position ->
-                                    draggedElement = position?.let { element }
-                                    dragPosition = position
-                                },
-                                onDrop = { drop ->
-                                    tapOrigin = null
-                                    workspaceBounds
-                                        ?.takeIf { it.contains(drop) }
-                                        ?.let { bounds ->
-                                            onEvent(
-                                                WorkspaceEvent.Spawn(
-                                                    element.id,
-                                                    (drop.x - bounds.left) / bounds.width,
-                                                    (drop.y - bounds.top) / bounds.height
+                val labelHeight = with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() }
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    // Exactly two whole rows, labels included, so no row is ever cut through its names.
+                    val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (PALETTE_COLUMNS - 1)) / PALETTE_COLUMNS
+                    val rowHeight = tileWidth + PALETTE_TILE_TEXT_GAP + labelHeight
+                    val paletteHeight = rowHeight * PALETTE_ROWS + PALETTE_GAP * (PALETTE_ROWS - 1) + PALETTE_VERTICAL_PADDING * 2
+                    Box(modifier = Modifier.fillMaxWidth().height(paletteHeight).testTag("palette_grid")) {
+                        LazyVerticalGrid(
+                            state = paletteState,
+                            columns = GridCells.Fixed(PALETTE_COLUMNS),
+                            horizontalArrangement = Arrangement.spacedBy(PALETTE_GAP),
+                            verticalArrangement = Arrangement.spacedBy(PALETTE_GAP),
+                            contentPadding = PaddingValues(top = PALETTE_VERTICAL_PADDING, end = PALETTE_END_PADDING, bottom = PALETTE_VERTICAL_PADDING),
+                            flingBehavior = rememberSnapFlingBehavior(paletteState, SnapPosition.Start),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            items(unlocked, key = { it.id }) { element ->
+                                DraggablePaletteElement(
+                                    element = element,
+                                    dimmed = draggedElement?.id == element.id,
+                                    modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
+                                    onDragPosition = { position ->
+                                        draggedElement = position?.let { element }
+                                        dragPosition = position
+                                    },
+                                    onDrop = { drop ->
+                                        tapOrigin = null
+                                        workspaceBounds
+                                            ?.takeIf { it.contains(drop) }
+                                            ?.let { bounds ->
+                                                onEvent(
+                                                    WorkspaceEvent.Spawn(
+                                                        element.id,
+                                                        (drop.x - bounds.left) / bounds.width,
+                                                        (drop.y - bounds.top) / bounds.height
+                                                    )
                                                 )
-                                            )
-                                        }
-                                },
-                                onTap = { center ->
-                                    tapOrigin = center
-                                    onEvent(WorkspaceEvent.SpawnAutomatically(element.id))
-                                },
-                                onPickUp = onPickUp
-                            )
+                                            }
+                                    },
+                                    onTap = { center ->
+                                        tapOrigin = center
+                                        onEvent(WorkspaceEvent.SpawnAutomatically(element.id))
+                                    },
+                                    onPickUp = onPickUp
+                                )
+                            }
                         }
+                        PaletteScrollbar(state = paletteState, modifier = Modifier.align(Alignment.CenterEnd).padding(vertical = 12.dp))
                     }
-                    PaletteScrollbar(state = paletteState, modifier = Modifier.align(Alignment.CenterEnd).padding(vertical = 12.dp))
                 }
             }
         }
@@ -454,3 +460,11 @@ private fun DraggablePaletteElement(
 }
 
 private val PALETTE_TITLE_MIN_SIZE = 12.sp
+private const val PALETTE_COLUMNS = 5
+private const val PALETTE_ROWS = 2
+private val PALETTE_GAP = 10.dp
+private val PALETTE_END_PADDING = 16.dp
+private val PALETTE_VERTICAL_PADDING = 12.dp
+
+// Matches the spacing between icon and name inside ElementTile.
+private val PALETTE_TILE_TEXT_GAP = 2.dp

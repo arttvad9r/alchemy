@@ -82,9 +82,9 @@ fun SettingsScreen(
         SettingsPanel {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Image(painterResource(R.drawable.ic_help), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
-                Text(stringResource(R.string.help), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.help), style = MaterialTheme.typography.titleMedium)
             }
-            Text(stringResource(R.string.help_text), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.help_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         AlchemyButton(
             text = stringResource(R.string.reset_progress),

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,8 +21,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
@@ -39,6 +40,7 @@ import com.artt.alchemy.ui.components.FactText
 import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 
@@ -56,17 +58,25 @@ fun ElementDetailsDialog(
     // A link swaps the element in place, so each one starts from the top.
     val scroll = remember(element.id) { ScrollState(0) }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(1f, fill = false).verticalScroll(scroll).testTag("element_details")
-        ) {
-            FramedElementIcon(element, Modifier.width(120.dp))
-            Text(element.name, style = MaterialTheme.typography.headlineSmall, color = Gold, modifier = Modifier.padding(top = 8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
-                RarityBadge(element.rarity)
-                if (element.id in ElementLinks.finalElementIds) FinalBadge()
+        Column(modifier = Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(scroll).testTag("element_details")) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                FramedElementIcon(element, Modifier.size(HEADER_ICON_SIZE))
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f).padding(start = 14.dp)) {
+                    val nameStyle = MaterialTheme.typography.headlineSmall
+                    Text(
+                        element.name,
+                        style = nameStyle,
+                        color = Gold,
+                        maxLines = 2,
+                        autoSize = WholeWordsAutoSize(min = NAME_MIN_SIZE, max = nameStyle.fontSize)
+                    )
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        RarityBadge(element.rarity)
+                        if (element.id in ElementLinks.finalElementIds) FinalBadge()
+                    }
+                }
             }
-            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 12.dp))
+            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 14.dp))
             if (madeFrom.isNotEmpty()) {
                 LinkSection(R.string.element_made_from) {
                     madeFrom.forEach { recipe ->
@@ -100,13 +110,12 @@ fun ElementDetailsDialog(
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 12.dp).testTag("element_links_note")
+                    modifier = Modifier.padding(top = 10.dp).testTag("element_links_note")
                 )
             }
         }
         // Outside the scroll, so the way out is always on screen however long the card is.
-        AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 16.dp).testTag("element_details_close"))
+        AlchemyButton(stringResource(R.string.close), ButtonStyle.BLUE, onDismiss, Modifier.padding(top = 14.dp).testTag("element_details_close"))
     }
 }
 
@@ -118,7 +127,7 @@ private fun LinkSection(titleRes: Int, content: @Composable () -> Unit) {
         stringResource(titleRes),
         style = MaterialTheme.typography.titleSmall,
         color = Gold,
-        modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 4.dp)
+        modifier = Modifier.padding(top = 14.dp, bottom = 2.dp)
     )
     content()
 }
@@ -128,7 +137,7 @@ private fun LinkRow(content: @Composable () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.padding(vertical = 2.dp)
     ) {
         content()
     }
@@ -145,4 +154,6 @@ private fun OperatorIcon(res: Int) {
     Image(painterResource(res), contentDescription = null, modifier = Modifier.size(18.dp))
 }
 
-private val LINK_TILE_WIDTH = 64.dp
+private val LINK_TILE_WIDTH = 60.dp
+private val HEADER_ICON_SIZE = 84.dp
+private val NAME_MIN_SIZE = 18.sp
