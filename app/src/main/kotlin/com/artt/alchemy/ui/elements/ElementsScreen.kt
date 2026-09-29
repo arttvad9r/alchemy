@@ -193,10 +193,10 @@ private fun ElementCard(
                     )
                 }
             }
-            // The name sits in the middle of what is left when a neighbour's name takes two lines.
+            // The name stays right under the icon; a taller neighbour only adds room below it.
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier.weight(1f).padding(top = CARD_TEXT_GAP)
             ) {
                 Text(
@@ -228,7 +228,8 @@ private fun ElementCard(
  */
 @Composable
 private fun catalogNameStyle(contentWidth: Dp): TextStyle {
-    val base = MaterialTheme.typography.labelMedium
+    // Tight leading, so a two-word name reads as one label.
+    val base = MaterialTheme.typography.labelMedium.let { it.copy(lineHeight = it.fontSize * NAME_LINE_HEIGHT) }
     val locked = stringResource(R.string.locked_element)
     val measurer = rememberTextMeasurer()
     val widthPx = with(LocalDensity.current) { contentWidth.roundToPx() }
@@ -242,7 +243,8 @@ private fun catalogNameStyle(contentWidth: Dp): TextStyle {
                 AlchemyCatalog.elements.none { measurer.measure(it.name, style, constraints = constraints, maxLines = 2).hasVisualOverflow }
         }
         val size = generateSequence(base.fontSize.value) { it - NAME_SIZE_STEP }.takeWhile { it > NAME_MIN_SIZE.value }.firstOrNull(fits)
-        base.copy(fontSize = (size ?: NAME_MIN_SIZE.value).sp)
+        val fontSize = (size ?: NAME_MIN_SIZE.value).sp
+        base.copy(fontSize = fontSize, lineHeight = fontSize * NAME_LINE_HEIGHT)
     }
 }
 
@@ -273,14 +275,15 @@ private val CARD_MIN_WIDTH = 80.dp
 private val ICON_INSET = 2.dp
 private val NAME_MIN_SIZE = 10.sp
 private const val NAME_SIZE_STEP = 0.5f
+private const val NAME_LINE_HEIGHT = 1.1f
 private val CARD_SIDE_PADDING = 4.dp
 private val SCREEN_PADDING = 6.dp
 
 // Between neighbouring cards: enough that their trims never touch.
 private val CARD_GAP = 4.dp
 
-// Space above and below the name, kept equal so the text sits evenly in the card.
-private val CARD_TEXT_GAP = 4.dp
+// Space between the icon and the name, and under the name.
+private val CARD_TEXT_GAP = 2.dp
 
 // The card art's bottom border, which the gap under the name is measured from.
 private val CARD_BOTTOM_BORDER = 4.dp
