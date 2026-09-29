@@ -49,11 +49,11 @@ class NavigationTest {
             moveTo(Offset(width * 2f, -600f))
             up()
         }
-        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь")).assertIsDisplayed()
+        composeRule.onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь")).assertIsDisplayed()
 
         composeRule.onNodeWithTag("nav_elements").performClick()
         composeRule.onNodeWithTag("nav_home").performClick()
 
-        composeRule.onNode(hasTestTag("workspace_canvas") and hasContentDescription("Огонь")).assertIsDisplayed()
+        composeRule.onNode(hasTestTag("workspace_item") and hasContentDescription("Огонь")).assertIsDisplayed()
     }
 }

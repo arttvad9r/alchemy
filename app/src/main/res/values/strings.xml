@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Алхимия</string>
+    <string name="app_tagline">Соединяй · Открывай · Создавай</string>
     <string name="progress">%1$d / %2$d</string>
     <string name="clear_workspace">Очистить</string>
     <string name="workspace_hint">Перетащите элементы сюда</string>
@@ -33,6 +34,7 @@
     <string name="achievement_civilization">Строитель цивилизации</string>
     <string name="achievement_cosmos">Покоритель космоса</string>
     <string name="achievement_completed">Получено</string>
+    <string name="achievement_unlocked">Достижение получено</string>
     <string name="settings">Настройки</string>
     <string name="sound">Звук</string>
     <string name="vibration">Вибрация</string>
@@ -46,6 +48,7 @@
     <string name="cancel">Отмена</string>
     <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
+    <string name="element_new_badge">Новое</string>
     <string name="new_element_title">Новый элемент</string>
     <string name="new_element_message">Открыт элемент: %1$s</string>
 </resources>

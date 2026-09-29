@@ -1,5 +1,8 @@
 package com.artt.alchemy.audio
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -45,28 +48,79 @@ class SoundEffects(context: Context) {
 
 /** The looping background track, created on first start and kept paused while the app is hidden. */
 class BackgroundMusic(private val context: Context) {
-    private var player: MediaPlayer? = null
+    private var current: MediaPlayer? = null
+    private var upcoming: MediaPlayer? = null
+    private var fade: ValueAnimator? = null
+    private var volume = 0f
 
     fun start() {
-        val current = player ?: MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)?.apply {
-            isLooping = true
-            setVolume(MUSIC_VOLUME, MUSIC_VOLUME)
-        }?.also { player = it } ?: return
-        if (!current.isPlaying) current.start()
+        val playing = current ?: newPlayer()?.also { first ->
+            current = first
+            chain(first)
+        } ?: return
+        if (!playing.isPlaying) playing.start()
+        fadeTo(MUSIC_VOLUME) {}
     }
 
     fun pause() {
-        player?.takeIf { it.isPlaying }?.pause()
+        val playing = current?.takeIf { it.isPlaying } ?: return
+        fadeTo(0f) { playing.pause() }
     }
 
     fun release() {
-        player?.release()
-        player = null
+        fade?.cancel()
+        fade = null
+        current?.release()
+        upcoming?.release()
+        current = null
+        upcoming = null
+    }
+
+    // Looping a single MediaPlayer leaves an audible gap at the loop point. A second player, already
+    // prepared, takes over the moment the first ends, so the track repeats without a break.
+    private fun chain(player: MediaPlayer) {
+        val next = newPlayer()
+        upcoming = next
+        next?.let(player::setNextMediaPlayer)
+        player.setOnCompletionListener { finished ->
+            finished.release()
+            current = upcoming
+            upcoming = null
+            current?.let(::chain)
+        }
+    }
+
+    private fun newPlayer(): MediaPlayer? = MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)
+        ?.apply { setVolume(volume, volume) }
+
+    private fun fadeTo(target: Float, onEnd: () -> Unit) {
+        fade?.cancel()
+        fade = ValueAnimator.ofFloat(volume, target).apply {
+            duration = FADE_MILLIS
+            addUpdateListener { animator ->
+                volume = animator.animatedValue as Float
+                current?.setVolume(volume, volume)
+                upcoming?.setVolume(volume, volume)
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                private var cancelled = false
+
+                override fun onAnimationCancel(animation: Animator) {
+                    cancelled = true
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    if (!cancelled) onEnd()
+                }
+            })
+            start()
+        }
     }
 
     private companion object {
         // Quiet enough to sit under the effects.
         const val MUSIC_VOLUME = 0.26f
+        const val FADE_MILLIS = 300L
     }
 }
 

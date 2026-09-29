@@ -57,6 +57,14 @@ UI_ASSETS = {
     "ui/panels_states/card_base.png": ("card_base", 512),
     "ui/panels_states/selected_ring_blue.png": ("fx_selected_ring", 256),
     "effects/energy_ring.png": ("fx_energy_ring", 512),
+    "effects/shockwave_ring.png": ("fx_shockwave_ring", 512),
+    "effects/sparkles_purple.png": ("fx_sparkles_purple", 512),
+    "effects/glow_purple_orb.png": ("fx_glow_purple_orb", 512),
+    "effects/glow_gold_orb.png": ("fx_glow_gold_orb", 512),
+    "effects/stars_cluster.png": ("fx_stars_cluster", 512),
+    "ui/buttons/input_field.png": ("field_row", 512),
+    "ui/icons/plus.png": ("ic_plus", 96),
+    "ui/icons/forward.png": ("ic_forward", 96),
 }
 
 PROGRESS_BAR = "ui/buttons/progress_bar.png"

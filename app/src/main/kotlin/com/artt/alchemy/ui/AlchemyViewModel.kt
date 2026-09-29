@@ -16,9 +16,11 @@ import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.reduce
+import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
 enum class AppTab {
     HOME,
@@ -33,7 +35,10 @@ data class CombinationEffect(
     val id: Long,
     val xFraction: Float,
     val yFraction: Float,
-    val isDiscovery: Boolean
+    val isDiscovery: Boolean,
+    val rarity: ElementRarity,
+    val resultInstanceId: Long,
+    val sources: List<EffectSource>
 )
 
 data class AlchemyUiState(
@@ -43,7 +48,11 @@ data class AlchemyUiState(
     val newlyUnlockedId: String? = null,
     val combinationEffect: CombinationEffect? = null,
     val itemTransitions: List<ItemTransition> = emptyList(),
-    val isResetConfirmationVisible: Boolean = false
+    val isResetConfirmationVisible: Boolean = false,
+    // Ids of achievements earned and not yet announced; the first one is on screen.
+    val achievementQueue: List<String> = emptyList(),
+    // Elements found this session that the catalog has not shown yet.
+    val freshElementIds: Set<String> = emptySet()
 )
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
@@ -71,12 +80,15 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
                 id = ++combinationEffectCount,
                 xFraction = item.xFraction,
                 yFraction = item.yFraction,
-                isDiscovery = newlyUnlockedId != null
+                isDiscovery = newlyUnlockedId != null,
+                rarity = AlchemyCatalog.rarityById.getValue(it.resultId),
+                resultInstanceId = item.instanceId,
+                sources = effectSources(state.workspace, result)
             )
         }
 
-        val transitions = itemTransitions(state.workspace, result)
-        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId != null)?.let(::play)
+        val transitions = itemTransitions(state.workspace, result, event)
+        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let(::play)
 
         if (progress != state.progress) store.save(progress)
         state = state.copy(
@@ -85,7 +97,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
             progress = progress,
             workspace = result.workspace,
-            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId
+            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
+            freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
+            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress)
         )
     }
 
@@ -109,6 +123,20 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun onButtonClick() {
         playSound(Sound.CLICK)
+    }
+
+    /** The achievement banner came on screen: the reward chime and a tap. */
+    fun onAchievementShown() {
+        playSound(Sound.DISCOVER)
+        vibrate(Haptic.CLICK)
+    }
+
+    fun dismissAchievement() {
+        state = state.copy(achievementQueue = state.achievementQueue.drop(1))
+    }
+
+    fun markElementsSeen() {
+        if (state.freshElementIds.isNotEmpty()) state = state.copy(freshElementIds = emptySet())
     }
 
     fun dismissNewElement() {
@@ -164,9 +192,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             GameFeedback.PLACE -> Sound.PLACE to Haptic.TICK
             GameFeedback.COMBINE -> Sound.COMBINE to Haptic.CLICK
             GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
+            GameFeedback.DISCOVER_GRAND -> Sound.DISCOVER to Haptic.HEAVY
             GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
             GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
-            GameFeedback.CLEAR -> null to Haptic.CLICK
+            GameFeedback.CLEAR -> Sound.REMOVE to Haptic.CLICK
         }
         sound?.let(::playSound)
         vibrate(haptic)

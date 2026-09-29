@@ -1,8 +1,6 @@
 package com.artt.alchemy.ui.achievements
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,36 +23,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
-import com.artt.alchemy.game.AlchemyCatalog
-import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.ui.components.AlchemyProgressBar
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelBorderColor
-import com.artt.alchemy.ui.theme.PanelColor
-
-data class AchievementDefinition(
-    val id: String,
-    val title: Int,
-    val target: Int,
-    val current: (PlayerProgress) -> Int
-)
-
-// The base elements are given at the start, so only elements found by mixing count.
-private val PlayerProgress.discoveredIds: Set<String>
-    get() = unlockedIds - AlchemyCatalog.baseElementIds
-
-private val achievements = listOf(
-    AchievementDefinition("first_unlocks", R.string.achievement_first_unlocks, 10) { it.discoveredIds.size },
-    AchievementDefinition("mixes", R.string.achievement_mixes, 25) { it.successfulMixCount },
-    AchievementDefinition("experiments", R.string.achievement_experiments, 50) { it.mixAttemptCount }
-) + ElementGroup.entries.map { group ->
-    AchievementDefinition(
-        id = "group_${group.name.lowercase()}",
-        title = group.achievementTitleRes,
-        target = AlchemyCatalog.elements.count { it.group == group && it.id !in AlchemyCatalog.baseElementIds }
-    ) { progress -> progress.discoveredIds.count { AlchemyCatalog.elementsById.getValue(it).group == group } }
-}
 
 @Composable
 fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) {
@@ -66,16 +37,15 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
     ) {
         item { ScreenBanner(stringResource(R.string.tab_achievements)) }
         items(achievements, key = AchievementDefinition::id) { achievement ->
-            val current = achievement.current(progress).coerceAtMost(achievement.target)
-            val completed = current == achievement.target
+            val current = achievement.progressOf(progress)
+            val completed = achievement.isCompleted(progress)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PanelColor, RoundedCornerShape(16.dp))
-                    .border(1.dp, if (completed) Gold else PanelBorderColor, RoundedCornerShape(16.dp))
-                    .padding(14.dp)
+                    .rowPanel()
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
                     .testTag("achievement_${achievement.id}")
             ) {
                 AchievementBadge(completed)
@@ -99,24 +69,15 @@ fun AchievementsScreen(progress: PlayerProgress, modifier: Modifier = Modifier) 
 
 /** A trophy in the gold wreath once earned, a chained lock until then. */
 @Composable
-private fun AchievementBadge(completed: Boolean) {
+fun AchievementBadge(completed: Boolean, modifier: Modifier = Modifier) {
     if (completed) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(BADGE_SIZE)) {
+        Box(contentAlignment = Alignment.Center, modifier = modifier.size(BADGE_SIZE)) {
             Image(painter = painterResource(R.drawable.achievement_wreath), contentDescription = null, modifier = Modifier.fillMaxSize())
             Image(painter = painterResource(R.drawable.nav_achievements), contentDescription = null, modifier = Modifier.size(BADGE_SIZE * 0.5f))
         }
     } else {
-        Image(painter = painterResource(R.drawable.achievement_locked), contentDescription = null, modifier = Modifier.size(BADGE_SIZE))
+        Image(painter = painterResource(R.drawable.achievement_locked), contentDescription = null, modifier = modifier.size(BADGE_SIZE))
     }
 }
 
 private val BADGE_SIZE = 56.dp
-
-private val ElementGroup.achievementTitleRes: Int
-    get() = when (this) {
-        ElementGroup.NATURE -> R.string.achievement_nature
-        ElementGroup.MATERIAL -> R.string.achievement_material
-        ElementGroup.LIFE -> R.string.achievement_life
-        ElementGroup.CIVILIZATION -> R.string.achievement_civilization
-        ElementGroup.COSMOS -> R.string.achievement_cosmos
-    }

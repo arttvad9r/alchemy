@@ -1,7 +1,10 @@
 package com.artt.alchemy.ui.elements
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -17,15 +20,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.items as lazyRowItems
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -42,9 +49,20 @@ import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
+import com.artt.alchemy.ui.theme.Gold
+import kotlinx.coroutines.delay
 
 @Composable
-fun ElementsScreen(progress: PlayerProgress, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ElementsScreen(
+    progress: PlayerProgress,
+    freshIds: Set<String>,
+    onSeen: () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // What was new when the catalog opened stays marked until it is left.
+    val fresh = remember { freshIds }
+    DisposableEffect(Unit) { onDispose(onSeen) }
     var query by remember { mutableStateOf("") }
     var openedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
@@ -95,12 +113,13 @@ fun ElementsScreen(progress: PlayerProgress, onClick: () -> Unit, modifier: Modi
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.
             items(entries.chunked(columns), key = { row -> row.first().id }) { row ->
-                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).animateItem()) {
                     row.forEach { element ->
                         val unlocked = element.id in progress.unlockedIds
                         ElementCard(
                             element,
                             unlocked = unlocked,
+                            fresh = element.id in fresh,
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                             onOpen = {
                                 onClick()
@@ -119,7 +138,19 @@ fun ElementsScreen(progress: PlayerProgress, onClick: () -> Unit, modifier: Modi
 }
 
 @Composable
-private fun ElementCard(element: ElementDefinition, unlocked: Boolean, modifier: Modifier = Modifier, onOpen: (() -> Unit)? = null) {
+private fun ElementCard(
+    element: ElementDefinition,
+    unlocked: Boolean,
+    fresh: Boolean,
+    modifier: Modifier = Modifier,
+    onOpen: (() -> Unit)? = null
+) {
+    // A fresh element shows as a silhouette for a moment, then its icon appears.
+    var revealed by remember { mutableStateOf(!fresh) }
+    LaunchedEffect(Unit) {
+        delay(REVEAL_DELAY_MILLIS)
+        revealed = true
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -130,7 +161,20 @@ private fun ElementCard(element: ElementDefinition, unlocked: Boolean, modifier:
             // Clears the ornament on the top edge of the card art.
             .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
     ) {
-        FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !unlocked)
+        Box(contentAlignment = Alignment.TopEnd) {
+            Crossfade(targetState = unlocked && revealed, label = "reveal") { shown ->
+                FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !shown)
+            }
+            if (fresh) {
+                Text(
+                    text = stringResource(R.string.element_new_badge),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    maxLines = 1,
+                    modifier = Modifier.background(Gold.copy(alpha = 0.85f), RoundedCornerShape(50)).padding(horizontal = 6.dp)
+                )
+            }
+        }
         // The name and badge sit in the middle of what is left when a neighbour's name takes two lines.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -158,6 +202,7 @@ private val ElementGroup.labelRes: Int
         ElementGroup.COSMOS -> R.string.group_cosmos
     }
 
+private const val REVEAL_DELAY_MILLIS = 250L
 private val CARD_MIN_WIDTH = 104.dp
 private val SCREEN_PADDING = 12.dp
 

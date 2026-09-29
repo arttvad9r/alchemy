@@ -1,13 +1,21 @@
 package com.artt.alchemy.ui.components
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,6 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -30,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -45,6 +59,10 @@ import androidx.compose.ui.window.DialogProperties
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
 import kotlin.math.roundToInt
+
+private const val PRESS_MILLIS = 90
+private const val PRESSED_SCALE = 0.96f
+private const val PRESSED_ALPHA = 0.85f
 
 /** A source range of the art; fixed segments keep their proportions, stretched ones absorb the rest. */
 private data class Segment(val start: Float, val end: Float, val stretch: Boolean)
@@ -64,6 +82,7 @@ private val PanelRows = listOf(Segment(0f, 0.3f, false), Segment(0.3f, 0.7f, tru
 
 // The search field art has the magnifier and a divider drawn into its left end, so that end stays whole.
 private val SearchFieldSegments = listOf(Segment(0f, 0.33f, false), Segment(0.33f, 0.75f, true), Segment(0.75f, 1f, false))
+private val RowSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.85f, true), Segment(0.85f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
 
 // Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
@@ -73,6 +92,9 @@ private const val PROGRESS_INSET_Y = 7f
 private val SEARCH_ICON_SPACE = 60.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
+private const val DIALOG_ENTRANCE_MILLIS = 200
+private const val PROGRESS_FILL_MILLIS = 600
+private const val DIALOG_START_SCALE = 0.9f
 private val DIALOG_MAX_WIDTH = 480.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
@@ -85,13 +107,23 @@ enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
 @Composable
 fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val art = ImageBitmap.imageResource(style.res)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val press by animateFloatAsState(if (pressed) 1f else 0f, tween(PRESS_MILLIS), label = "buttonPress")
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .defaultMinSize(minHeight = 48.dp)
             .widthIn(min = 96.dp)
+            // The press follows the art's own shape; the platform ripple would be a plain rectangle.
+            .graphicsLayer {
+                val scale = 1f - (1f - PRESSED_SCALE) * press
+                scaleX = scale
+                scaleY = scale
+                alpha = 1f - (1f - PRESSED_ALPHA) * press
+            }
             .drawBehind { drawSliced(art, CapSegments, WholeHeight, size.height / art.height) }
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(interactionSource = interactionSource, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
         Text(text = text, style = MaterialTheme.typography.labelLarge, color = style.textColor)
@@ -119,13 +151,19 @@ fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: M
 
 @Composable
 fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(if (checked) R.drawable.toggle_on else R.drawable.toggle_off),
-        contentDescription = null,
+    Box(
         modifier = modifier
             .size(width = 64.dp, height = 34.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
-    )
+    ) {
+        Crossfade(targetState = checked, animationSpec = tween(PRESS_MILLIS * 2), label = "toggle") { on ->
+            Image(
+                painter = painterResource(if (on) R.drawable.toggle_on else R.drawable.toggle_off),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }
 
 /** Single-line Material text field drawn over the search field art, which has the magnifier drawn in. */
@@ -158,9 +196,17 @@ fun AlchemyDialog(
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val art = ImageBitmap.imageResource(panelRes)
+        val entrance = remember { Animatable(0f) }
+        LaunchedEffect(Unit) { entrance.animateTo(1f, tween(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing)) }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .graphicsLayer {
+                    val value = entrance.value
+                    alpha = value
+                    scaleX = DIALOG_START_SCALE + (1f - DIALOG_START_SCALE) * value
+                    scaleY = scaleX
+                }
                 .fillMaxWidth(DIALOG_WIDTH_FRACTION)
                 .widthIn(max = DIALOG_MAX_WIDTH)
                 .drawBehind { drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height)) }
@@ -177,6 +223,10 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
     val track = ImageBitmap.imageResource(R.drawable.progress_track)
     val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
     val fraction = progress.coerceIn(0f, 1f)
+    // Starts empty so the fill grows to its value when the bar first appears, then follows changes.
+    var target by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(fraction) { target = fraction }
+    val shown by animateFloatAsState(target, tween(PROGRESS_FILL_MILLIS), label = "progressFill")
     Box(
         modifier = modifier
             .height(16.dp)
@@ -186,7 +236,7 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
                 drawSliced(track, CapSegments, WholeHeight, scale)
                 val insetX = PROGRESS_INSET_X * scale
                 val insetY = PROGRESS_INSET_Y * scale
-                val fillWidth = (size.width - 2 * insetX) * fraction
+                val fillWidth = (size.width - 2 * insetX) * shown
                 if (fillWidth >= 1f) {
                     val fillHeight = size.height - 2 * insetY
                     drawSliced(
@@ -228,6 +278,13 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
     return drawBehind {
         drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height, maxScale), alpha)
     }
+}
+
+/** A single-line row panel: the art's height follows the row, so the trim keeps its thickness. */
+@Composable
+fun Modifier.rowPanel(): Modifier {
+    val art = ImageBitmap.imageResource(R.drawable.field_row)
+    return drawBehind { drawSliced(art, RowSegments, WholeHeight, size.height / art.height) }
 }
 
 private fun DrawScope.drawSliced(

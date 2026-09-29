@@ -1,11 +1,16 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -13,7 +18,10 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -30,7 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.artt.alchemy.R
+import com.artt.alchemy.ui.achievements.AchievementToast
 import com.artt.alchemy.ui.achievements.AchievementsScreen
+import com.artt.alchemy.ui.achievements.achievementsById
 import com.artt.alchemy.ui.elements.ElementsScreen
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.recipes.RecipesScreen
@@ -38,6 +48,12 @@ import com.artt.alchemy.ui.settings.SettingsScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelColor
+
+// The home scene stays bright; list screens dim it so text keeps its contrast.
+private const val HOME_DIM = 0.2f
+private const val LIST_DIM = 0.7f
+private const val UNSELECTED_ICON_ALPHA = 0.6f
+private const val TAB_FADE_MILLIS = 180
 
 @Composable
 fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
@@ -55,42 +71,67 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            // The home scene stays bright; list screens dim it so text keeps its contrast.
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = if (state.selectedTab == AppTab.HOME) 0.2f else 0.7f))
+            val dim by animateFloatAsState(
+                targetValue = if (state.selectedTab == AppTab.HOME) HOME_DIM else LIST_DIM,
+                animationSpec = tween(TAB_FADE_MILLIS),
+                label = "backgroundDim"
             )
+            Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = dim)))
             Scaffold(
                 containerColor = Color.Transparent,
                 bottomBar = { AlchemyNavigationBar(selectedTab = state.selectedTab, onSelect = viewModel::selectTab) }
             ) { padding ->
-                when (state.selectedTab) {
-                    AppTab.HOME -> HomeScreen(
-                        state = state,
-                        onEvent = viewModel::onWorkspaceEvent,
-                        onDismissNewElement = viewModel::dismissNewElement,
-                        onPickUp = viewModel::onPickUp,
-                        onClick = viewModel::onButtonClick,
-                        onEffectConsumed = viewModel::consumeCombinationEffect,
-                        onTransitionsConsumed = viewModel::consumeItemTransitions,
-                        modifier = Modifier.padding(padding)
-                    )
-                    AppTab.ELEMENTS -> ElementsScreen(state.progress, onClick = viewModel::onButtonClick, modifier = Modifier.padding(padding))
-                    AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
-                    AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
-                    AppTab.SETTINGS -> SettingsScreen(
-                        state = state,
-                        onSoundChanged = viewModel::setSoundEnabled,
-                        onVibrationChanged = viewModel::setVibrationEnabled,
-                        onMusicChanged = viewModel::setMusicEnabled,
-                        onRequestReset = viewModel::requestReset,
-                        onConfirmReset = viewModel::confirmReset,
-                        onDismissReset = viewModel::dismissReset,
-                        modifier = Modifier.padding(padding)
-                    )
+                Crossfade(targetState = state.selectedTab, animationSpec = tween(TAB_FADE_MILLIS), label = "tab") { tab ->
+                    when (tab) {
+                        AppTab.HOME -> HomeScreen(
+                            state = state,
+                            onEvent = viewModel::onWorkspaceEvent,
+                            onDismissNewElement = viewModel::dismissNewElement,
+                            onPickUp = viewModel::onPickUp,
+                            onClick = viewModel::onButtonClick,
+                            onEffectConsumed = viewModel::consumeCombinationEffect,
+                            onTransitionsConsumed = viewModel::consumeItemTransitions,
+                            modifier = Modifier.padding(padding)
+                        )
+                        AppTab.ELEMENTS -> ElementsScreen(
+                            progress = state.progress,
+                            freshIds = state.freshElementIds,
+                            onSeen = viewModel::markElementsSeen,
+                            onClick = viewModel::onButtonClick,
+                            modifier = Modifier.padding(padding)
+                        )
+                        AppTab.RECIPES -> RecipesScreen(state.progress, Modifier.padding(padding))
+                        AppTab.ACHIEVEMENTS -> AchievementsScreen(state.progress, Modifier.padding(padding))
+                        AppTab.SETTINGS -> SettingsScreen(
+                            state = state,
+                            onSoundChanged = viewModel::setSoundEnabled,
+                            onVibrationChanged = viewModel::setVibrationEnabled,
+                            onMusicChanged = viewModel::setMusicEnabled,
+                            onRequestReset = viewModel::requestReset,
+                            onConfirmReset = viewModel::confirmReset,
+                            onDismissReset = viewModel::dismissReset,
+                            modifier = Modifier.padding(padding)
+                        )
+                    }
                 }
             }
+            AchievementBanner(state, viewModel)
+        }
+    }
+}
+
+// Waits until a discovery card or its effect is done, so the banner never covers the reveal.
+@Composable
+private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: AlchemyViewModel) {
+    val achievement = state.achievementQueue.firstOrNull()?.let(achievementsById::getValue)
+    if (achievement != null && state.newlyUnlockedId == null && state.combinationEffect == null) {
+        key(achievement.id) {
+            AchievementToast(
+                achievement = achievement,
+                onShown = viewModel::onAchievementShown,
+                onDismiss = viewModel::dismissAchievement,
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp)
+            )
         }
     }
 }
@@ -101,6 +142,7 @@ private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit
     NavigationBar(containerColor = PanelColor, tonalElevation = 0.dp) {
         AppTab.entries.forEach { tab ->
             val selected = selectedTab == tab
+            val iconAlpha by animateFloatAsState(if (selected) 1f else UNSELECTED_ICON_ALPHA, tween(TAB_FADE_MILLIS), label = "navIcon")
             NavigationBarItem(
                 selected = selected,
                 onClick = { onSelect(tab) },
@@ -108,7 +150,7 @@ private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit
                     Image(
                         painter = painterResource(tab.iconRes),
                         contentDescription = null,
-                        modifier = Modifier.size(30.dp).alpha(if (selected) 1f else 0.6f)
+                        modifier = Modifier.size(30.dp).alpha(iconAlpha)
                     )
                 },
                 label = { Text(stringResource(tab.labelRes), style = labelStyle, maxLines = 1, softWrap = false) },
