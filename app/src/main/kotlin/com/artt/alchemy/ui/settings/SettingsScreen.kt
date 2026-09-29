@@ -33,6 +33,7 @@ import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 
@@ -95,7 +96,7 @@ fun SettingsScreen(
     }
     if (state.isResetConfirmationVisible) {
         AlchemyDialog(onDismissRequest = onDismissReset, panelRes = R.drawable.dialog_blue) {
-            Text(stringResource(R.string.reset_confirmation_title), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.reset_confirmation_title), style = MaterialTheme.typography.titleLarge, color = Gold, textAlign = TextAlign.Center)
             Text(
                 stringResource(R.string.reset_confirmation_message),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -116,8 +117,8 @@ private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(PanelColor, RoundedCornerShape(16.dp))
-            .border(1.dp, PanelBorderColor, RoundedCornerShape(16.dp))
+            .background(PanelColor, RoundedCornerShape(20.dp))
+            .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
             .padding(16.dp),
         content = content
     )

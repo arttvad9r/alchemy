@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
@@ -59,14 +60,19 @@ fun ElementDetailsDialog(
         onDismissRequest = onDismiss,
         panelRes = R.drawable.dialog_blue,
         sidePadding = CARD_SIDE_PADDING,
+        widthFraction = CARD_WIDTH_FRACTION,
         height = CARD_HEIGHT,
         onClose = onDismiss
     ) {
         Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("element_details")) {
-            // Leaves the top right corner to the close cross.
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = HEADER_END_GAP)) {
+            // Centred, with equal room on both sides so the close cross never covers a long name.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = HEADER_SIDE_GAP)
+            ) {
                 FramedElementIcon(element, Modifier.size(HEADER_ICON_SIZE))
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f).padding(start = 14.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f, fill = false).padding(start = 14.dp)) {
                     val nameStyle = MaterialTheme.typography.headlineSmall
                     Text(
                         element.name,
@@ -81,7 +87,7 @@ fun ElementDetailsDialog(
                     }
                 }
             }
-            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 10.dp))
+            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 8.dp))
             if (madeFrom.isNotEmpty()) {
                 LinkSection(R.string.element_made_from) {
                     madeFrom.forEach { recipe ->
@@ -115,7 +121,8 @@ fun ElementDetailsDialog(
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 10.dp).testTag("element_links_note")
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("element_links_note")
                 )
             }
         }
@@ -130,7 +137,8 @@ private fun LinkSection(titleRes: Int, content: @Composable () -> Unit) {
         stringResource(titleRes),
         style = MaterialTheme.typography.titleSmall,
         color = Gold,
-        modifier = Modifier.padding(top = 14.dp, bottom = 2.dp)
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp)
     )
     content()
 }
@@ -139,8 +147,8 @@ private fun LinkSection(titleRes: Int, content: @Composable () -> Unit) {
 private fun LinkRow(content: @Composable () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(vertical = 2.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp)
     ) {
         content()
     }
@@ -159,8 +167,9 @@ private fun OperatorIcon(res: Int) {
 
 private val LINK_TILE_WIDTH = 60.dp
 private val HEADER_ICON_SIZE = 84.dp
-private val HEADER_END_GAP = 36.dp
-private val CARD_SIDE_PADDING = 16.dp
+private val HEADER_SIDE_GAP = 36.dp
+private val CARD_SIDE_PADDING = 20.dp
+private const val CARD_WIDTH_FRACTION = 0.96f
 
 // Fits a fact, one recipe and the note on a compact phone; longer cards scroll.
 private val CARD_HEIGHT = 470.dp

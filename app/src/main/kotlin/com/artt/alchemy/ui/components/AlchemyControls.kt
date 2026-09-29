@@ -197,6 +197,7 @@ fun AlchemyDialog(
     onDismissRequest: () -> Unit,
     @DrawableRes panelRes: Int,
     sidePadding: Dp = DIALOG_SIDE_PADDING,
+    widthFraction: Float = DIALOG_WIDTH_FRACTION,
     // A set height keeps every card the same size; its content scrolls inside.
     height: Dp? = null,
     // Shows a close cross in the top right corner.
@@ -216,7 +217,7 @@ fun AlchemyDialog(
                     scaleX = DIALOG_START_SCALE + (1f - DIALOG_START_SCALE) * value
                     scaleY = scaleX
                 }
-                .fillMaxWidth(DIALOG_WIDTH_FRACTION)
+                .fillMaxWidth(widthFraction)
                 .widthIn(max = DIALOG_MAX_WIDTH)
                 .then(if (height != null) Modifier.height(height) else Modifier)
                 .drawBehind { drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height)) }

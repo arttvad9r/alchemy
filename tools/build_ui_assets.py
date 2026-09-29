@@ -7,6 +7,7 @@ Transparent margins are trimmed so artwork fills the bounds it is drawn into.
 Usage: python3 tools/build_ui_assets.py  (requires pillow)
 """
 
+import colorsys
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw
@@ -65,8 +66,14 @@ UI_ASSETS = {
     "ui/buttons/input_field.png": ("field_row", 512),
     "ui/icons/plus.png": ("ic_plus", 96),
     "ui/icons/forward.png": ("ic_forward", 96),
-    "ui/icons/close.png": ("ic_close", 96),
 }
+
+CLOSE_ICON = "ui/icons/close.png"
+# The close icon is drawn orange-red; the dialogs want the blue of the button art.
+CLOSE_HUE = 0.6
+# Strokes lighter than this (the cross itself) lose most of their colour and read as white.
+CLOSE_WHITE_LIGHTNESS = 0.6
+CLOSE_WHITE_SATURATION = 0.35
 
 PROGRESS_BAR = "ui/buttons/progress_bar.png"
 # The bar art is drawn half full; its empty right end becomes both ends of the track.
@@ -89,6 +96,24 @@ def convert(source: Path, name: str, max_side: int) -> None:
     if scale < 1.0:
         image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
     image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
+def convert_close_icon() -> None:
+    """Recolour the close icon to the blue buttons: one blue hue throughout, the cross nearly white."""
+    image = trimmed(ASSETS / CLOSE_ICON)
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            red, green, blue, alpha = pixels[x, y]
+            if alpha == 0:
+                continue
+            _, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+            if lightness > CLOSE_WHITE_LIGHTNESS:
+                saturation *= CLOSE_WHITE_SATURATION
+            r, g, b = colorsys.hls_to_rgb(CLOSE_HUE, lightness, saturation)
+            pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
+    image.thumbnail((96, 96), Image.LANCZOS)
+    image.save(RES_DIR / "ic_close.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def convert_progress_bar() -> None:
@@ -115,6 +140,7 @@ def main() -> None:
     for source, (name, max_side) in UI_ASSETS.items():
         convert(ASSETS / source, name, max_side)
     convert_progress_bar()
+    convert_close_icon()
 
 
 if __name__ == "__main__":

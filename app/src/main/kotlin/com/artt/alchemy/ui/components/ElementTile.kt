@@ -180,8 +180,8 @@ fun FactText(text: String, modifier: Modifier = Modifier) {
         ),
         fontSize = FACT_FONT_SIZE,
         color = MaterialTheme.colorScheme.onSurface,
-        // Ragged right: justifying is ignored on some phones and leaves wide gaps on narrow ones.
-        textAlign = TextAlign.Start,
+        // Centred like the rest of the cards; justifying is ignored on some phones and leaves wide gaps on narrow ones.
+        textAlign = TextAlign.Center,
         modifier = modifier
     )
 }

@@ -1,5 +1,6 @@
 package com.artt.alchemy.ui.home
 
+import android.graphics.Typeface
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -50,6 +52,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.lerp
+import androidx.core.content.res.ResourcesCompat
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementRarity
@@ -146,11 +149,13 @@ fun WorkspaceCanvas(
     )
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
+    val context = LocalContext.current
     val labelPaint = remember(labelColor) {
         android.graphics.Paint().apply {
             color = labelColor
             textAlign = android.graphics.Paint.Align.CENTER
-            isFakeBoldText = true
+            // The app's reading face at bold weight, like every other label.
+            typeface = ResourcesCompat.getFont(context, R.font.alegreya)?.let { Typeface.create(it, LABEL_WEIGHT, false) }
             isAntiAlias = true
             // Keeps labels readable over the bright scene background.
             setShadowLayer(LABEL_SHADOW_RADIUS, 0f, 2f, android.graphics.Color.BLACK)
@@ -417,3 +422,5 @@ private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float,
 }
 
 private fun itemRadiusSquared(width: Int, height: Int): Float = minOf(width, height).let { it * ITEM_RADIUS_FRACTION }.let { it * it }
+
+private const val LABEL_WEIGHT = 700
