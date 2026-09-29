@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
@@ -48,9 +49,10 @@ import com.artt.alchemy.game.ElementGroup
 import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.ui.components.AlchemySearchField
 import com.artt.alchemy.ui.components.AlchemyTab
+import com.artt.alchemy.ui.components.ElementIcon
 import com.artt.alchemy.ui.components.FinalMark
-import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.ScreenBanner
+import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
@@ -76,7 +78,7 @@ fun ElementsScreen(
     }.sortedBy { it.id !in progress.unlockedIds }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        // Three columns on a phone keep long names whole even with large text; wider screens get more.
+        // Four columns on a compact phone; long names shrink to whole words, wider screens get more.
         val columns = maxOf(1, ((maxWidth - SCREEN_PADDING * 2) / CARD_MIN_WIDTH).toInt())
         LazyColumn(
             modifier = Modifier.fillMaxSize().testTag("screen_elements"),
@@ -162,11 +164,12 @@ private fun ElementCard(
             .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
             .panelBackground(R.drawable.card_base)
             // Clears the ornament on the top edge of the card art.
-            .padding(start = 6.dp, top = 10.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
+            .padding(start = 6.dp, top = 8.dp, end = 6.dp, bottom = CARD_TEXT_GAP + CARD_BOTTOM_BORDER)
     ) {
         Box(contentAlignment = Alignment.TopEnd) {
+            // The card art is the only frame; the icon sits straight on it.
             Crossfade(targetState = unlocked && revealed, label = "reveal") { shown ->
-                FramedElementIcon(element, Modifier.fillMaxWidth(), locked = !shown)
+                ElementIcon(element, Modifier.fillMaxWidth().padding(ICON_INSET), silhouette = !shown)
             }
             if (unlocked && element.id in ElementLinks.finalElementIds) {
                 val finalLabel = stringResource(R.string.element_final)
@@ -194,11 +197,13 @@ private fun ElementCard(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.weight(1f).padding(top = CARD_TEXT_GAP)
         ) {
+            val nameStyle = MaterialTheme.typography.labelMedium
             Text(
                 text = if (unlocked) element.name else stringResource(R.string.locked_element),
-                style = MaterialTheme.typography.labelMedium,
+                style = nameStyle,
                 textAlign = TextAlign.Center,
                 maxLines = 2,
+                autoSize = WholeWordsAutoSize(min = NAME_MIN_SIZE, max = nameStyle.fontSize),
                 color = if (unlocked) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -217,9 +222,11 @@ private val ElementGroup.labelRes: Int
 private const val REVEAL_DELAY_MILLIS = 250L
 private val FINAL_MARK_SIZE = 11.dp
 
-// Sits on the frame's corner ornament, clear of the icon art.
-private val FINAL_MARK_INSET = 7.dp
-private val CARD_MIN_WIDTH = 104.dp
+// In the icon's corner, clear of the art.
+private val FINAL_MARK_INSET = 2.dp
+private val CARD_MIN_WIDTH = 80.dp
+private val ICON_INSET = 4.dp
+private val NAME_MIN_SIZE = 10.sp
 private val SCREEN_PADDING = 12.dp
 
 // Space above and below the name, kept equal so the text sits evenly in the card.
