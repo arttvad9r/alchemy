@@ -75,6 +75,13 @@
     <string name="cancel">Отмена</string>
     <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
+    <string name="back">Назад</string>
+    <string name="tip_tap">Нажмите на элемент, и он ляжет на рабочую область</string>
+    <string name="tip_combine">Наложите один элемент на другой, чтобы получить новый</string>
+    <string name="tip_remove">Перетащите элемент за край рабочей области, чтобы убрать его</string>
+    <string name="tip_next">Дальше</string>
+    <string name="tips_skip">Пропустить подсказки</string>
+    <string name="tips_show">Показать подсказки</string>
     <string name="element_new_badge">Новое</string>
     <string name="completion_title">Алхимия завершена</string>
     <string name="completion_message">Открыты все %1$d элементов</string>

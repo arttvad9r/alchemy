@@ -107,7 +107,12 @@ fun PlayerProgress.reset(): PlayerProgress = initialPlayerProgress()
 class ProgressStore(context: Context) {
     private val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
 
-    fun load(): PlayerProgress = PlayerProgress(
+    fun load(): PlayerProgress = loadRaw().let { saved ->
+        // Saves from before the first-run tips exist have no flag; a player who already mixed needs no tips.
+        if (preferences.contains(KEY_ONBOARDING_SEEN)) saved else saved.copy(onboardingSeen = saved.mixAttemptCount > 0)
+    }
+
+    private fun loadRaw(): PlayerProgress = PlayerProgress(
         unlockedIds = preferences.getStringSet(KEY_UNLOCKED_IDS, null)?.toSet() ?: AlchemyCatalog.baseElementIds,
         discoveryOrder = preferences.getString(KEY_DISCOVERY_ORDER, null)?.split(SEPARATOR)?.filter(String::isNotEmpty).orEmpty(),
         knownRecipeKeys = preferences.getStringSet(KEY_KNOWN_RECIPES, null)?.toSet() ?: emptySet(),

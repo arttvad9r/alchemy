@@ -112,6 +112,9 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                                 onPaletteSort = viewModel::setPaletteSort,
                                 onEffectConsumed = viewModel::consumeCombinationEffect,
                                 onTransitionsConsumed = viewModel::consumeItemTransitions,
+                                onNextTip = viewModel::nextTip,
+                                onSkipTips = viewModel::skipTips,
+                                onShowTips = viewModel::showTips,
                                 modifier = Modifier.padding(padding)
                             )
                             AppTab.ELEMENTS -> ElementsScreen(

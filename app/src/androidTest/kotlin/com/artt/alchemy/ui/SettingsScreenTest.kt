@@ -13,8 +13,10 @@ import org.junit.Rule
 import org.junit.Test
 
 class SettingsScreenTest {
+    private val composeRule = createAndroidComposeRule<MainActivity>()
+
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val chain = skippingOnboarding(composeRule)
 
     @Test
     fun settings_toggles_and_confirmed_reset_update_visible_progress() {

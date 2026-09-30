@@ -49,6 +49,7 @@ fun ElementDetailsDialog(
     element: ElementDefinition,
     progress: PlayerProgress,
     onOpenElement: (ElementDefinition) -> Unit,
+    onBack: (() -> Unit)?,
     onDismiss: () -> Unit
 ) {
     val madeFrom = ElementLinks.recipesByResult[element.id].orEmpty().filter { it.isKnown(progress) }
@@ -62,7 +63,8 @@ fun ElementDetailsDialog(
         sidePadding = CARD_SIDE_PADDING,
         widthFraction = CARD_WIDTH_FRACTION,
         height = CARD_HEIGHT,
-        onClose = onDismiss
+        onClose = onDismiss,
+        onBack = onBack
     ) {
         Column(modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).testTag("element_details")) {
             // Centred, with equal room on both sides so the close cross never covers a long name.

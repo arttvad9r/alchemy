@@ -102,6 +102,19 @@ private val RowSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.85f
 private val DropdownSegments = listOf(Segment(0f, 0.15f, false), Segment(0.15f, 0.72f, true), Segment(0.72f, 1f, false))
 private val WholeHeight = listOf(Segment(0f, 1f, true))
 
+// The bubble's tail sits in the middle of the bottom edge and stays whole with the lower corners.
+private val BubbleColumns = listOf(
+    Segment(0f, 0.2f, false),
+    Segment(0.2f, 0.42f, true),
+    Segment(0.42f, 0.58f, false),
+    Segment(0.58f, 0.8f, true),
+    Segment(0.8f, 1f, false)
+)
+private val BubbleRows = listOf(Segment(0f, 0.25f, false), Segment(0.25f, 0.6f, true), Segment(0.6f, 1f, false))
+
+// The bubble art is about three times as large as it should be drawn, so its corners and tail stay small.
+private const val BUBBLE_ART_DENSITY = 3f
+
 // Where the fill sits inside the track art, in track pixels (see tools/build_ui_assets.py).
 private const val PROGRESS_INSET_X = 6f
 private const val PROGRESS_INSET_Y = 7f
@@ -261,6 +274,8 @@ fun AlchemyDialog(
     height: Dp? = null,
     // Shows a close cross in the top right corner.
     onClose: (() -> Unit)? = null,
+    // Shows a back arrow in the top left corner.
+    onBack: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
@@ -289,20 +304,41 @@ fun AlchemyDialog(
                 content = content
             )
             if (onClose != null) {
-                Image(
-                    painter = painterResource(R.drawable.ic_close),
+                AlchemyIconButton(
+                    icon = R.drawable.ic_close,
                     contentDescription = stringResource(R.string.close),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = CLOSE_TOP_INSET, end = CLOSE_END_INSET)
-                        .size(CLOSE_SIZE)
-                        .clip(CircleShape)
-                        .clickable(onClick = onClose)
-                        .testTag("dialog_close")
+                    onClick = onClose,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(top = CLOSE_TOP_INSET, end = CLOSE_END_INSET).testTag("dialog_close"),
+                    size = CLOSE_SIZE
+                )
+            }
+            if (onBack != null) {
+                AlchemyIconButton(
+                    icon = R.drawable.ic_back,
+                    contentDescription = stringResource(R.string.back),
+                    onClick = onBack,
+                    modifier = Modifier.align(Alignment.TopStart).padding(top = CLOSE_TOP_INSET, start = CLOSE_END_INSET).testTag("dialog_back"),
+                    size = CLOSE_SIZE
                 )
             }
         }
     }
+}
+
+/** A round icon standing in for a word: close, back, check, info. It always carries a spoken description. */
+@Composable
+fun AlchemyIconButton(
+    @DrawableRes icon: Int,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = ICON_BUTTON_SIZE
+) {
+    Image(
+        painter = painterResource(icon),
+        contentDescription = contentDescription,
+        modifier = modifier.size(size).clip(CircleShape).clickable(role = Role.Button, onClick = onClick)
+    )
 }
 
 /** The bar art: an empty track with a glowing fill that grows with [progress] from 0 to 1. */
@@ -442,6 +478,20 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
     }
 }
 
+/** A speech bubble with its tail at the bottom centre; leave room for the tail below the content. */
+@Composable
+fun Modifier.tooltipBackground(): Modifier {
+    val art = ImageBitmap.imageResource(R.drawable.tooltip_bubble)
+    return drawBehind { drawSliced(art, BubbleColumns, BubbleRows, density / BUBBLE_ART_DENSITY) }
+}
+
+/** The green pill behind a counter; its height follows the content so the rim keeps its thickness. */
+@Composable
+fun Modifier.pillBadge(): Modifier {
+    val art = ImageBitmap.imageResource(R.drawable.pill_badge)
+    return drawBehind { drawSliced(art, CapSegments, WholeHeight, size.height / art.height) }
+}
+
 /** A single-line row panel: the art's height follows the row, so the trim keeps its thickness. */
 @Composable
 fun Modifier.rowPanel(): Modifier {
@@ -498,6 +548,7 @@ private val DIALOG_SIDE_PADDING = 32.dp
 /** Distance from the screen edge (and from the top of the content area) to a screen's content, the same everywhere. */
 val ScreenPadding = 4.dp
 private val CLOSE_SIZE = 36.dp
+private val ICON_BUTTON_SIZE = 44.dp
 
 // Below the corner ornament and level with the top of the card's content.
 private val CLOSE_TOP_INSET = 40.dp

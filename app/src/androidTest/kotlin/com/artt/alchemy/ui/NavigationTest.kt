@@ -14,8 +14,10 @@ import org.junit.Rule
 import org.junit.Test
 
 class NavigationTest {
+    private val composeRule = createAndroidComposeRule<MainActivity>()
+
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val chain = skippingOnboarding(composeRule)
 
     @Test
     fun bottomNavigationReachesAllFiveScreens() {

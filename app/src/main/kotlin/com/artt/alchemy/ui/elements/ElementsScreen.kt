@@ -77,7 +77,8 @@ fun ElementsScreen(
     val fresh = remember { freshIds }
     DisposableEffect(Unit) { onDispose(onSeen) }
     var query by remember { mutableStateOf("") }
-    var openedElement by remember { mutableStateOf<ElementDefinition?>(null) }
+    // Cards opened one from another, so back returns to the previous one.
+    var openedCards by remember { mutableStateOf(emptyList<ElementDefinition>()) }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
     // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
     val entries = AlchemyCatalog.elements.filter { element ->
@@ -126,7 +127,7 @@ fun ElementsScreen(
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                             onOpen = {
                                 onClick()
-                                openedElement = element
+                                openedCards = listOf(element)
                             }.takeIf { unlocked }
                         )
                     }
@@ -135,8 +136,14 @@ fun ElementsScreen(
             }
         }
     }
-    openedElement?.let { element ->
-        ElementDetailsDialog(element, progress, onOpenElement = { openedElement = it }, onDismiss = { openedElement = null })
+    openedCards.lastOrNull()?.let { element ->
+        ElementDetailsDialog(
+            element = element,
+            progress = progress,
+            onOpenElement = { openedCards = if (it == element) openedCards else openedCards + it },
+            onBack = { openedCards = openedCards.dropLast(1) }.takeIf { openedCards.size > 1 },
+            onDismiss = { openedCards = emptyList() }
+        )
     }
 }
 

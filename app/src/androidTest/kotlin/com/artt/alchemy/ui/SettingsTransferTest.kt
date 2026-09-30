@@ -41,7 +41,7 @@ class SettingsTransferTest {
     fun startWithFreshProgress() {
         store = ProgressStore(context)
         original = store.load()
-        store.save(initialPlayerProgress().copy(reducedMotion = false))
+        store.save(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
         composeRule.onNodeWithTag("nav_settings").performClick()
     }
@@ -93,7 +93,7 @@ class SettingsTransferTest {
         composeRule.onNodeWithTag("transfer_dialog").assertIsDisplayed()
         composeRule.onNodeWithTag("import_dialog").assertDoesNotExist()
         composeRule.onNodeWithTag("transfer_ok").performClick()
-        assertEquals(initialPlayerProgress().copy(soundEnabled = false, reducedMotion = false), store.load())
+        assertEquals(initialPlayerProgress().copy(soundEnabled = false, reducedMotion = false, onboardingSeen = true), store.load())
     }
 
     @Test

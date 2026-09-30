@@ -36,7 +36,7 @@ class HintsScreenTest {
     fun startFresh() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
         original = store.load()
-        store.save(initialPlayerProgress())
+        store.save(initialPlayerProgress().copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 
