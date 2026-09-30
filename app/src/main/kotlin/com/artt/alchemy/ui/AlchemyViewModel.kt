@@ -2,15 +2,18 @@ package com.artt.alchemy.ui
 
 import android.app.Application
 import android.net.Uri
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.artt.alchemy.audio.BackgroundMusic
+import com.artt.alchemy.audio.ComboStreak
 import com.artt.alchemy.audio.Haptic
 import com.artt.alchemy.audio.Haptics
 import com.artt.alchemy.audio.Sound
 import com.artt.alchemy.audio.SoundEffects
+import com.artt.alchemy.audio.panAt
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
@@ -31,6 +34,13 @@ import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
 const val TIP_COUNT = 3
+
+private const val CENTER = 0.5f
+
+// How long the music stays lowered under each big moment.
+private const val DISCOVER_DUCK_MILLIS = 1300L
+private const val GRAND_DUCK_MILLIS = 2600L
+private const val ACHIEVEMENT_DUCK_MILLIS = 2000L
 
 enum class AppTab {
     HOME,
@@ -92,6 +102,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     private val sounds = SoundEffects(application)
     private val haptics = Haptics(application)
     private val music = BackgroundMusic(application)
+    private val streak = ComboStreak()
 
     init {
         applyVolumes()
@@ -117,7 +128,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         }
 
         val transitions = itemTransitions(state.workspace, result, event)
-        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let(::play)
+        // Heard from where it happened: the mix, or the item that came, went or was refused.
+        val where = effect?.xFraction ?: transitions.firstOrNull()?.xFraction ?: CENTER
+        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let { play(it, where) }
 
         if (progress != state.progress) store.save(progress)
         state = state.copy(
@@ -140,7 +153,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** Asks for a hint, or for the next step of the one already shown. */
     fun requestHint() {
-        playSound(Sound.CLICK)
+        playSound(Sound.HINT)
         updateProgress { requestHint() }
     }
 
@@ -176,6 +189,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** An element was taken in hand, from the palette or on the workspace. */
     fun onPickUp() {
+        playSound(Sound.PICKUP)
         vibrate(Haptic.TICK)
     }
 
@@ -185,8 +199,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** The achievement banner came on screen: the reward chime and a tap. */
     fun onAchievementShown() {
-        playSound(Sound.DISCOVER)
-        vibrate(Haptic.CLICK)
+        playSound(Sound.ACHIEVEMENT)
+        vibrate(Haptic.ACHIEVEMENT)
+        music.duck(ACHIEVEMENT_DUCK_MILLIS)
     }
 
     fun dismissAchievement() {
@@ -332,17 +347,39 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         music.release()
     }
 
-    private fun play(feedback: GameFeedback) {
-        val (sound, haptic) = when (feedback) {
-            GameFeedback.PLACE -> Sound.PLACE to Haptic.TICK
-            GameFeedback.COMBINE -> Sound.COMBINE to Haptic.CLICK
-            GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
-            GameFeedback.DISCOVER_GRAND -> Sound.DISCOVER to Haptic.HEAVY
-            GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
-            GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
-            GameFeedback.CLEAR -> Sound.REMOVE to Haptic.CLICK
+    private fun play(feedback: GameFeedback, xFraction: Float) {
+        val pan = panAt(xFraction)
+        when (feedback) {
+            GameFeedback.PLACE -> feedback(Sound.PLACE, Haptic.TICK, pan)
+
+            // Mixes in quick succession climb in pitch, so a good run sounds like one.
+            GameFeedback.COMBINE -> feedback(Sound.COMBINE, Haptic.CLICK, pan, streak.hit(SystemClock.uptimeMillis()))
+
+            GameFeedback.DISCOVER -> {
+                streak.hit(SystemClock.uptimeMillis())
+                feedback(Sound.DISCOVER, Haptic.DISCOVER, pan)
+                music.duck(DISCOVER_DUCK_MILLIS)
+            }
+
+            GameFeedback.DISCOVER_GRAND -> {
+                streak.hit(SystemClock.uptimeMillis())
+                feedback(Sound.DISCOVER_GRAND, Haptic.DISCOVER_GRAND, pan)
+                music.duck(GRAND_DUCK_MILLIS)
+            }
+
+            GameFeedback.NO_MATCH -> {
+                streak.reset()
+                feedback(Sound.NO_MATCH, Haptic.TICK, pan)
+            }
+
+            GameFeedback.REMOVE -> feedback(Sound.REMOVE, Haptic.TICK, pan)
+
+            GameFeedback.CLEAR -> feedback(Sound.WHOOSH, Haptic.CLICK, 0f)
         }
-        sound?.let(::playSound)
+    }
+
+    private fun feedback(sound: Sound, haptic: Haptic, pan: Float, semitones: Int = 0) {
+        if (state.progress.soundEnabled) sounds.play(sound, pan, semitones.toFloat())
         vibrate(haptic)
     }
 
