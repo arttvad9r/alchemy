@@ -33,8 +33,6 @@ import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
-const val TIP_COUNT = 3
-
 private const val CENTER = 0.5f
 
 // How long the music stays lowered under each big moment.
@@ -65,22 +63,22 @@ data class AlchemyUiState(
     val progress: PlayerProgress,
     val workspace: WorkspaceState = WorkspaceState(),
     val selectedTab: AppTab = AppTab.HOME,
-    val newlyUnlockedId: String? = null,
     val combinationEffect: CombinationEffect? = null,
     val itemTransitions: List<ItemTransition> = emptyList(),
     val isResetConfirmationVisible: Boolean = false,
-    // Ids of achievements earned and not yet announced; the first one is on screen.
-    val achievementQueue: List<String> = emptyList(),
+    // Discovery cards, the finished collection and achievement banners waiting their turn; the first one is on stage.
+    val reveals: List<Reveal> = emptyList(),
     // Elements found this session that the catalog has not shown yet.
     val freshElementIds: Set<String> = emptySet(),
-    // The finished-collection card: raised by the mix that opens the last element, or from the achievements screen.
-    val isCompletionVisible: Boolean = false,
     // A save read from a file, waiting for the player to agree to replace the current progress.
     val pendingImport: PlayerProgress? = null,
     val transferResult: TransferResult? = null,
     // The first-run tip on screen while the progress has not marked them seen.
     val tipStep: Int = 0
-)
+) {
+    /** The reveal on stage now, if any. */
+    val reveal: Reveal? get() = reveals.firstOrNull()
+}
 
 /** How saving progress to a file or loading it from one ended, shown to the player once. */
 enum class TransferResult {
@@ -132,17 +130,23 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         val where = effect?.xFraction ?: transitions.firstOrNull()?.xFraction ?: CENTER
         workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let { play(it, where) }
 
-        if (progress != state.progress) store.save(progress)
+        // The tips follow what the player does; after the last one they are done for good.
+        val tipStep = if (progress.onboardingSeen) state.tipStep else tipAfter(state.tipStep, event, state.workspace, result)
+        val onboarded = if (tipStep >= TIP_COUNT) progress.copy(onboardingSeen = true) else progress
+        val reveals = listOfNotNull(newlyUnlockedId?.let(Reveal::Discovery)) +
+            listOfNotNull(Reveal.Completion.takeIf { progress.isComplete && !state.progress.isComplete }) +
+            newlyCompletedAchievements(state.progress, progress).map(Reveal::Achievement)
+
+        if (onboarded != state.progress) store.save(onboarded)
         state = state.copy(
             combinationEffect = effect ?: state.combinationEffect,
             // Transitions pile up until Home takes them, so none is lost between frames.
             itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
-            progress = progress,
+            progress = onboarded,
             workspace = result.workspace,
-            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
             freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
-            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress),
-            isCompletionVisible = state.isCompletionVisible || (progress.isComplete && !state.progress.isComplete)
+            reveals = state.reveals.enqueue(reveals),
+            tipStep = tipStep.coerceAtMost(TIP_COUNT - 1)
         )
     }
 
@@ -204,23 +208,17 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         music.duck(ACHIEVEMENT_DUCK_MILLIS)
     }
 
-    fun dismissAchievement() {
-        state = state.copy(achievementQueue = state.achievementQueue.drop(1))
+    fun dismissAchievement(id: String) {
+        dismiss(Reveal.Achievement(id))
     }
 
     fun showCompletion() {
         playSound(Sound.CLICK)
-        state = state.copy(isCompletionVisible = true)
+        state = state.copy(reveals = state.reveals.enqueue(listOf(Reveal.Completion)))
     }
 
     fun dismissCompletion() {
-        state = state.copy(isCompletionVisible = false)
-    }
-
-    /** Moves to the next first-run tip; after the last one the tips are done. */
-    fun nextTip() {
-        playSound(Sound.CLICK)
-        if (state.tipStep >= TIP_COUNT - 1) skipTips() else state = state.copy(tipStep = state.tipStep + 1)
+        dismiss(Reveal.Completion)
     }
 
     fun skipTips() {
@@ -238,8 +236,12 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         if (state.freshElementIds.isNotEmpty()) state = state.copy(freshElementIds = emptySet())
     }
 
-    fun dismissNewElement() {
-        state = state.copy(newlyUnlockedId = null)
+    fun dismissNewElement(elementId: String) {
+        dismiss(Reveal.Discovery(elementId))
+    }
+
+    private fun dismiss(reveal: Reveal) {
+        state = state.copy(reveals = state.reveals - reveal)
     }
 
     fun requestReset() {

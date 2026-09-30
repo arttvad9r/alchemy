@@ -142,7 +142,8 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                         }
                     }
                 }
-                if (state.isCompletionVisible && state.newlyUnlockedId == null && state.combinationEffect == null) {
+                // Reveals take the stage one at a time, in the order the queue gives them.
+                if (state.reveal == Reveal.Completion && state.combinationEffect == null) {
                     CompletionDialog(state.progress, onDismiss = viewModel::dismissCompletion, onClick = viewModel::onButtonClick)
                 }
                 AchievementBanner(state, viewModel)
@@ -163,7 +164,6 @@ private fun TabScreen(tab: AppTab, state: AlchemyUiState, viewModel: AlchemyView
             onPaletteSort = viewModel::setPaletteSort,
             onEffectConsumed = viewModel::consumeCombinationEffect,
             onTransitionsConsumed = viewModel::consumeItemTransitions,
-            onNextTip = viewModel::nextTip,
             onSkipTips = viewModel::skipTips,
             onShowTips = viewModel::showTips,
             modifier = modifier
@@ -223,16 +223,16 @@ private fun tabTransition(reducedMotion: Boolean): AnimatedContentTransitionScop
     }
 }
 
-// Waits until a discovery card or its effect is done, so the banner never covers the reveal.
+// On stage once the discovery cards and the finale ahead of it are done, and never over a mix's effect.
 @Composable
 private fun BoxScope.AchievementBanner(state: AlchemyUiState, viewModel: AlchemyViewModel) {
-    val achievement = state.achievementQueue.firstOrNull()?.let(achievementsById::getValue)
-    if (achievement != null && state.newlyUnlockedId == null && state.combinationEffect == null && !state.isCompletionVisible) {
+    val achievement = (state.reveal as? Reveal.Achievement)?.id?.let(achievementsById::getValue)
+    if (achievement != null && state.combinationEffect == null) {
         key(achievement.id) {
             AchievementToast(
                 achievement = achievement,
                 onShown = viewModel::onAchievementShown,
-                onDismiss = viewModel::dismissAchievement,
+                onDismiss = { viewModel.dismissAchievement(achievement.id) },
                 modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(ScreenPadding)
             )
         }

@@ -57,6 +57,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -99,6 +100,7 @@ import com.artt.alchemy.game.sortElements
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.ItemTransition
+import com.artt.alchemy.ui.Reveal
 import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
@@ -141,13 +143,12 @@ private val WORKSPACE_FRAME_INSET = 12.dp
 fun HomeScreen(
     state: AlchemyUiState,
     onEvent: (WorkspaceEvent) -> Unit,
-    onDismissNewElement: () -> Unit,
+    onDismissNewElement: (elementId: String) -> Unit,
     onPickUp: () -> Unit,
     onClick: () -> Unit,
     onPaletteSort: (ElementSort) -> Unit,
     onEffectConsumed: () -> Unit,
     onTransitionsConsumed: () -> Unit,
-    onNextTip: () -> Unit,
     onSkipTips: () -> Unit,
     onShowTips: () -> Unit,
     modifier: Modifier = Modifier
@@ -262,7 +263,6 @@ fun HomeScreen(
                     isEmpty = state.workspace.items.isEmpty(),
                     tipsVisible = !state.progress.onboardingSeen,
                     tipStep = state.tipStep,
-                    onNextTip = onNextTip,
                     onSkipTips = onSkipTips
                 )
             }
@@ -387,9 +387,10 @@ fun HomeScreen(
             LinearOutSlowInEasing.transform(effectTime.value) >= if (grand) GRAND_CARD_AFTER_EFFECT else DISCOVERY_CARD_AFTER_EFFECT
         }
     }
-    state.newlyUnlockedId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
+    (state.reveal as? Reveal.Discovery)?.elementId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
-        NewElementDialog(element, onDismiss = onDismissNewElement, onClick = onClick)
+        // Keyed, so a card that follows another plays its entrance afresh.
+        key(elementId) { NewElementDialog(element, onDismiss = { onDismissNewElement(elementId) }, onClick = onClick) }
     }
 }
 
