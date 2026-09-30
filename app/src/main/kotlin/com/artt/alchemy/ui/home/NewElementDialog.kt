@@ -32,7 +32,6 @@ import com.artt.alchemy.R
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.game.ElementRarity
-import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
@@ -41,6 +40,8 @@ import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.elementFact
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
@@ -96,8 +97,8 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                 RarityBadge(element.rarity)
                 if (element.id in ElementLinks.finalElementIds) FinalBadge()
             }
-            Text(stringResource(R.string.new_element_message, element.name), textAlign = TextAlign.Center)
-            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
+            Text(stringResource(R.string.new_element_message, elementName(element.id)), textAlign = TextAlign.Center)
+            FactText(elementFact(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
         }
         AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
             onClick()

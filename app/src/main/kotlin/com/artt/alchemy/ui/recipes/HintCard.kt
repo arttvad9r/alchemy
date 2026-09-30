@@ -28,6 +28,7 @@ import com.artt.alchemy.game.nextHintRecipe
 import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.ui.components.ElementFrame
 import com.artt.alchemy.ui.components.FramedElementIcon
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 
@@ -60,7 +61,7 @@ fun HintCard(progress: PlayerProgress, onRequestHint: () -> Unit, onPlaceHint: (
     val second = AlchemyCatalog.elementsById.getValue(recipe.secondId)
     val result = AlchemyCatalog.elementsById.getValue(recipe.resultId)
     val secondRevealed = hint.step >= 2
-    val description = stringResource(R.string.hint_place, first.name, if (secondRevealed) second.name else "?")
+    val description = stringResource(R.string.hint_place, elementName(first.id), if (secondRevealed) elementName(second.id) else "?")
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier

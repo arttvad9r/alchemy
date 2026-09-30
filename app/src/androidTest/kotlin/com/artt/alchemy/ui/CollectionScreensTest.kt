@@ -9,8 +9,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
-import com.artt.alchemy.game.elementFacts
+import com.artt.alchemy.ui.components.elementFact
 import org.junit.Rule
 import org.junit.Test
 
@@ -52,7 +53,7 @@ class CollectionScreensTest {
         composeRule.onNodeWithTag("nav_elements").performClick()
         composeRule.onNodeWithTag("element_fire").performClick()
 
-        composeRule.onNodeWithText(elementFacts.getValue("fire")).assertIsDisplayed()
+        composeRule.onNodeWithText(InstrumentationRegistry.getInstrumentation().targetContext.resources.elementFact("fire")).assertIsDisplayed()
 
         composeRule.onNodeWithTag("dialog_close").performClick()
         composeRule.onNodeWithTag("element_details").assertDoesNotExist()

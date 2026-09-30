@@ -15,9 +15,9 @@ import com.artt.alchemy.MainActivity
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
-import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Recipe
 import com.artt.alchemy.game.nextHintRecipe
+import com.artt.alchemy.ui.components.elementName
 import org.junit.After
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
@@ -100,7 +100,7 @@ class HintsScreenTest {
 
     private fun firstHint(): Recipe = nextHintRecipe(initialPlayerProgress().unlockedIds)!!
 
-    private fun name(elementId: String): String = AlchemyCatalog.elementsById.getValue(elementId).name
+    private fun name(elementId: String): String = InstrumentationRegistry.getInstrumentation().targetContext.resources.elementName(elementId)
 
     private fun openRecipes() {
         composeRule.onNodeWithTag("nav_recipes").performClick()

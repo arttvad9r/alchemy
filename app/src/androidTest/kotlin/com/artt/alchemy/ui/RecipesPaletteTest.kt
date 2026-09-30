@@ -6,7 +6,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
@@ -59,7 +60,9 @@ class RecipesPaletteTest {
         composeRule.onNodeWithTag("nav_recipes").performClick()
         composeRule.onNodeWithTag("recipe_fire|water").assertIsDisplayed()
 
-        composeRule.onNodeWithTag("recipes_group_life").performScrollTo().performClick()
+        // The tab row scrolls sideways and composes only what is on screen, so bring the later tabs in first.
+        composeRule.onNodeWithTag("recipes_group_nature").performTouchInput { swipeLeft() }
+        composeRule.onNodeWithTag("recipes_group_life").performClick()
         composeRule.onNodeWithTag("recipe_fire|water").assertDoesNotExist()
 
         composeRule.onNodeWithTag("recipes_group_nature").performClick()

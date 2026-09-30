@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -59,6 +60,7 @@ import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.rarity
@@ -80,10 +82,11 @@ fun ElementsScreen(
     // Cards opened one from another, so back returns to the previous one.
     var openedCards by remember { mutableStateOf(emptyList<ElementDefinition>()) }
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
+    val resources = LocalContext.current.resources
     // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
     val entries = AlchemyCatalog.elements.filter { element ->
         (selectedGroup == null || element.group == selectedGroup) &&
-            (query.isBlank() || (element.id in progress.unlockedIds && element.name.contains(query, ignoreCase = true)))
+            (query.isBlank() || (element.id in progress.unlockedIds && resources.elementName(element.id).contains(query, ignoreCase = true)))
     }.sortedBy { it.id !in progress.unlockedIds }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -197,7 +200,7 @@ private fun ElementCard(
                 modifier = Modifier.weight(1f).padding(top = ElementTextGap)
             ) {
                 Text(
-                    text = if (unlocked) element.name else stringResource(R.string.locked_element),
+                    text = if (unlocked) elementName(element.id) else stringResource(R.string.locked_element),
                     style = nameStyle,
                     textAlign = TextAlign.Center,
                     maxLines = 2,
@@ -221,23 +224,25 @@ private fun ElementCard(
 
 /**
  * One name size for the whole catalog: the largest that keeps every name in two lines of whole words
- * and "Не открыт" on one line, so neighbouring cards never differ.
+ * and the "locked" label on one line, so neighbouring cards never differ.
  */
 @Composable
 private fun catalogNameStyle(contentWidth: Dp): TextStyle {
     // Tight leading, so a two-word name reads as one label.
     val base = MaterialTheme.typography.labelMedium.let { it.copy(lineHeight = it.fontSize * NAME_LINE_HEIGHT) }
     val locked = stringResource(R.string.locked_element)
+    val resources = LocalContext.current.resources
     val measurer = rememberTextMeasurer()
     val widthPx = with(LocalDensity.current) { contentWidth.roundToPx() }
-    return remember(base, locked, widthPx) {
+    return remember(base, locked, widthPx, resources) {
+        val names = AlchemyCatalog.elements.map { resources.elementName(it.id) }
         val constraints = Constraints(maxWidth = widthPx.coerceAtLeast(1))
-        val words = (AlchemyCatalog.elements.flatMap { it.name.split(' ') } + locked).distinct()
+        val words = (names.flatMap { it.split(' ') } + locked).distinct()
         val fits = { size: Float ->
             val style = base.copy(fontSize = size.sp)
             words.all { measurer.measure(it, style, softWrap = false).size.width <= widthPx } &&
                 measurer.measure(locked, style, softWrap = false).size.width <= widthPx &&
-                AlchemyCatalog.elements.none { measurer.measure(it.name, style, constraints = constraints, maxLines = 2).hasVisualOverflow }
+                names.none { measurer.measure(it, style, constraints = constraints, maxLines = 2).hasVisualOverflow }
         }
         val size = generateSequence(base.fontSize.value) { it - NAME_SIZE_STEP }.takeWhile { it > NAME_MIN_SIZE.value }.firstOrNull(fits)
         val fontSize = (size ?: NAME_MIN_SIZE.value).sp

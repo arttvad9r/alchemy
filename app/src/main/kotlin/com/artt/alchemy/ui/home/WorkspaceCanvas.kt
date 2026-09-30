@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.lerp
 import androidx.core.content.res.ResourcesCompat
 import com.artt.alchemy.R
-import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.overlapTarget
@@ -63,6 +62,7 @@ import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.elementIconRes
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import kotlin.math.PI
 import kotlin.math.roundToInt
@@ -226,7 +226,7 @@ fun WorkspaceCanvas(
                 lift = lift.value
             )
             // The item in hand is drawn last, so it never slides under the others.
-            currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion) }
+            currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
             drawTransitions(frames, art, radius)
             effect?.let { drawEffect(it, time, art, radius) }
         }
@@ -241,12 +241,13 @@ private fun ItemAccessibilityNodes(items: List<WorkspaceItem>, width: Int, heigh
     val side = with(LocalDensity.current) { (radius * 2).toDp() }
     items.forEach { item ->
         key(item.instanceId) {
+            val name = elementName(item.elementId)
             Box(
                 modifier = Modifier
                     .offset { IntOffset((item.xFraction * width - radius).roundToInt(), (item.yFraction * height - radius).roundToInt()) }
                     .size(side)
                     .testTag("workspace_item")
-                    .semantics { contentDescription = AlchemyCatalog.elementsById.getValue(item.elementId).name }
+                    .semantics { contentDescription = name }
             )
         }
     }
@@ -280,7 +281,7 @@ private class WorkspaceArt(
     val stars: ImageBitmap
 )
 
-private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPaint: android.graphics.Paint, radius: Float, motion: ItemMotion) {
+private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPaint: android.graphics.Paint, radius: Float, motion: ItemMotion, name: String) {
     val icon = art.icons[item.elementId] ?: return
     val iconSize = radius * 2 * ICON_SHARE
     var center = Offset(item.xFraction * size.width, item.yFraction * size.height)
@@ -324,7 +325,7 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
         )
         val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
         labelPaint.alpha = (alpha * 255).roundToInt()
-        drawContext.canvas.nativeCanvas.drawText(AlchemyCatalog.elementsById.getValue(item.elementId).name, center.x, labelBaseline, labelPaint)
+        drawContext.canvas.nativeCanvas.drawText(name, center.x, labelBaseline, labelPaint)
         labelPaint.alpha = 255
     }
 }

@@ -19,7 +19,7 @@ import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Combination
 import com.artt.alchemy.game.ElementLinks
-import com.artt.alchemy.game.elementFacts
+import com.artt.alchemy.ui.components.elementFact
 import com.artt.alchemy.ui.components.withTypographicBinding
 import org.junit.After
 import org.junit.Before
@@ -54,12 +54,12 @@ class ElementLinksScreenTest {
 
         composeRule.onNodeWithTag("link_steam").performScrollTo().performClick()
 
-        composeRule.onNodeWithText(withTypographicBinding(elementFacts.getValue("steam"))).assertIsDisplayed()
+        composeRule.onNodeWithText(withTypographicBinding(fact("steam"))).assertIsDisplayed()
         composeRule.onNodeWithTag("link_water").assertExists()
         composeRule.onNodeWithTag("element_links_note").assertExists()
 
         composeRule.onNodeWithTag("link_fire").performScrollTo().performClick()
-        composeRule.onNodeWithText(withTypographicBinding(elementFacts.getValue("fire"))).assertIsDisplayed()
+        composeRule.onNodeWithText(withTypographicBinding(fact("fire"))).assertIsDisplayed()
     }
 
     @Test
@@ -73,6 +73,8 @@ class ElementLinksScreenTest {
         composeRule.onNodeWithTag("element_details").assertIsDisplayed()
         composeRule.onNode(hasTestTag("element_links_note") and hasText("Больше ни с чем не сочетается")).assertExists()
     }
+
+    private fun fact(elementId: String): String = InstrumentationRegistry.getInstrumentation().targetContext.resources.elementFact(elementId)
 
     private fun launchWith(progress: PlayerProgress) {
         store.save(progress.copy(onboardingSeen = true))

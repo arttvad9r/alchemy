@@ -127,16 +127,17 @@ fun FinalMark(modifier: Modifier = Modifier) {
 
 @Composable
 fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val name = elementName(element.id)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(ElementTextGap),
         modifier = modifier
-            .semantics { contentDescription = element.name }
+            .semantics { contentDescription = name }
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
     ) {
         FramedElementIcon(element, Modifier.fillMaxWidth())
         Text(
-            text = element.name,
+            text = name,
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center,
             maxLines = 1,
