@@ -56,6 +56,7 @@ private const val GLOW_SIZE = 220
 private const val GLOW_ALPHA = 0.85f
 private const val TITLE_START_SCALE = 0.6f
 private const val ICON_SHINE_DELAY_MILLIS = 520L
+private const val ICON_SHINE_MILLIS = 480
 private const val TITLE_SHINE_DELAY_MILLIS = 260L
 
 // A legendary find gets more rays than the rest.
@@ -119,7 +120,7 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                         .width(140.dp)
                         .scale(ICON_START_SCALE + (1f - ICON_START_SCALE) * iconIn.value)
                         .graphicsLayer { alpha = iconIn.value.coerceIn(0f, 1f) }
-                        .shineOnce(delayMillis = ICON_SHINE_DELAY_MILLIS)
+                        .shineOnce(delayMillis = ICON_SHINE_DELAY_MILLIS, durationMillis = ICON_SHINE_MILLIS)
                 )
             }
             Row(

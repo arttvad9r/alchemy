@@ -20,9 +20,12 @@ private const val SPARK_DRAG = 2.6f
 private const val MAX_SPARKS = 260
 private const val SPARK_GLOW_SHARE = 3.2f
 private const val SPARK_GLOW_ALPHA = 0.28f
-private const val TRAIL_SPACING = 0.14f
-private const val MAX_TRAIL_PER_FRAME = 4
-private const val TRAIL_LIFE = 0.5f
+private const val TRAIL_SPACING = 0.32f
+private const val MAX_TRAIL_PER_FRAME = 2
+private const val TRAIL_LIFE = 0.3f
+
+// The ambience rises out of stillness when the workspace comes into view.
+private const val MOTES_FADE_IN_SECONDS = 1.5f
 
 // Ambient motes drifting up through the workspace.
 private const val MOTE_COUNT = 26
@@ -137,7 +140,7 @@ class Sparks {
                     vx = (random.nextFloat() - 0.5f) * unit * 0.3f,
                     vy = -unit * (0.2f + 0.3f * random.nextFloat()),
                     life = TRAIL_LIFE * (0.6f + 0.4f * random.nextFloat()),
-                    size = unit * (0.02f + 0.025f * random.nextFloat()),
+                    size = unit * (0.012f + 0.014f * random.nextFloat()),
                     color = if (random.nextInt(3) == 0) SparkWhite else color,
                     gravity = 0f
                 )
@@ -191,6 +194,7 @@ class Motes {
     fun draw(scope: DrawScope, seconds: Float, unit: Float) {
         val width = scope.size.width
         val height = scope.size.height
+        val arrival = (seconds / MOTES_FADE_IN_SECONDS).coerceIn(0f, 1f)
         motes.forEach { mote ->
             // From just below the bottom edge up past the top, then round again.
             val travelled = (mote.start + seconds * mote.speed) % MOTE_TRAVEL
@@ -198,7 +202,7 @@ class Motes {
             val x = mote.x + mote.sway * sin(seconds * 0.6f + mote.phase)
             val edgeFade = minOf(1f, (y + MOTE_EDGE) / (2 * MOTE_EDGE), (1f + MOTE_EDGE - y) / (2 * MOTE_EDGE)).coerceIn(0f, 1f)
             val twinkle = 0.55f + 0.45f * sin(seconds * (1.1f + mote.speed * 20f) + mote.phase * 3f)
-            val alpha = edgeFade * twinkle
+            val alpha = edgeFade * twinkle * arrival
             if (alpha <= 0f) return@forEach
             val center = Offset(x * width, y * height)
             val radius = unit * mote.size

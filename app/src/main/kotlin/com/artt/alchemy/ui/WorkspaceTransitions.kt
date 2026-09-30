@@ -8,6 +8,9 @@ import com.artt.alchemy.game.WorkspaceState
 enum class TransitionKind {
     APPEAR,
     VANISH,
+
+    // Swept away with the rest by clearing the workspace: housekeeping, so quieter than a removal.
+    SWEEP,
     SHAKE
 }
 
@@ -39,7 +42,7 @@ fun itemTransitions(before: WorkspaceState, result: WorkspaceResult, event: Work
         .map { ItemTransition(it.instanceId, TransitionKind.APPEAR, it.xFraction, it.yFraction) }
     val vanished = before.items
         .filterNot { it.instanceId in afterIds }
-        .map { ItemTransition(it.instanceId, TransitionKind.VANISH, it.xFraction, it.yFraction) }
+        .map { ItemTransition(it.instanceId, if (event is WorkspaceEvent.Clear) TransitionKind.SWEEP else TransitionKind.VANISH, it.xFraction, it.yFraction) }
     val refusedId = when {
         !result.attemptedMix -> null
         event is WorkspaceEvent.ResolveOverlap -> event.draggedInstanceId

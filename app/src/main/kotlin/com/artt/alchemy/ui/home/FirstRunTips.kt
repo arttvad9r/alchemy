@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
+import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.ui.TIP_COUNT
 import com.artt.alchemy.ui.components.AlchemyIconButton
 import com.artt.alchemy.ui.components.LocalReducedMotion
@@ -40,9 +41,10 @@ import com.artt.alchemy.ui.theme.Gold
 
 private const val TIP_FADE_MILLIS = 300
 private const val TIP_START_SCALE = 0.85f
+private const val HALF = 0.5f
 private const val HINT_FADE_MILLIS = 250
-private val TIP_MAX_WIDTH = 320.dp
-private val TIP_ICON_SIZE = 36.dp
+private val TIP_MAX_WIDTH = 280.dp
+private val TIP_ICON_SIZE = 30.dp
 
 // The bubble art's tail hangs below its body.
 private val TIP_TAIL_ROOM = 26.dp
@@ -66,16 +68,16 @@ fun FirstRunTip(step: Int, count: Int, onSkip: () -> Unit, modifier: Modifier = 
             .widthIn(max = TIP_MAX_WIDTH)
             .fillMaxWidth()
             .tooltipBackground()
-            .padding(start = 24.dp, top = 14.dp, end = 24.dp, bottom = 14.dp + TIP_TAIL_ROOM)
+            .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 8.dp + TIP_TAIL_ROOM)
             .testTag("first_run_tip")
     ) {
         Text(
             text = stringResource(tipText(step)),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
             AlchemyIconButton(
                 R.drawable.ic_close,
                 stringResource(R.string.tips_skip),
@@ -88,9 +90,13 @@ fun FirstRunTip(step: Int, count: Int, onSkip: () -> Unit, modifier: Modifier = 
     }
 }
 
-/** The empty-plate hint, or the first-run tips in its place while they are due. */
+/**
+ * The empty-plate hint, or the first-run tips in its place while they are due. [items] are where the elements lie,
+ * so a tip can keep out of the way of the ones the player is about to handle.
+ */
 @Composable
-fun BoxScope.WorkspaceGuidance(isEmpty: Boolean, tipsVisible: Boolean, tipStep: Int, onSkipTips: () -> Unit) {
+fun BoxScope.WorkspaceGuidance(items: List<WorkspaceItem>, tipsVisible: Boolean, tipStep: Int, onSkipTips: () -> Unit) {
+    val isEmpty = items.isEmpty()
     val hintAlpha by animateFloatAsState(if (isEmpty && !tipsVisible) 1f else 0f, motion(tween(HINT_FADE_MILLIS)), label = "hintAlpha")
     if (hintAlpha > 0f) {
         Text(
@@ -102,13 +108,19 @@ fun BoxScope.WorkspaceGuidance(isEmpty: Boolean, tipsVisible: Boolean, tipStep: 
         )
     }
     if (tipsVisible) {
-        // The first tip points down at the palette; the others sit at the top, clear of where elements land.
+        // The first tip points down at the palette; the others take the half of the plate with fewer elements in it.
+        val upper = items.count { it.yFraction < HALF }
+        val alignment = when {
+            tipStep == 0 -> Alignment.BottomCenter
+            upper <= items.size - upper -> Alignment.TopCenter
+            else -> Alignment.BottomCenter
+        }
         AnimatedContent(
             targetState = tipStep,
             transitionSpec = tipTransition(LocalReducedMotion.current),
             contentAlignment = Alignment.Center,
             label = "tip",
-            modifier = Modifier.align(if (tipStep == 0) Alignment.BottomCenter else Alignment.TopCenter)
+            modifier = Modifier.align(alignment)
         ) { step ->
             FirstRunTip(step = step, count = TIP_COUNT, onSkip = onSkipTips)
         }

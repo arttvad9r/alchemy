@@ -129,7 +129,7 @@ private val DROPDOWN_CHEVRON_SPACE = 34.dp
 private const val DIALOG_WIDTH_FRACTION = 0.9f
 private const val DIALOG_DAMPING = 0.68f
 private const val PROGRESS_FILL_MILLIS = 600
-private const val DIALOG_START_SCALE = 0.85f
+private const val DIALOG_START_SCALE = 0.9f
 private val DIALOG_MAX_WIDTH = 480.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {

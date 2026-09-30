@@ -32,6 +32,7 @@ import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -74,11 +75,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -86,7 +90,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -107,6 +110,7 @@ import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDropdown
 import com.artt.alchemy.ui.components.AlchemyIconButton
 import com.artt.alchemy.ui.components.ButtonStyle
+import com.artt.alchemy.ui.components.ElementIcon
 import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.LocalReducedMotion
@@ -164,7 +168,6 @@ fun HomeScreen(
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var dragPosition by remember { mutableStateOf<Offset?>(null) }
-    val previewHalfSize = with(androidx.compose.ui.platform.LocalDensity.current) { 36.dp.roundToPx() }
 
     // The effect is taken out of the UI state at once so it does not replay when Home is shown again.
     var playingEffect by remember { mutableStateOf<CombinationEffect?>(null) }
@@ -260,7 +263,7 @@ fun HomeScreen(
                     }
                 )
                 WorkspaceGuidance(
-                    isEmpty = state.workspace.items.isEmpty(),
+                    items = state.workspace.items,
                     tipsVisible = !state.progress.onboardingSeen,
                     tipStep = state.tipStep,
                     onSkipTips = onSkipTips
@@ -325,13 +328,9 @@ fun HomeScreen(
                                         workspaceBounds
                                             ?.takeIf { it.contains(drop) }
                                             ?.let { bounds ->
-                                                onEvent(
-                                                    WorkspaceEvent.Spawn(
-                                                        element.id,
-                                                        (drop.x - bounds.left) / bounds.width,
-                                                        (drop.y - bounds.top) / bounds.height
-                                                    )
-                                                )
+                                                // The element lands where its icon was under the finger, clear of the edges.
+                                                val at = dropPosition(Offset(drop.x - bounds.left, drop.y - bounds.top), bounds.width, bounds.height)
+                                                onEvent(WorkspaceEvent.Spawn(element.id, at.x, at.y))
                                             }
                                     },
                                     onTap = { center ->
@@ -352,30 +351,7 @@ fun HomeScreen(
         val position = dragPosition
         val bounds = homeBounds
         if (element != null && position != null && bounds != null) {
-            // The tile rises out of the palette into the hand: it grows a little and glows in its rarity's colour.
-            val lift = remember(element.id) { Animatable(1f) }
-            val liftSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
-            LaunchedEffect(element.id) { lift.animateTo(PREVIEW_LIFT_SCALE, liftSpec) }
-            val glow = element.rarity.glowColor
-            ElementTile(
-                element = element,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .offset {
-                        IntOffset(
-                            (position.x - bounds.left - previewHalfSize).roundToInt(),
-                            (position.y - bounds.top - previewHalfSize).roundToInt()
-                        )
-                    }
-                    .width(72.dp)
-                    .zIndex(1f)
-                    .graphicsLayer {
-                        scaleX = lift.value
-                        scaleY = lift.value
-                    }
-                    .drawBehind { drawTileGlow(glow, PREVIEW_GLOW_ALPHA) }
-                    .testTag("drag_preview")
-            )
+            DragPreview(element, position - bounds.topLeft, workspaceBounds)
         }
     }
 
@@ -391,6 +367,55 @@ fun HomeScreen(
         val element = AlchemyCatalog.elementsById.getValue(elementId)
         // Keyed, so a card that follows another plays its entrance afresh.
         key(elementId) { NewElementDialog(element, onDismiss = { onDismissNewElement(elementId) }, onClick = onClick) }
+    }
+}
+
+/**
+ * The element in hand while it is dragged out of the palette, drawn as it will look on the workspace: its bare icon and
+ * name at the workspace's size, centred under the finger at [at] and glowing in its rarity's colour. It rises a little
+ * as it leaves the palette and lands without changing shape.
+ */
+@Composable
+private fun BoxScope.DragPreview(element: ElementDefinition, at: Offset, workspace: Rect?) {
+    val density = LocalDensity.current
+    val iconPx = workspace?.let { workspaceIconSize(it.width, it.height) } ?: with(density) { PREVIEW_FALLBACK_ICON.toPx() }
+    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
+    val lift = remember(element.id) { Animatable(1f) }
+    val liftSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+    LaunchedEffect(element.id) { lift.animateTo(PREVIEW_LIFT_SCALE, liftSpec) }
+    val glow = element.rarity.glowColor
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .layout { measurable, constraints ->
+                // Centres the icon, not the whole column, under the finger.
+                val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+                layout(placeable.width, placeable.height) {
+                    placeable.place((at.x - placeable.width / 2f).roundToInt(), (at.y - iconPx / 2f).roundToInt())
+                }
+            }
+            .zIndex(1f)
+            .graphicsLayer {
+                scaleX = lift.value
+                scaleY = lift.value
+                transformOrigin = TransformOrigin(0.5f, iconPx / 2f / size.height.coerceAtLeast(1f))
+            }
+            .testTag("drag_preview")
+    ) {
+        ElementIcon(
+            element,
+            Modifier
+                .size(with(density) { iconPx.toDp() })
+                .drawBehind { drawGlow(center, size.width * PREVIEW_GLOW_SHARE, glow, PREVIEW_GLOW_ALPHA) }
+        )
+        Text(
+            text = elementName(element.id),
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = labelSize, shadow = PreviewLabelShadow),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            softWrap = false
+        )
     }
 }
 
@@ -479,8 +504,11 @@ private fun TransitionClock(playing: MutableList<PlayingTransition>, onTick: (no
 
 private const val COUNTER_BOUNCE_SCALE = 1.25f
 private const val COUNTER_ROLL_MILLIS = 260
-private const val PREVIEW_LIFT_SCALE = 1.18f
+private const val PREVIEW_LIFT_SCALE = 1.12f
 private const val PREVIEW_GLOW_ALPHA = 0.7f
+private const val PREVIEW_GLOW_SHARE = 0.85f
+private val PREVIEW_FALLBACK_ICON = 56.dp
+private val PreviewLabelShadow = Shadow(color = Color.Black, offset = Offset(0f, 2f), blurRadius = 6f)
 private const val TILE_GLOW_SHARE = 0.75f
 private const val FRESH_GLOW_LOW = 0.25f
 private const val FRESH_GLOW_HIGH = 0.75f

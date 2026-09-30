@@ -88,11 +88,27 @@ private const val WATERMARK_SIZE_FRACTION = 0.85f
 private const val WATERMARK_ALPHA = 0.28f
 private const val SMOKE_ALPHA = 0.9f
 private const val HELD_RING_SHARE = 1.45f
+
+// The ring around the element in hand stays faint, so the target it would mix with is what stands out.
+private const val HELD_RING_ALPHA = 0.4f
 private const val TARGET_PULSE_MILLIS = 550
 private const val LIFT_SCALE = 0.12f
 private const val LIFT_SHADOW_ALPHA = 0.35f
 private const val TARGET_RING_SHARE = 1.7f
-private const val APPEAR_START_SCALE = 0.5f
+private const val TARGET_GLOW_SHARE = 1.1f
+private const val TARGET_GLOW_ALPHA = 0.7f
+private const val TARGET_SCALE = 0.08f
+private val TargetGlow = Color(0xFFFFD98A)
+
+// A tapped element flies in from its palette tile at about the tile's size; a dropped one only settles.
+private const val FLY_START_SCALE = 0.8f
+private const val DROP_START_SCALE = 0.92f
+private const val SWEEP_ALPHA = 0.35f
+
+// How far inside the edges an element comes to rest, in item radii: its icon and name stay clear of the frame.
+private const val REST_SIDE = 0.7f
+private const val REST_TOP = 0.9f
+private const val REST_BOTTOM = 0.95f
 private const val FLY_IN_SPEED = 1.5f
 private const val SHAKE_WAVES = 2.5f
 private const val SHAKE_AMPLITUDE_SHARE = 0.1f
@@ -249,8 +265,14 @@ fun WorkspaceCanvas(
                                 currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
                             }
                             val position = normalize(lastPosition, size.width, size.height)
-                            currentOnMove(item.instanceId, position)
-                            if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
+                            if (position.x in 0f..1f && position.y in 0f..1f) {
+                                // Let go inside: it settles a little in from the edge instead of hanging over the frame.
+                                val resting = restingPosition(position, size.width.toFloat(), size.height.toFloat())
+                                currentOnMove(item.instanceId, resting)
+                                currentOnResolve(item.instanceId, resting)
+                            } else {
+                                currentOnMove(item.instanceId, position)
+                            }
                         } finally {
                             heldId = null
                         }
@@ -266,10 +288,13 @@ fun WorkspaceCanvas(
             val held = currentItems.find { it.instanceId == heldId }
             if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
             labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
-            held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }?.let { target ->
+            val target = held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }
+            target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
                 val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
-                drawCentered(art.energyRing, iconCenterOf(center, radius, iconSize), iconSize * TARGET_RING_SHARE, targetPulse)
+                val iconCenter = iconCenterOf(center, radius, iconSize)
+                drawGlow(iconCenter, iconSize * TARGET_GLOW_SHARE, TargetGlow, TARGET_GLOW_ALPHA * targetPulse)
+                drawCentered(art.energyRing, iconCenter, iconSize * TARGET_RING_SHARE, targetPulse)
             }
             val motion = ItemMotion(
                 appearing = frames.filter { it.transition.kind == TransitionKind.APPEAR }.associateBy { it.transition.instanceId },
@@ -279,7 +304,8 @@ fun WorkspaceCanvas(
                 heldId = heldId,
                 liftedId = liftedId,
                 lift = lift.value,
-                seconds = seconds
+                seconds = seconds,
+                targetId = target?.instanceId
             )
             // The item in hand is drawn last, so it never slides under the others.
             currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
@@ -372,7 +398,9 @@ private class ItemMotion(
     val heldId: Long?,
     val liftedId: Long?,
     val lift: Float,
-    val seconds: Float
+    val seconds: Float,
+    // The element the one in hand would mix with if let go now.
+    val targetId: Long?
 )
 
 private class WorkspaceArt(
@@ -399,8 +427,9 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     var scale = 1f
     var alpha = 1f
     motion.appearing[item.instanceId]?.let { frame ->
-        scale = lerp(APPEAR_START_SCALE, 1f, easeOutBack(frame.progress))
-        alpha = (frame.progress * 4f).coerceAtMost(1f)
+        scale = lerp(if (frame.origin == null) DROP_START_SCALE else FLY_START_SCALE, 1f, easeOutBack(frame.progress))
+        // A dropped element takes over from the tile in hand at once; a flying one fades in as it leaves the palette.
+        alpha = if (frame.origin == null) 1f else (frame.progress * 4f).coerceAtMost(1f)
         frame.origin?.let { origin ->
             val fly = easeOutCubic(frame.progress * FLY_IN_SPEED)
             center = Offset(lerp(origin.x * size.width, center.x, fly), lerp(origin.y * size.height, center.y, fly))
@@ -416,6 +445,8 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     }
     val liftAmount = if (item.instanceId == motion.liftedId) motion.lift else 0f
     scale *= 1f + LIFT_SCALE * liftAmount
+    // The target rises a little to meet the element in hand.
+    if (item.instanceId == motion.targetId) scale *= 1f + TARGET_SCALE
     if (alpha <= 0f || scale <= 0f) return
     // Each item floats on its own beat; one in hand is held still.
     val beat = motion.seconds * BOB_SPEED + (item.instanceId % BEAT_SPREAD) * BEAT_STEP
@@ -435,7 +466,7 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
                 size = Size(iconSize * 0.8f, iconSize * 0.2f)
             )
         }
-        if (item.instanceId == motion.heldId) drawCentered(art.heldRing, iconCenter, iconSize * HELD_RING_SHARE, 1f)
+        if (item.instanceId == motion.heldId) drawCentered(art.heldRing, iconCenter, iconSize * HELD_RING_SHARE, HELD_RING_ALPHA)
         drawImage(
             image = icon,
             dstOffset = IntOffset((center.x - iconSize / 2).roundToInt(), (center.y - radius * ICON_TOP_SHARE).roundToInt()),
@@ -457,6 +488,7 @@ private fun DrawScope.drawTransitions(frames: List<TransitionFrame>, art: Worksp
         when (transition.kind) {
             TransitionKind.APPEAR -> drawCentered(art.appearSparkles, center, radius * (1.8f + 1.2f * progress), fade)
             TransitionKind.VANISH -> drawCentered(art.smoke, center, radius * (1.4f + 1.4f * progress), fade * SMOKE_ALPHA)
+            TransitionKind.SWEEP -> drawCentered(art.smoke, center, radius * (1f + 0.6f * progress), fade * SWEEP_ALPHA)
             TransitionKind.SHAKE -> Unit
         }
     }
@@ -550,6 +582,28 @@ private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Fl
 
 private fun normalize(position: Offset, width: Int, height: Int): Offset = Offset(position.x / width, position.y / height)
 
+/** Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and name clear the edges. */
+internal fun restingPosition(position: Offset, width: Float, height: Float): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    val side = (radius * REST_SIDE / width).coerceAtMost(HALF)
+    val top = (radius * REST_TOP / height).coerceAtMost(HALF)
+    val bottom = (radius * REST_BOTTOM / height).coerceAtMost(HALF)
+    return Offset(position.x.coerceIn(side, 1f - side), position.y.coerceIn(top, 1f - bottom))
+}
+
+/** Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace), in workspace fractions. */
+internal fun dropPosition(iconCenter: Offset, width: Float, height: Float): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    val center = Offset(iconCenter.x, iconCenter.y + radius * ICON_TOP_SHARE - radius * ICON_SHARE)
+    return restingPosition(Offset(center.x / width, center.y / height), width, height)
+}
+
+/** The side of an element's icon on a workspace of this size, in pixels. */
+internal fun workspaceIconSize(width: Float, height: Float): Float = minOf(width, height) * ITEM_RADIUS_FRACTION * 2 * ICON_SHARE
+
+/** The size of an element's name on a workspace of this size, in pixels. */
+internal fun workspaceLabelSize(width: Float, height: Float): Float = minOf(width, height) * LABEL_SIZE_FRACTION
+
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x
     val dy = item.yFraction * height - position.y
@@ -559,6 +613,7 @@ private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float,
 private fun itemRadiusSquared(width: Int, height: Int): Float = minOf(width, height).let { it * ITEM_RADIUS_FRACTION }.let { it * it }
 
 private const val LABEL_WEIGHT = 700
+private const val HALF = 0.5f
 private const val NANOS_PER_SECOND = 1_000_000_000f
 
 // A long pause (the app in the background, a dropped frame) moves sparks at most this far in one step.
@@ -616,7 +671,7 @@ private class WorkspaceFx {
             when (transition.kind) {
                 TransitionKind.SHAKE -> sparks.burst(iconCenterOf(at, radius, radius * 2 * ICON_SHARE), radius, count = 7, speed = 3f, colors = NoMatchColors, life = 0.4f, gravity = 3f)
                 TransitionKind.VANISH -> sparks.burst(at, radius, count = 9, speed = 2.2f, colors = EmberColors, life = 0.7f, gravity = -1.5f)
-                TransitionKind.APPEAR -> Unit
+                TransitionKind.APPEAR, TransitionKind.SWEEP -> Unit
             }
         }
         sparked = current

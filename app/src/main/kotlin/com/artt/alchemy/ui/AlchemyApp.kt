@@ -7,7 +7,9 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -94,10 +96,11 @@ private const val LIST_DIM = 0.7f
 private const val UNSELECTED_ICON_ALPHA = 0.6f
 private const val TAB_FADE_MILLIS = 180
 
-// Screens slide a little towards the tab chosen, the new one fading in as the old one fades out.
-private const val TAB_ENTER_MILLIS = 260
-private const val TAB_EXIT_MILLIS = 160
-private const val TAB_SLIDE_SHARE = 12
+// Screens drift a little towards the tab chosen. The new one starts fading in at once and the old one lingers at
+// first, so their fades overlap and some screen is always in view; the drift only hints at the direction.
+private const val TAB_ENTER_MILLIS = 240
+private const val TAB_EXIT_MILLIS = 200
+private const val TAB_SLIDE_SHARE = 32
 
 // The selected tab's pill grows out from the icon and the icon hops as it is chosen.
 private const val INDICATOR_START_WIDTH = 0.45f
@@ -107,12 +110,13 @@ private val NAV_ICON_SIZE = 26.dp
 private val NAV_TOP_LINE = 1.dp
 private val NavTopLine = Brush.horizontalGradient(listOf(Color.Transparent, Gold.copy(alpha = 0.55f), Color.Transparent))
 
+/** The whole game; [sceneReady] turns true once the launch splash has gone, and the music waits for it. */
 @Composable
-fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
+fun AlchemyApp(viewModel: AlchemyViewModel = viewModel(), sceneReady: Boolean = true) {
     val state = viewModel.state
-    // Music plays only while the app is on screen.
-    LifecycleResumeEffect(state.progress.musicEnabled) {
-        viewModel.resumeMusic()
+    // Music plays only while the app is on screen, and never over the splash.
+    LifecycleResumeEffect(state.progress.musicEnabled, sceneReady) {
+        if (sceneReady) viewModel.resumeMusic()
         onPauseOrDispose { viewModel.pauseMusic() }
     }
     val reducedMotion = state.progress.reducedMotion ?: systemAnimationsOff(LocalContext.current)
@@ -216,9 +220,9 @@ private fun tabTransition(reducedMotion: Boolean): AnimatedContentTransitionScop
     } else {
         val direction = if (targetState.ordinal > initialState.ordinal) 1 else -1
         val enter = slideInHorizontally(tween(TAB_ENTER_MILLIS, easing = FastOutSlowInEasing)) { width -> direction * width / TAB_SLIDE_SHARE } +
-            fadeIn(tween(TAB_ENTER_MILLIS, delayMillis = TAB_EXIT_MILLIS / 2))
+            fadeIn(tween(TAB_ENTER_MILLIS, easing = LinearOutSlowInEasing))
         val exit = slideOutHorizontally(tween(TAB_EXIT_MILLIS, easing = FastOutSlowInEasing)) { width -> -direction * width / TAB_SLIDE_SHARE } +
-            fadeOut(tween(TAB_EXIT_MILLIS))
+            fadeOut(tween(TAB_EXIT_MILLIS, easing = FastOutLinearInEasing))
         enter togetherWith exit
     }
 }

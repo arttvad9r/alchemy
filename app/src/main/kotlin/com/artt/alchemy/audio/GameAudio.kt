@@ -17,18 +17,23 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibrationEffect.Composition
 import android.os.VibratorManager
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import androidx.annotation.RawRes
 import com.artt.alchemy.R
 import kotlin.random.Random
 
-/** A sound effect; [pitchSpread] is how far each play may drift from the recorded pitch, so repeats never sound canned. */
-enum class Sound(@param:RawRes val res: Int, val pitchSpread: Float = 0f) {
+/**
+ * A sound effect; [pitchSpread] is how far each play may drift from the recorded pitch, so repeats never sound canned,
+ * and [gain] evens out files mastered hotter than the rest, so the mix keeps its headroom.
+ */
+enum class Sound(@param:RawRes val res: Int, val pitchSpread: Float = 0f, val gain: Float = 1f) {
     PLACE(R.raw.sfx_place, 0.06f),
-    COMBINE(R.raw.sfx_combine, 0.02f),
+    COMBINE(R.raw.sfx_combine, 0.02f, gain = 0.5f),
     DISCOVER(R.raw.sfx_discover),
-    DISCOVER_GRAND(R.raw.sfx_discover_grand),
+    DISCOVER_GRAND(R.raw.sfx_discover_grand, gain = 0.85f),
     NO_MATCH(R.raw.sfx_no_match, 0.04f),
-    REMOVE(R.raw.sfx_remove, 0.06f),
+    REMOVE(R.raw.sfx_remove, 0.06f, gain = 0.65f),
     CLICK(R.raw.sfx_click, 0.05f),
     PAGE(R.raw.sfx_page, 0.03f),
     PICKUP(R.raw.sfx_pickup, 0.08f),
@@ -79,7 +84,7 @@ class SoundEffects(context: Context) {
      * in pitch for the sounds that repeat often.
      */
     fun play(sound: Sound, pan: Float = 0f, semitones: Float = 0f) {
-        val volume = EFFECT_VOLUME * level
+        val volume = EFFECT_VOLUME * level * sound.gain
         val (left, right) = stereoGains(pan)
         val drift = if (sound.pitchSpread > 0f) Random.nextFloat() * 2f * sound.pitchSpread - sound.pitchSpread else 0f
         val rate = (semitoneRate(semitones) * (1f + drift)).coerceIn(MIN_RATE, MAX_RATE)
@@ -96,7 +101,9 @@ class SoundEffects(context: Context) {
     private companion object {
         // Room for a discovery, its achievement chime and the next touches to ring together.
         const val MAX_STREAMS = 8
-        const val EFFECT_VOLUME = 0.8f
+
+        // Leaves headroom for several effects and the music sounding at once.
+        const val EFFECT_VOLUME = 0.6f
 
         // The playback rates SoundPool accepts.
         const val MIN_RATE = 0.5f
@@ -162,7 +169,7 @@ class BackgroundMusic(private val context: Context) {
         handler.removeCallbacks(intro)
         if (!focus.request()) return
         // At launch the scene settles for a moment in silence, then the music comes in slowly.
-        if (introPlayed) play(FADE_MILLIS) else handler.postDelayed(intro, INTRO_DELAY_MILLIS)
+        if (introPlayed) play(FADE_IN_MILLIS) else handler.postDelayed(intro, INTRO_DELAY_MILLIS)
     }
 
     fun pause() {
@@ -188,14 +195,14 @@ class BackgroundMusic(private val context: Context) {
         handler.removeCallbacks(restore)
         handler.removeCallbacks(intro)
         val playing = current?.takeIf { it.isPlaying } ?: return
-        fadeTo(0f, FADE_MILLIS) { playing.pause() }
+        fadeTo(0f, FADE_OUT_MILLIS) { playing.pause() }
     }
 
     // A call or another player takes over: give way, and come back when a passing interruption ends. After a
     // permanent loss the music waits for the game to come back on screen. Ducking is left to the system.
     private fun onFocusChange(change: Int) {
         when (change) {
-            AudioManager.AUDIOFOCUS_GAIN -> if (wanted && !audible) play(FADE_MILLIS)
+            AudioManager.AUDIOFOCUS_GAIN -> if (wanted && !audible) play(FADE_IN_MILLIS)
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> silence()
 
@@ -247,6 +254,8 @@ class BackgroundMusic(private val context: Context) {
         fade?.cancel()
         fade = ValueAnimator.ofFloat(volume, target).apply {
             duration = millis
+            // The ear hears loudness, not amplitude: a rise starts gently instead of jumping out of silence.
+            interpolator = if (target > volume) AccelerateInterpolator(FADE_IN_CURVE) else DecelerateInterpolator()
             addUpdateListener { animator ->
                 volume = animator.animatedValue as Float
                 current?.setVolume(volume, volume)
@@ -270,9 +279,11 @@ class BackgroundMusic(private val context: Context) {
     private companion object {
         // Quiet enough to sit under the effects.
         const val MUSIC_VOLUME = 0.26f
-        const val FADE_MILLIS = 300L
-        const val INTRO_DELAY_MILLIS = 350L
-        const val INTRO_FADE_MILLIS = 900L
+        const val FADE_IN_MILLIS = 900L
+        const val FADE_OUT_MILLIS = 600L
+        const val FADE_IN_CURVE = 1.6f
+        const val INTRO_DELAY_MILLIS = 400L
+        const val INTRO_FADE_MILLIS = 1600L
 
         // Under a discovery the music steps back to a third, quickly, and returns slowly.
         const val DUCK_LEVEL = 0.35f

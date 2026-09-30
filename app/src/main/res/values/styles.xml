@@ -1,9 +1,11 @@
 <resources>
     <style name="Theme.Alchemy" parent="android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowBackground">@color/scene_background</item>
-        <!-- The system splash, dressed as the game: the spell book on a violet glow over the night sky of the scene. -->
+        <!-- The system splash, dressed as the game: the spell book on a violet disc over the night sky of the scene. -->
         <item name="android:windowSplashScreenBackground">@color/scene_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_icon_background</item>
+        <!-- The game's name in gold under the book, in the player's language. -->
+        <item name="android:windowSplashScreenBrandingImage">@drawable/splash_branding</item>
     </style>
 </resources>

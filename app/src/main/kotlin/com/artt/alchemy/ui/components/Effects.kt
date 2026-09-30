@@ -34,10 +34,12 @@ import kotlinx.coroutines.delay
 private const val PRESSED_SCALE = 0.93f
 
 // The band of light is this share of the content's width, and crosses in this share of a shimmer's period.
-private const val SHINE_BAND_SHARE = 0.4f
+private const val SHINE_BAND_SHARE = 0.28f
 private const val SHIMMER_CROSSING_SHARE = 0.28f
 private const val SHIMMER_PERIOD_MILLIS = 5600
-private val ShineColor = Color(0xB3FFFFFF)
+
+// Light enough to read as a gleam over the art, never so bright that it hides it.
+private val ShineColor = Color(0x5CFFFFFF)
 
 // A cascade: items composed in a screen's first moments arrive one after another, rising a little as they fade in.
 private const val CASCADE_WINDOW_MILLIS = 450L
