@@ -15,8 +15,10 @@ import org.junit.Rule
 import org.junit.Test
 
 class CollectionScreensTest {
+    private val composeRule = createAndroidComposeRule<MainActivity>()
+
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val chain = skippingOnboarding(composeRule)
 
     @Test
     fun elementsGridStartsWithFirstCardOnLeft() {

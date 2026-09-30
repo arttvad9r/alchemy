@@ -36,6 +36,7 @@ import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.TransferResult
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
+import com.artt.alchemy.ui.components.AlchemyIconButton
 import com.artt.alchemy.ui.components.AlchemySlider
 import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
@@ -206,7 +207,7 @@ fun SettingsScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
-                AlchemyButton(stringResource(R.string.ok), ButtonStyle.BLUE, onDismissTransferResult, Modifier.testTag("transfer_ok"))
+                AlchemyIconButton(R.drawable.ic_check, stringResource(R.string.ok), onDismissTransferResult, Modifier.testTag("transfer_ok"))
             }
         }
     }

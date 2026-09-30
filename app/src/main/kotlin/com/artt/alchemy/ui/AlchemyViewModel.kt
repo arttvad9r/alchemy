@@ -30,6 +30,8 @@ import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
+const val TIP_COUNT = 3
+
 enum class AppTab {
     HOME,
     ELEMENTS,
@@ -65,7 +67,9 @@ data class AlchemyUiState(
     val isCompletionVisible: Boolean = false,
     // A save read from a file, waiting for the player to agree to replace the current progress.
     val pendingImport: PlayerProgress? = null,
-    val transferResult: TransferResult? = null
+    val transferResult: TransferResult? = null,
+    // The first-run tip on screen while the progress has not marked them seen.
+    val tipStep: Int = 0
 )
 
 /** How saving progress to a file or loading it from one ended, shown to the player once. */
@@ -196,6 +200,23 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun dismissCompletion() {
         state = state.copy(isCompletionVisible = false)
+    }
+
+    /** Moves to the next first-run tip; after the last one the tips are done. */
+    fun nextTip() {
+        playSound(Sound.CLICK)
+        if (state.tipStep >= TIP_COUNT - 1) skipTips() else state = state.copy(tipStep = state.tipStep + 1)
+    }
+
+    fun skipTips() {
+        playSound(Sound.CLICK)
+        updateProgress { copy(onboardingSeen = true) }
+    }
+
+    fun showTips() {
+        playSound(Sound.CLICK)
+        updateProgress { copy(onboardingSeen = false) }
+        state = state.copy(tipStep = 0)
     }
 
     fun markElementsSeen() {

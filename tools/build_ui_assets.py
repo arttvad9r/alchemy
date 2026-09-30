@@ -69,6 +69,11 @@ UI_ASSETS = {
     "ui/buttons/dropdown_field.png": ("field_dropdown", 512),
     "ui/icons/recent_clock.png": ("ic_recent", 96),
     "ui/icons/hint_bulb.png": ("ic_hint", 96),
+    "ui/icons/back.png": ("ic_back", 96),
+    "ui/icons/check.png": ("ic_check", 96),
+    "ui/icons/info.png": ("ic_info", 96),
+    "ui/buttons/pill_badge_green.png": ("pill_badge", 256),
+    "ui/buttons/tooltip_bubble.png": ("tooltip_bubble", 512),
     "ui/panels_states/discovery_burst_gold.png": ("fx_discovery_burst_gold", 256),
 }
 

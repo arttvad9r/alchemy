@@ -82,6 +82,7 @@ class CompletionScreenTest {
         val others = all.filterNot { it == recipe.resultId || it in ingredients }
         store.save(
             initialPlayerProgress().copy(
+                onboardingSeen = true,
                 unlockedIds = (all - recipe.resultId).toSet(),
                 discoveryOrder = others + ingredients.distinct()
             )

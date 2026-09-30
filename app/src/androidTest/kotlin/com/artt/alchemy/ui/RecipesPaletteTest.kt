@@ -33,7 +33,7 @@ class RecipesPaletteTest {
     fun rememberProgress() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
         original = store.load()
-        store.save(initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam")))
+        store.save(initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam")).copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 

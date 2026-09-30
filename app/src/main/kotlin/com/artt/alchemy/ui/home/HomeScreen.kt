@@ -67,7 +67,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,6 +84,7 @@ import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDropdown
+import com.artt.alchemy.ui.components.AlchemyIconButton
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ElementTextGap
 import com.artt.alchemy.ui.components.ElementTile
@@ -93,7 +93,7 @@ import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
-import com.artt.alchemy.ui.components.rowPanel
+import com.artt.alchemy.ui.components.pillBadge
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -105,7 +105,6 @@ private const val EFFECT_DURATION_MILLIS = 700
 private const val DISCOVERY_CARD_AFTER_EFFECT = 0.3f
 private const val TRANSITION_DURATION_MILLIS = 450L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
-private const val HINT_FADE_MILLIS = 250
 private const val DRAGGED_TILE_ALPHA = 0.4f
 private const val DRAGGED_TILE_FADE_MILLIS = 120
 
@@ -123,6 +122,9 @@ fun HomeScreen(
     onPaletteSort: (ElementSort) -> Unit,
     onEffectConsumed: () -> Unit,
     onTransitionsConsumed: () -> Unit,
+    onNextTip: () -> Unit,
+    onSkipTips: () -> Unit,
+    onShowTips: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val unlockedIds = state.progress.unlockedIds
@@ -185,6 +187,12 @@ fun HomeScreen(
         Column(modifier = Modifier.fillMaxSize().padding(ScreenPadding)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 GameTitle(modifier = Modifier.weight(1f))
+                AlchemyIconButton(
+                    icon = R.drawable.ic_info,
+                    contentDescription = stringResource(R.string.tips_show),
+                    onClick = onShowTips,
+                    modifier = Modifier.padding(end = 8.dp).testTag("show_tips")
+                )
                 AlchemyButton(
                     text = stringResource(R.string.clear_workspace),
                     style = ButtonStyle.BLUE,
@@ -224,16 +232,13 @@ fun HomeScreen(
                             }
                     }
                 )
-                val hintAlpha by animateFloatAsState(if (state.workspace.items.isEmpty()) 1f else 0f, motion(tween(HINT_FADE_MILLIS)), label = "hintAlpha")
-                if (hintAlpha > 0f) {
-                    Text(
-                        text = stringResource(R.string.workspace_hint),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp).alpha(hintAlpha)
-                    )
-                }
+                WorkspaceGuidance(
+                    isEmpty = state.workspace.items.isEmpty(),
+                    tipsVisible = !state.progress.onboardingSeen,
+                    tipStep = state.tipStep,
+                    onNextTip = onNextTip,
+                    onSkipTips = onSkipTips
+                )
             }
             Spacer(modifier = Modifier.height(ScreenPadding))
             Column(
@@ -367,7 +372,7 @@ private fun ProgressCounter(unlocked: Int) {
                 scaleX = bounce.value
                 scaleY = bounce.value
             }
-            .rowPanel()
+            .pillBadge()
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
         Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
