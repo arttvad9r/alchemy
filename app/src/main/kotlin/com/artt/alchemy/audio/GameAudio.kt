@@ -5,11 +5,14 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.SoundPool
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibrationEffect.Composition
@@ -34,14 +37,38 @@ enum class Sound(@param:RawRes val res: Int, val pitchSpread: Float = 0f) {
     ACHIEVEMENT(R.raw.sfx_achievement)
 }
 
-private val GameAudioAttributes = AudioAttributes.Builder()
+private val EffectAttributes = AudioAttributes.Builder()
     .setUsage(AudioAttributes.USAGE_GAME)
     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
     .build()
 
-/** Short effects, loaded up front so they play without delay. */
+private val MusicAttributes = AudioAttributes.Builder()
+    .setUsage(AudioAttributes.USAGE_GAME)
+    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+    .build()
+
+/** A play asked for before its sound finished loading, kept to be played the moment it is ready. */
+private class PendingPlay(val left: Float, val right: Float, val rate: Float, val askedAt: Long)
+
+/**
+ * Short effects, loaded up front so they play without delay. SoundPool loads in the background, so a sound asked for
+ * in the first moments after launch waits for its load and plays then, unless it would come too late to belong.
+ */
 class SoundEffects(context: Context) {
-    private val pool = SoundPool.Builder().setMaxStreams(MAX_STREAMS).setAudioAttributes(GameAudioAttributes).build()
+    private val pool = SoundPool.Builder().setMaxStreams(MAX_STREAMS).setAudioAttributes(EffectAttributes).build()
+    private val loaded = HashSet<Int>()
+    private val pending = HashMap<Int, PendingPlay>()
+
+    init {
+        pool.setOnLoadCompleteListener { _, sampleId, status ->
+            if (status == LOAD_SUCCESS) loaded += sampleId
+            val play = pending.remove(sampleId) ?: return@setOnLoadCompleteListener
+            if (status == LOAD_SUCCESS && SystemClock.uptimeMillis() - play.askedAt <= LATE_MILLIS) {
+                pool.play(sampleId, play.left, play.right, 1, 0, play.rate)
+            }
+        }
+    }
+
     private val ids = Sound.entries.associateWith { pool.load(context, it.res, 1) }
 
     /** The player's effects volume from 0 to 1, applied to every effect started after it is set. */
@@ -56,7 +83,12 @@ class SoundEffects(context: Context) {
         val (left, right) = stereoGains(pan)
         val drift = if (sound.pitchSpread > 0f) Random.nextFloat() * 2f * sound.pitchSpread - sound.pitchSpread else 0f
         val rate = (semitoneRate(semitones) * (1f + drift)).coerceIn(MIN_RATE, MAX_RATE)
-        pool.play(ids.getValue(sound), volume * left, volume * right, 1, 0, rate)
+        val id = ids.getValue(sound)
+        if (id in loaded) {
+            pool.play(id, volume * left, volume * right, 1, 0, rate)
+        } else {
+            pending[id] = PendingPlay(volume * left, volume * right, rate, SystemClock.uptimeMillis())
+        }
     }
 
     fun release() = pool.release()
@@ -69,18 +101,50 @@ class SoundEffects(context: Context) {
         // The playback rates SoundPool accepts.
         const val MIN_RATE = 0.5f
         const val MAX_RATE = 2f
+
+        const val LOAD_SUCCESS = 0
+
+        // A sound still loading this long after it was asked for no longer matches what is on screen.
+        const val LATE_MILLIS = 250L
     }
 }
 
-/** The looping background track, created on first start and kept paused while the app is hidden. */
+/**
+ * The game's claim on audio output while its music plays. Other apps pause or duck for it; a call or another player
+ * taking over reports back through [onChange].
+ */
+private class AudioFocus(context: Context, onChange: (Int) -> Unit) {
+    private val manager = context.getSystemService(AudioManager::class.java)
+    private val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+        .setAudioAttributes(MusicAttributes)
+        .setOnAudioFocusChangeListener({ change -> onChange(change) }, Handler(Looper.getMainLooper()))
+        .build()
+
+    fun request(): Boolean = manager.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+
+    fun abandon() {
+        manager.abandonAudioFocusRequest(request)
+    }
+}
+
+/**
+ * The looping background track, created on first start and kept paused while the app is hidden. It holds audio focus
+ * only while it plays, so a player who turned the music off keeps listening to their own.
+ */
 class BackgroundMusic(private val context: Context) {
     private var current: MediaPlayer? = null
     private var upcoming: MediaPlayer? = null
     private var fade: ValueAnimator? = null
     private var volume = 0f
     private var audible = false
+
+    // The game is on screen with music on; it may still be silent while another app holds the focus.
+    private var wanted = false
+    private var introPlayed = false
     private val handler = Handler(Looper.getMainLooper())
     private val restore = Runnable { if (audible) fadeTo(MUSIC_VOLUME * level, RESTORE_MILLIS) {} }
+    private val intro = Runnable { play(INTRO_FADE_MILLIS) }
+    private val focus = AudioFocus(context, ::onFocusChange)
 
     /** The player's music volume from 0 to 1; a playing track follows it at once. */
     var level = 1f
@@ -94,6 +158,21 @@ class BackgroundMusic(private val context: Context) {
         }
 
     fun start() {
+        wanted = true
+        handler.removeCallbacks(intro)
+        if (!focus.request()) return
+        // At launch the scene settles for a moment in silence, then the music comes in slowly.
+        if (introPlayed) play(FADE_MILLIS) else handler.postDelayed(intro, INTRO_DELAY_MILLIS)
+    }
+
+    fun pause() {
+        wanted = false
+        silence()
+        focus.abandon()
+    }
+
+    private fun play(fadeMillis: Long) {
+        introPlayed = true
         val playing = current ?: newPlayer()?.also { first ->
             current = first
             chain(first)
@@ -101,14 +180,30 @@ class BackgroundMusic(private val context: Context) {
         if (!playing.isPlaying) playing.start()
         audible = true
         handler.removeCallbacks(restore)
-        fadeTo(MUSIC_VOLUME * level, FADE_MILLIS) {}
+        fadeTo(MUSIC_VOLUME * level, fadeMillis) {}
     }
 
-    fun pause() {
+    private fun silence() {
         audible = false
         handler.removeCallbacks(restore)
+        handler.removeCallbacks(intro)
         val playing = current?.takeIf { it.isPlaying } ?: return
         fadeTo(0f, FADE_MILLIS) { playing.pause() }
+    }
+
+    // A call or another player takes over: give way, and come back when a passing interruption ends. After a
+    // permanent loss the music waits for the game to come back on screen. Ducking is left to the system.
+    private fun onFocusChange(change: Int) {
+        when (change) {
+            AudioManager.AUDIOFOCUS_GAIN -> if (wanted && !audible) play(FADE_MILLIS)
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> silence()
+
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                silence()
+                focus.abandon()
+            }
+        }
     }
 
     /** Lowers the music under a big moment for [holdMillis], then lets it swell back. */
@@ -121,6 +216,8 @@ class BackgroundMusic(private val context: Context) {
 
     fun release() {
         handler.removeCallbacks(restore)
+        handler.removeCallbacks(intro)
+        focus.abandon()
         fade?.cancel()
         fade = null
         current?.release()
@@ -143,7 +240,7 @@ class BackgroundMusic(private val context: Context) {
         }
     }
 
-    private fun newPlayer(): MediaPlayer? = MediaPlayer.create(context, R.raw.music_background, GameAudioAttributes, 0)
+    private fun newPlayer(): MediaPlayer? = MediaPlayer.create(context, R.raw.music_background, MusicAttributes, 0)
         ?.apply { setVolume(volume, volume) }
 
     private fun fadeTo(target: Float, millis: Long, onEnd: () -> Unit) {
@@ -174,6 +271,8 @@ class BackgroundMusic(private val context: Context) {
         // Quiet enough to sit under the effects.
         const val MUSIC_VOLUME = 0.26f
         const val FADE_MILLIS = 300L
+        const val INTRO_DELAY_MILLIS = 350L
+        const val INTRO_FADE_MILLIS = 900L
 
         // Under a discovery the music steps back to a third, quickly, and returns slowly.
         const val DUCK_LEVEL = 0.35f
