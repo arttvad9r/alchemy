@@ -62,6 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -91,6 +92,7 @@ import com.artt.alchemy.ui.components.ElementTile
 import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.pillBadge
@@ -98,6 +100,7 @@ import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
 import com.artt.alchemy.ui.theme.TitleFontFamily
+import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.currentCoroutineContext
 
@@ -130,8 +133,9 @@ fun HomeScreen(
     val unlockedIds = state.progress.unlockedIds
     val paletteSort = state.progress.paletteSort
     val discoveryOrder = state.progress.discoveryOrder
-    val unlocked = remember(unlockedIds, discoveryOrder, paletteSort) {
-        sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort)
+    val resources = LocalContext.current.resources
+    val unlocked = remember(unlockedIds, discoveryOrder, paletteSort, resources) {
+        sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort, Locale.getDefault(), resources::elementName)
     }
     var workspaceBounds by remember { mutableStateOf<Rect?>(null) }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }

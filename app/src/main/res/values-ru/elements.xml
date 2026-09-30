@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="element_name_fire">Огонь</string>
+    <string name="element_fact_fire" formatted="false">В невесомости пламя свечи горит шаром, а не языком: без силы тяжести горячий воздух не уходит вверх.</string>
+    <string name="element_name_water">Вода</string>
+    <string name="element_fact_water" formatted="false">Горячая вода иногда замерзает быстрее холодной. Это эффект Мпембы, и учёные до сих пор спорят о его причинах.</string>
+    <string name="element_name_earth">Земля</string>
+    <string name="element_fact_earth" formatted="false">В чайной ложке плодородной почвы живёт больше микроорганизмов, чем людей на всей Земле.</string>
+    <string name="element_name_air">Воздух</string>
+    <string name="element_fact_air" formatted="false">Хотя воздух кажется невесомым, кубометр воздуха у поверхности Земли весит примерно 1,2 килограмма.</string>
+    <string name="element_name_steam">Пар</string>
+    <string name="element_fact_steam" formatted="false">Настоящий водяной пар невидим. Белые клубы над чайником — это уже крошечные капли, остывшие в воздухе.</string>
+    <string name="element_name_mud">Грязь</string>
+    <string name="element_fact_mud" formatted="false">Слоны и свиньи валяются в грязи не от неряшливости: грязевая корка защищает кожу от солнца и насекомых.</string>
+    <string name="element_name_dust">Пыль</string>
+    <string name="element_fact_dust" formatted="false">Пыль из Сахары каждый год перелетает Атлантический океан и удобряет леса Амазонии.</string>
+    <string name="element_name_lava">Лава</string>
+    <string name="element_fact_lava" formatted="false">Базальтовая лава раскаляется до 1200 °C — горячее, чем нужно, чтобы расплавить медь.</string>
+    <string name="element_name_energy">Энергия</string>
+    <string name="element_fact_energy" formatted="false">Солнце каждую секунду превращает в энергию около четырёх миллионов тонн своей массы.</string>
+    <string name="element_name_rain">Дождь</string>
+    <string name="element_fact_rain" formatted="false">Капли дождя похожи не на слёзы, а на булочки: снизу их сплющивает сопротивление воздуха.</string>
+    <string name="element_name_stone">Камень</string>
+    <string name="element_fact_stone" formatted="false">Гнейсам Акаста в Канаде около 4 миллиардов лет — это одни из древнейших известных пород земной коры.</string>
+    <string name="element_name_wind">Ветер</string>
+    <string name="element_fact_wind" formatted="false">Самый сильный подтверждённый порыв ветра вне торнадо — 408 км/ч — измерили в Австралии во время циклона «Оливия» в 1996 году.</string>
+    <string name="element_name_metal">Металл</string>
+    <string name="element_fact_metal" formatted="false">Галлий — металл, который тает прямо в ладони: он плавится уже при 30 °C.</string>
+    <string name="element_name_sand">Песок</string>
+    <string name="element_fact_sand" formatted="false">Белый песок многих тропических пляжей отчасти сделан рыбами-попугаями: они перемалывают кораллы.</string>
+    <string name="element_name_clay">Глина</string>
+    <string name="element_fact_clay" formatted="false">Первые письменные документы человечества — шумерские клинописные таблички — были из глины.</string>
+    <string name="element_name_smoke">Дым</string>
+    <string name="element_fact_smoke" formatted="false">Дымом с сигнальных башен на Великой Китайской стене передавали весть о приближении врага.</string>
+    <string name="element_name_ice">Лёд</string>
+    <string name="element_fact_ice" formatted="false">Лёд легче воды, поэтому водоёмы замерзают сверху, а рыбы переживают зиму подо льдом.</string>
+    <string name="element_name_cloud">Облако</string>
+    <string name="element_fact_cloud" formatted="false">Небольшое кучевое облако может содержать сотни тонн воды, но микроскопические капли удерживаются в воздухе восходящими потоками.</string>
+    <string name="element_name_plant">Растение</string>
+    <string name="element_fact_plant" formatted="false">Бамбук — чемпион по скорости роста: некоторые его виды прибавляют почти метр в сутки.</string>
+    <string name="element_name_ash">Пепел</string>
+    <string name="element_fact_ash" formatted="false">Вулканический пепел — не зола, а крошечные осколки камня и стекла. Поэтому он так опасен для самолётов.</string>
+    <string name="element_name_glass">Стекло</string>
+    <string name="element_fact_glass" formatted="false">Древнейшие стеклянные бусины сделали в Месопотамии около 4500 лет назад.</string>
+    <string name="element_name_lightning">Молния</string>
+    <string name="element_fact_lightning" formatted="false">Канал молнии на мгновение нагревается примерно до 30 000 °C — в несколько раз горячее поверхности Солнца.</string>
+    <string name="element_name_snow">Снег</string>
+    <string name="element_fact_snow" formatted="false">Каждая снежинка прозрачна, но сугроб белый: грани кристаллов рассеивают весь спектр света.</string>
+    <string name="element_name_ocean">Океан</string>
+    <string name="element_fact_ocean" formatted="false">По данным GEBCO за 2025 год, современными методами подробно картографировано лишь 27,3% дна Мирового океана.</string>
+    <string name="element_name_mountain">Гора</string>
+    <string name="element_fact_mountain" formatted="false">Гималаи всё ещё растут: столкновение Индийской и Евразийской плит продолжает поднимать горы на миллиметры в год.</string>
+    <string name="element_name_river">Река</string>
+    <string name="element_fact_river" formatted="false">Амазонка несёт в океан около пятой части всей речной воды планеты.</string>
+    <string name="element_name_swamp">Болото</string>
+    <string name="element_fact_swamp" formatted="false">Торфяники занимают лишь около 3% суши, но хранят примерно вдвое больше углерода, чем вся растительность лесов мира.</string>
+    <string name="element_name_tree">Дерево</string>
+    <string name="element_fact_tree" formatted="false">Сосне Мафусаил в Калифорнии около 4800 лет — она старше египетских пирамид в Гизе.</string>
+    <string name="element_name_life">Жизнь</string>
+    <string name="element_fact_life" formatted="false">В теле человека микробных клеток примерно столько же, сколько его собственных.</string>
+    <string name="element_name_seed">Семя</string>
+    <string name="element_fact_seed" formatted="false">Из семени финиковой пальмы возрастом около 2000 лет, найденного в крепости Масада, вырастили живое дерево.</string>
+    <string name="element_name_flower">Цветок</string>
+    <string name="element_fact_flower" formatted="false">Раффлезия Арнольди — самый большой одиночный цветок: до метра в диаметре, и пахнет он гнилым мясом.</string>
+    <string name="element_name_forest">Лес</string>
+    <string name="element_fact_forest" formatted="false">Тайга — самая большая наземная экосистема планеты: она тянется через Россию, Скандинавию, Канаду и Аляску.</string>
+    <string name="element_name_moss">Мох</string>
+    <string name="element_fact_moss" formatted="false">Мохообразные относятся к древнейшим группам наземных растений: их предки вышли на сушу задолго до появления деревьев и динозавров.</string>
+    <string name="element_name_sky">Небо</string>
+    <string name="element_fact_sky" formatted="false">Небо голубое, потому что воздух сильнее рассеивает синий свет. А на Марсе закаты, наоборот, голубые.</string>
+    <string name="element_name_sun">Солнце</string>
+    <string name="element_fact_sun" formatted="false">Свет Солнца долетает до Земли примерно за 8 минут 20 секунд.</string>
+    <string name="element_name_moon">Луна</string>
+    <string name="element_fact_moon" formatted="false">Луна каждый год удаляется от Земли примерно на 3,8 сантиметра.</string>
+    <string name="element_name_light">Свет</string>
+    <string name="element_fact_light" formatted="false">Свет пролетает расстояние от Земли до Луны чуть больше чем за секунду.</string>
+    <string name="element_name_shadow">Тень</string>
+    <string name="element_fact_shadow" formatted="false">Тень Луны во время солнечного затмения мчится по Земле со скоростью от 1700 км/ч.</string>
+    <string name="element_name_time">Время</string>
+    <string name="element_fact_time" formatted="false">На вершине горы время идёт чуть быстрее, чем у подножия: атомные часы замечают это даже на высоте 30 см.</string>
+    <string name="element_name_crystal">Кристалл</string>
+    <string name="element_fact_crystal" formatted="false">В мексиканской Пещере кристаллов растут кристаллы гипса длиной больше 10 метров.</string>
+    <string name="element_name_salt">Соль</string>
+    <string name="element_fact_salt" formatted="false">Соль веками была так ценна, что налог на неё вызывал восстания — например, Соляной бунт в Москве в 1648 году.</string>
+    <string name="element_name_wave">Волна</string>
+    <string name="element_fact_wave" formatted="false">Мировой рекорд самой высокой официально измеренной волны, покорённой сёрфером, — 26,21 метра у Назаре в Португалии.</string>
+    <string name="element_name_fish">Рыба</string>
+    <string name="element_fact_fish" formatted="false">Некоторые рыбы умеют «ходить»: илистые прыгуны выбираются на сушу и передвигаются на плавниках.</string>
+    <string name="element_name_algae">Водоросли</string>
+    <string name="element_fact_algae" formatted="false">Около половины кислорода на Земле производят океанические организмы, прежде всего фитопланктон.</string>
+    <string name="element_name_bird">Птица</string>
+    <string name="element_fact_bird" formatted="false">Полярная крачка каждый год летает из Арктики в Антарктику и обратно — до 70 000 км.</string>
+    <string name="element_name_beast">Зверь</string>
+    <string name="element_fact_beast" formatted="false">Гепард — самое быстрое наземное животное: на короткой дистанции он способен разгоняться примерно до 100 км/ч.</string>
+    <string name="element_name_human">Человек</string>
+    <string name="element_fact_human" formatted="false">У взрослого человека обычно 206 костей, а многие отдельные костные элементы детского скелета с возрастом срастаются.</string>
+    <string name="element_name_tool">Инструмент</string>
+    <string name="element_fact_tool" formatted="false">Древнейшим известным каменным орудиям около 3,3 миллиона лет — они старше самого рода Homo.</string>
+    <string name="element_name_wood">Древесина</string>
+    <string name="element_fact_wood" formatted="false">Венеция стоит на деревянных сваях: в насыщенном водой грунте почти нет кислорода, и древесина разрушается очень медленно.</string>
+    <string name="element_name_house">Дом</string>
+    <string name="element_fact_house" formatted="false">В Чатал-Хююке, одном из первых поселений, дома стояли вплотную без улиц, а входили в них через крышу.</string>
+    <string name="element_name_field">Поле</string>
+    <string name="element_fact_field" formatted="false">В Средние века поле делили на три части и засевали по очереди, давая земле отдохнуть. Это называли трёхпольем.</string>
+    <string name="element_name_farm">Ферма</string>
+    <string name="element_fact_farm" formatted="false">Первые фермы появились около 11 000 лет назад на Ближнем Востоке, в Плодородном полумесяце.</string>
+    <string name="element_name_wheat">Пшеница</string>
+    <string name="element_fact_wheat" formatted="false">Пшеницей засеяно больше полей на Земле, чем любой другой культурой.</string>
+    <string name="element_name_bread">Хлеб</string>
+    <string name="element_fact_bread" formatted="false">Древнейшему найденному хлебу около 14 000 лет — его пекли ещё до появления земледелия.</string>
+    <string name="element_name_cattle">Скот</string>
+    <string name="element_fact_cattle" formatted="false">Желудок коровы состоит из четырёх отделов, а переваривать целлюлозу ей помогают микроорганизмы, живущие прежде всего в рубце.</string>
+    <string name="element_name_milk">Молоко</string>
+    <string name="element_fact_milk" formatted="false">Большинство взрослых людей в мире плохо усваивают молочный сахар — лактозу.</string>
+    <string name="element_name_cheese">Сыр</string>
+    <string name="element_fact_cheese" formatted="false">Древнейшему найденному сыру около 3600 лет — его обнаружили в захоронениях в пустыне Такла-Макан.</string>
+    <string name="element_name_meat">Мясо</string>
+    <string name="element_fact_meat" formatted="false">Красный цвет мяса в основном создаёт белок миоглобин, а не оставшаяся в нём кровь.</string>
+    <string name="element_name_leather">Кожа</string>
+    <string name="element_fact_leather" formatted="false">Древнейшей найденной кожаной туфле около 5500 лет — её нашли в пещере Арени в Армении.</string>
+    <string name="element_name_wool">Шерсть</string>
+    <string name="element_fact_wool" formatted="false">Нить шерсти мериноса в три-четыре раза тоньше человеческого волоса.</string>
+    <string name="element_name_cloth">Ткань</string>
+    <string name="element_fact_cloth" formatted="false">Секрет шёлка Китай хранил тысячи лет. По преданию, за вывоз коконов шелкопряда грозила смерть.</string>
+    <string name="element_name_rope">Верёвка</string>
+    <string name="element_fact_rope" formatted="false">Древнейшему известному обрывку верёвки около 50 000 лет — его свили неандертальцы.</string>
+    <string name="element_name_paper">Бумага</string>
+    <string name="element_fact_paper" formatted="false">Бумагу делали в Китае ещё до нашей эры, а Цай Луню около 105 года приписывают улучшение её изготовления.</string>
+    <string name="element_name_ink">Чернила</string>
+    <string name="element_fact_ink" formatted="false">Каракатица выпускает чернила, чтобы сбить хищника с толку. Из них раньше делали коричневую краску сепию.</string>
+    <string name="element_name_book">Книга</string>
+    <string name="element_fact_book" formatted="false">«Алмазная сутра» 868 года — древнейшая известная печатная книга с точной датой.</string>
+    <string name="element_name_knowledge">Знание</string>
+    <string name="element_fact_knowledge" formatted="false">Александрийская библиотека, по древним оценкам, хранила десятки или даже сотни тысяч свитков.</string>
+    <string name="element_name_wheel">Колесо</string>
+    <string name="element_fact_wheel" formatted="false">Гончарный круг появился раньше колёсной повозки: люди сначала вращали глину, а потом придумали телегу.</string>
+    <string name="element_name_cart">Телега</string>
+    <string name="element_fact_cart" formatted="false">Колесу с осью, найденному на Люблянских болотах в Словении, больше 5000 лет.</string>
+    <string name="element_name_road">Дорога</string>
+    <string name="element_fact_road" formatted="false">Сеть римских дорог насчитывала сотни тысяч километров, причём десятки тысяч километров были мощёными.</string>
+    <string name="element_name_village">Деревня</string>
+    <string name="element_fact_village" formatted="false">Первые постоянные деревни появились раньше земледелия — там, где рядом было много диких злаков и дичи.</string>
+    <string name="element_name_settlement">Посёлок</string>
+    <string name="element_fact_settlement" formatted="false">В Иерихоне люди жили уже больше 10 000 лет назад — это одно из древнейших постоянных поселений мира.</string>
+    <string name="element_name_city">Город</string>
+    <string name="element_fact_city" formatted="false">Урук в Месопотамии считают одним из первых городов: 5000 лет назад в нём жили десятки тысяч человек.</string>
+    <string name="element_name_bridge">Мост</string>
+    <string name="element_fact_bridge" formatted="false">Мост Аркадико в Греции построен больше 3000 лет назад, и по нему до сих пор можно пройти.</string>
+    <string name="element_name_boat">Лодка</string>
+    <string name="element_fact_boat" formatted="false">Древнейшей найденной лодке — долблёнке из Песса в Нидерландах — около 10 000 лет.</string>
+    <string name="element_name_sail">Парус</string>
+    <string name="element_fact_sail" formatted="false">Египтяне ходили под парусами по Нилу больше 5000 лет назад.</string>
+    <string name="element_name_ship">Корабль</string>
+    <string name="element_fact_ship" formatted="false">«Титаник» был разделён на 16 водонепроницаемых отсеков, но айсберг повредил сразу слишком много из них.</string>
+    <string name="element_name_port">Порт</string>
+    <string name="element_fact_port" formatted="false">Римляне использовали бетон, способный твердеть под водой, и с его помощью строили долговечные гавани и портовые сооружения.</string>
+    <string name="element_name_net">Сеть</string>
+    <string name="element_fact_net" formatted="false">Древнейшей найденной рыболовной сети около 10 000 лет — её нашли в Финляндии.</string>
+    <string name="element_name_fisherman">Рыбак</string>
+    <string name="element_fact_fisherman" formatted="false">В Китае и Японии рыбаки веками ловили рыбу с помощью прирученных бакланов.</string>
+    <string name="element_name_feather">Перо</string>
+    <string name="element_fact_feather" formatted="false">Количество перьев у птиц сильно зависит от вида: у маленьких их могут быть тысячи, а у крупных водоплавающих — десятки тысяч.</string>
+    <string name="element_name_egg">Яйцо</string>
+    <string name="element_fact_egg" formatted="false">Страусиное яйцо весит как два десятка куриных — это самое большое яйцо среди ныне живущих птиц.</string>
+    <string name="element_name_nest">Гнездо</string>
+    <string name="element_fact_nest" formatted="false">Птицы-ткачи плетут гнёзда из травинок и завязывают клювом настоящие узлы.</string>
+    <string name="element_name_bee">Пчела</string>
+    <string name="element_fact_bee" formatted="false">Для производства килограмма мёда пчелиная семья посещает огромное число цветков — оценки идут на миллионы посещений.</string>
+    <string name="element_name_honey">Мёд</string>
+    <string name="element_fact_honey" formatted="false">Мёд хранится необычно долго благодаря низкому содержанию доступной воды, высокой концентрации сахара и кислой среде.</string>
+    <string name="element_name_fruit">Фрукт</string>
+    <string name="element_fact_fruit" formatted="false">С точки зрения ботаники клубника — не ягода, а банан — ягода.</string>
+    <string name="element_name_vegetable">Овощ</string>
+    <string name="element_fact_vegetable" formatted="false">Помидор с точки зрения ботаники — ягода, но в 1893 году Верховный суд США признал его овощем.</string>
+    <string name="element_name_herbs">Травы</string>
+    <string name="element_fact_herbs" formatted="false">Мята холодит не потому, что остывает: ментол включает в коже те же рецепторы, что реагируют на холод.</string>
+    <string name="element_name_medicine">Лекарство</string>
+    <string name="element_fact_medicine" formatted="false">Флеминг заметил, что плесень в лабораторной чашке мешает расти бактериям, — так был открыт пенициллин.</string>
+    <string name="element_name_poison">Яд</string>
+    <string name="element_fact_poison" formatted="false">Парацельсу приписывают принцип «доза делает яд»: практически любое вещество может стать вредным при достаточно большой дозе.</string>
+    <string name="element_name_mushroom">Гриб</string>
+    <string name="element_fact_mushroom" formatted="false">Грибница опёнка в Орегоне занимает почти 10 км² и считается одним из крупнейших известных организмов на Земле.</string>
+    <string name="element_name_bone">Кость</string>
+    <string name="element_fact_bone" formatted="false">Костная ткань постоянно перестраивается: специальные клетки разрушают старые участки кости и одновременно создают новые.</string>
+    <string name="element_name_skull">Череп</string>
+    <string name="element_fact_skull" formatted="false">Череп новорождённого состоит из подвижных пластин с мягкими «родничками» — так голова может расти.</string>
+    <string name="element_name_blood">Кровь</string>
+    <string name="element_fact_blood" formatted="false">В одном кубическом миллиметре крови около 5 миллионов эритроцитов.</string>
+    <string name="element_name_corpse">Труп</string>
+    <string name="element_fact_corpse" formatted="false">Волосы и ногти после смерти не растут — это иллюзия: кожа высыхает и оттягивается.</string>
+    <string name="element_name_ghost">Призрак</string>
+    <string name="element_fact_ghost" formatted="false">В Древнем Риме в мае проводили обряд Лемурии, чтобы изгнать из дома беспокойных духов умерших.</string>
+    <string name="element_name_spirit">Дух</string>
+    <string name="element_fact_spirit" formatted="false">Слово «спирт» происходит от латинского spiritus — «дух»: алхимики называли летучие вещества духами.</string>
+    <string name="element_name_cemetery">Кладбище</string>
+    <string name="element_fact_cemetery" formatted="false">На парижском кладбище Пер-Лашез покоятся Шопен, Мольер и Эдит Пиаф.</string>
+    <string name="element_name_grave">Могила</string>
+    <string name="element_fact_grave" formatted="false">Древнейшим известным намеренным захоронениям людей около 100 000 лет — их нашли в пещерах Израиля.</string>
+    <string name="element_name_wolf">Волк</string>
+    <string name="element_fact_wolf" formatted="false">Домашние собаки произошли от древней популяции серых волков; точное место и детали их одомашнивания учёные всё ещё уточняют.</string>
+    <string name="element_name_horse">Лошадь</string>
+    <string name="element_fact_horse" formatted="false">Лошади могут дремать стоя: особое строение ног «запирает» суставы, и животное не падает.</string>
+    <string name="element_name_rider">Всадник</string>
+    <string name="element_fact_rider" formatted="false">Гонцы монгольской почтовой системы Ям покрывали огромные расстояния, меняя лошадей на сети станций.</string>
+    <string name="element_name_string">Струна</string>
+    <string name="element_fact_string" formatted="false">Звук скрипки рождается от трения смычка о струну, а смычки веками делали из конского волоса.</string>
+    <string name="element_name_bow">Лук</string>
+    <string name="element_fact_bow" formatted="false">Каменные наконечники из Южной Африки показывают, что технологии лука и стрел могли использоваться уже десятки тысяч лет назад.</string>
+    <string name="element_name_hunter">Охотник</string>
+    <string name="element_fact_hunter" formatted="false">Человек хорошо приспособлен к длительному бегу в жару: потоотделение помогает отводить тепло во время продолжительной нагрузки.</string>
+    <string name="element_name_arrow">Стрела</string>
+    <string name="element_fact_arrow" formatted="false">Ледяной человек Эци, живший 5300 лет назад, погиб от стрелы: её наконечник нашли у него в плече.</string>
+    <string name="element_name_spear">Копьё</string>
+    <string name="element_fact_spear" formatted="false">Деревянным копьям из Шёнингена в Германии около 200 000 лет — это одни из древнейших сохранившихся охотничьих орудий.</string>
+    <string name="element_name_sword">Меч</string>
+    <string name="element_fact_sword" formatted="false">Узор дамасских клинков рождался из самой структуры металла — высокоуглеродистой тигельной стали вутц.</string>
+    <string name="element_name_shield">Щит</string>
+    <string name="element_fact_shield" formatted="false">Римские легионеры строили из щитов «черепаху» — строй, закрытый щитами со всех сторон и сверху.</string>
+    <string name="element_name_armor">Броня</string>
+    <string name="element_fact_armor" formatted="false">Полный рыцарский доспех весил около 20–25 кг: в нём можно было бегать и вскакивать в седло.</string>
+    <string name="element_name_warrior">Воин</string>
+    <string name="element_fact_warrior" formatted="false">В Терракотовой армии больше 8000 воинов; их фигуры собирали из повторяющихся деталей, но лица и отделку индивидуализировали.</string>
+    <string name="element_name_campfire">Костёр</string>
+    <string name="element_fact_campfire" formatted="false">Люди пользовались огнём, по разным данным, уже около миллиона лет назад.</string>
+    <string name="element_name_tent">Палатка</string>
+    <string name="element_fact_tent" formatted="false">Бедуинские шатры ткали из козьей шерсти: намокая, волокна разбухают, и ткань лучше держит дождь.</string>
+    <string name="element_name_camp">Лагерь</string>
+    <string name="element_fact_camp" formatted="false">Базовый лагерь Эвереста стоит на высоте около 5300 метров — выше любой вершины Альп.</string>
+    <string name="element_name_forge">Кузница</string>
+    <string name="element_fact_forge" formatted="false">Кузнецы определяли температуру металла на глаз — по цвету каления: от тёмно-красного до ярко-жёлтого.</string>
+    <string name="element_name_hammer">Молот</string>
+    <string name="element_fact_hammer" formatted="false">Молот Тора Мьёльнир, по скандинавским мифам, всегда возвращался в руку бога после броска.</string>
+    <string name="element_name_plow">Плуг</string>
+    <string name="element_fact_plow" formatted="false">Тяжёлый плуг позволил в Средние века распахать плотные почвы Северной Европы и прокормить больше людей.</string>
+    <string name="element_name_mine">Шахта</string>
+    <string name="element_fact_mine" formatted="false">Самая глубокая шахта мира, Мпоненг в ЮАР, уходит под землю почти на 4 километра.</string>
+    <string name="element_name_gold">Золото</string>
+    <string name="element_fact_gold" formatted="false">Золото настолько плотное, что литр чистого золота весит примерно 19,3 килограмма.</string>
+    <string name="element_name_silver">Серебро</string>
+    <string name="element_fact_silver" formatted="false">Серебро проводит электричество и тепло лучше всех остальных металлов.</string>
+    <string name="element_name_gem">Самоцвет</string>
+    <string name="element_fact_gem" formatted="false">Алмаз и графит состоят из углерода, но атомы в них соединены по-разному — поэтому один прозрачен и твёрд, а другой мягок и тёмен.</string>
+    <string name="element_name_crown">Корона</string>
+    <string name="element_fact_crown" formatted="false">Большая императорская корона Российской империи украшена почти пятью тысячами бриллиантов.</string>
+    <string name="element_name_king">Король</string>
+    <string name="element_fact_king" formatted="false">Людовик XIV правил Францией 72 года — дольше любого другого монарха в истории Европы.</string>
+    <string name="element_name_queen">Королева</string>
+    <string name="element_fact_queen" formatted="false">Клеопатра жила ближе по времени к высадке на Луну, чем к постройке пирамиды Хеопса.</string>
+    <string name="element_name_castle">Замок</string>
+    <string name="element_fact_castle" formatted="false">Виндзорский замок — старейший и крупнейший обитаемый замок мира: королевской резиденцией он служит почти тысячу лет.</string>
+    <string name="element_name_tower">Башня</string>
+    <string name="element_fact_tower" formatted="false">Эйфелеву башню строили как временную — её собирались разобрать через 20 лет.</string>
+    <string name="element_name_temple">Храм</string>
+    <string name="element_fact_temple" formatted="false">Ангкор-Ват в Камбодже — самое большое религиозное сооружение в мире.</string>
+    <string name="element_name_statue">Статуя</string>
+    <string name="element_fact_statue" formatted="false">Статуя Свободы изначально была медно-рыжей, а зелёной стала из-за окисления меди на воздухе.</string>
+    <string name="element_name_garden">Сад</string>
+    <string name="element_fact_garden" formatted="false">Висячие сады Семирамиды — единственное из семи чудес света, существование которого так и не доказано.</string>
+    <string name="element_name_fountain">Фонтан</string>
+    <string name="element_fact_fountain" formatted="false">Монеты, которые туристы бросают в фонтан Треви в Риме, регулярно собирают и направляют на благотворительность.</string>
+    <string name="element_name_park">Парк</string>
+    <string name="element_fact_park" formatted="false">Йеллоустон, основанный в 1872 году, стал первым национальным парком в мире.</string>
+    <string name="element_name_market">Рынок</string>
+    <string name="element_fact_market" formatted="false">Гранд-базар в Стамбуле — один из старейших крытых рынков мира: в нём около 4000 лавок.</string>
+    <string name="element_name_barrel">Бочка</string>
+    <string name="element_fact_barrel" formatted="false">Бочку делают выпуклой не зря: такую тяжёлую ношу легко катить и поворачивать на ходу.</string>
+    <string name="element_name_juice">Сок</string>
+    <string name="element_fact_juice" formatted="false">Чтобы получить один литр кленового сиропа, обычно приходится выпарить примерно 40 литров кленового сока.</string>
+    <string name="element_name_wine">Вино</string>
+    <string name="element_fact_wine" formatted="false">Древнейшим следам виноделия около 8000 лет — их нашли в глиняных сосудах на территории Грузии.</string>
+    <string name="element_name_beer">Пиво</string>
+    <string name="element_fact_beer" formatted="false">Строителям египетских пирамид часть платы выдавали пивом.</string>
+    <string name="element_name_tavern">Таверна</string>
+    <string name="element_fact_tavern" formatted="false">Ирландский Sean\'s Bar ведёт свою историю от таверны, стоявшей на этом месте больше тысячи лет назад, — по преданию.</string>
+    <string name="element_name_bakery">Пекарня</string>
+    <string name="element_fact_bakery" formatted="false">В Помпеях нашли хлеб, пролежавший под вулканическим пеплом почти 2000 лет.</string>
+    <string name="element_name_mill">Мельница</string>
+    <string name="element_fact_mill" formatted="false">Первые ветряные мельницы появились в Персии больше тысячи лет назад, и их лопасти вращались горизонтально.</string>
+    <string name="element_name_farmer">Фермер</string>
+    <string name="element_fact_farmer" formatted="false">Земледелие возникло независимо в нескольких регионах мира — в том числе на Ближнем Востоке, в Китае и Мезоамерике.</string>
+    <string name="element_name_baker">Пекарь</string>
+    <string name="element_fact_baker" formatted="false">Слово «компания» буквально значит «те, кто делит хлеб»: от латинских com — «вместе» и panis — «хлеб».</string>
+    <string name="element_name_blacksmith">Кузнец</string>
+    <string name="element_fact_blacksmith" formatted="false">Фамилии Кузнецов, Смит, Шмидт и Ковальский означают одно и то же — «кузнец».</string>
+    <string name="element_name_miner">Шахтёр</string>
+    <string name="element_fact_miner" formatted="false">Шахтёры брали под землю канареек: птица первой чувствовала опасный газ и предупреждала людей.</string>
+    <string name="element_name_merchant">Торговец</string>
+    <string name="element_fact_merchant" formatted="false">Шёлковый путь был не одной дорогой, а целой сетью сухопутных и морских маршрутов от Китая до Средиземноморья.</string>
+    <string name="element_name_scholar">Учёный</string>
+    <string name="element_fact_scholar" formatted="false">Эратосфен больше 2000 лет назад измерил окружность Земли с помощью тени от шеста — и почти не ошибся.</string>
+    <string name="element_name_priest">Жрец</string>
+    <string name="element_fact_priest" formatted="false">Латинское pontifex принято толковать как «строитель мостов» — так в Риме называли членов коллегии жрецов.</string>
+    <string name="element_name_sailor">Моряк</string>
+    <string name="element_fact_sailor" formatted="false">Цитрусовые помогали морякам предотвращать цингу задолго до того, как в XX веке учёные выделили витамин C.</string>
+    <string name="element_name_captain">Капитан</string>
+    <string name="element_fact_captain" formatted="false">Магеллан начал первое кругосветное плавание, но сам его не завершил — он погиб на Филиппинах.</string>
+    <string name="element_name_pirate">Пират</string>
+    <string name="element_fact_pirate" formatted="false">«Хождение по доске» прославили книги и кино: надёжных свидетельств, что пираты так делали, почти нет.</string>
+    <string name="element_name_storm">Буря</string>
+    <string name="element_fact_storm" formatted="false">В каждый момент над Землёй бушует около 2000 гроз.</string>
+    <string name="element_name_hurricane">Ураган</string>
+    <string name="element_fact_hurricane" formatted="false">Ураган, тайфун и тропический циклон — названия одного типа шторма: разные слова используют в разных регионах мира.</string>
+    <string name="element_name_blizzard">Метель</string>
+    <string name="element_fact_blizzard" formatted="false">Антарктическая метель часто состоит не из нового снега: сильный ветер поднимает и несёт снег, уже лежащий на поверхности.</string>
+    <string name="element_name_volcano">Вулкан</string>
+    <string name="element_fact_volcano" formatted="false">Самый большой вулкан Солнечной системы, Олимп на Марсе, в два с половиной раза выше Эвереста.</string>
+    <string name="element_name_desert">Пустыня</string>
+    <string name="element_fact_desert" formatted="false">Самая большая пустыня мира — Антарктида: пустыней считают место, где почти не бывает осадков.</string>
+    <string name="element_name_oasis">Оазис</string>
+    <string name="element_fact_oasis" formatted="false">Многие оазисы Сахары питает подземная вода, накопившаяся тысячи лет назад, когда пустыня была зелёной.</string>
+    <string name="element_name_jungle">Джунгли</string>
+    <string name="element_fact_jungle" formatted="false">В тропическом лесу большая часть питательных веществ заключена в самих растениях: ливни быстро вымывают их из почвы.</string>
+    <string name="element_name_island">Остров</string>
+    <string name="element_fact_island" formatted="false">Гренландия — самый большой остров в мире. Австралию, которая больше, считают уже материком.</string>
+    <string name="element_name_beach">Пляж</string>
+    <string name="element_fact_beach" formatted="false">На некоторых пляжах и дюнах песок «поёт»: гудит или скрипит под ногами.</string>
+    <string name="element_name_coral">Коралл</string>
+    <string name="element_fact_coral" formatted="false">Большой Барьерный риф тянется примерно на 2300 километров и состоит почти из 3000 отдельных рифов.</string>
+    <string name="element_name_shark">Акула</string>
+    <string name="element_fact_shark" formatted="false">Акулы старше деревьев: они появились больше 400 миллионов лет назад.</string>
+    <string name="element_name_mermaid">Русалка</string>
+    <string name="element_fact_mermaid" formatted="false">Моряки прошлого принимали за русалок ламантинов. Даже Колумб записал, что видел трёх «сирен».</string>
+    <string name="element_name_dragon">Дракон</string>
+    <string name="element_fact_dragon" formatted="false">В Китае ископаемые кости веками продавали как «кости дракона» и использовали в традиционной медицине.</string>
+    <string name="element_name_phoenix">Феникс</string>
+    <string name="element_fact_phoenix" formatted="false">По Геродоту, феникс прилетал в египетский Гелиополь раз в 500 лет — чтобы похоронить своего отца.</string>
+    <string name="element_name_griffin">Грифон</string>
+    <string name="element_fact_griffin" formatted="false">По одной из гипотез, легенды о грифонах подпитывали находки окаменелостей в Центральной Азии, но это спорно.</string>
+    <string name="element_name_unicorn">Единорог</string>
+    <string name="element_fact_unicorn" formatted="false">Средневековые «рога единорога», которые продавали за огромные деньги, были бивнями нарвала.</string>
+    <string name="element_name_golem">Голем</string>
+    <string name="element_fact_golem" formatted="false">По легенде, пражский раввин Лёв слепил Голема из глины, чтобы тот защищал еврейский квартал.</string>
+    <string name="element_name_magic">Магия</string>
+    <string name="element_fact_magic" formatted="false">Слово «магия» происходит от «маги» — так называли жрецов древней Персии.</string>
+    <string name="element_name_wizard">Волшебник</string>
+    <string name="element_fact_wizard" formatted="false">Английское wizard происходит от wise — «мудрый»: волшебник буквально значит «мудрец».</string>
+    <string name="element_name_alchemy">Алхимия</string>
+    <string name="element_fact_alchemy" formatted="false">Мечта алхимиков сбылась в XX веке: физики превратили висмут в золото. Правда, дороже, чем стоит само золото.</string>
+    <string name="element_name_rune">Руна</string>
+    <string name="element_fact_rune" formatted="false">Слово «руна» в древнегерманских языках означало «тайна».</string>
+    <string name="element_name_potion">Зелье</string>
+    <string name="element_fact_potion" formatted="false">Античный териак считали лекарством от всего: в некоторых рецептах было около 60 ингредиентов, включая опиум и мясо гадюки.</string>
+    <string name="element_name_elixir">Эликсир</string>
+    <string name="element_fact_elixir" formatted="false">Слово «эликсир» пришло из арабского «аль-иксир» — так алхимики называли порошок для превращения металлов.</string>
+    <string name="element_name_portal">Портал</string>
+    <string name="element_fact_portal" formatted="false">Теория относительности допускает «кротовые норы», но неизвестно, могут ли такие туннели существовать в природе.</string>
+    <string name="element_name_spellbook">Книга заклинаний</string>
+    <string name="element_fact_spellbook" formatted="false">На большую средневековую рукопись уходили шкуры множества животных, а на самые объёмные — сотни.</string>
+    <string name="element_name_enchantment">Зачарование</string>
+    <string name="element_fact_enchantment" formatted="false">Английское charm, «очарование», происходит от латинского carmen — «песня, заклинание».</string>
+    <string name="element_name_clock">Часы</string>
+    <string name="element_fact_clock" formatted="false">Оптические атомные часы так точны, что за всё время существования Вселенной ошиблись бы меньше чем на секунду.</string>
+    <string name="element_name_hourglass">Песочные часы</string>
+    <string name="element_fact_hourglass" formatted="false">На кораблях время отмеряли песочными часами — отсюда морское слово «склянки».</string>
+    <string name="element_name_star">Звезда</string>
+    <string name="element_fact_star" formatted="false">Смотря на звёзды, мы видим их прошлое: свет ближайших приходит через годы, а далёких — через тысячи и миллионы лет.</string>
+    <string name="element_name_observatory">Обсерватория</string>
+    <string name="element_fact_observatory" formatted="false">Обсерватория Улугбека в Самарканде в XV веке измерила длину года с ошибкой меньше минуты.</string>
+    <string name="element_name_astronomer">Астроном</string>
+    <string name="element_fact_astronomer" formatted="false">В 1610 году Галилей открыл в телескоп четыре спутника Юпитера — их так и называют галилеевыми.</string>
+    <string name="element_name_philosopher_stone">Философский камень</string>
+    <string name="element_fact_philosopher_stone" formatted="false">Исаак Ньютон написал об алхимии около миллиона слов и всерьёз искал философский камень.</string>
+</resources>

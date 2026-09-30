@@ -1,6 +1,9 @@
 package com.artt.alchemy.ui.settings
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -133,6 +136,20 @@ fun SettingsScreen(
                 onChanged = onReducedMotionChanged
             )
             Text(stringResource(R.string.reduced_motion_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        // Per-app language exists from Android 13; older systems follow the system language.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val context = LocalContext.current
+            SettingsPanel {
+                Text(stringResource(R.string.language), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.language_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                AlchemyButton(
+                    text = stringResource(R.string.language_open),
+                    style = ButtonStyle.BLUE,
+                    onClick = { context.startActivity(appLanguageSettingsIntent(context.packageName)) },
+                    modifier = Modifier.fillMaxWidth().testTag("settings_language")
+                )
+            }
         }
         SettingsPanel {
             Text(stringResource(R.string.progress_transfer), style = MaterialTheme.typography.titleMedium)
@@ -276,6 +293,8 @@ private val TransferResult.messageRes: Int
         TransferResult.IMPORTED -> R.string.transfer_imported
         TransferResult.IMPORT_INVALID -> R.string.transfer_import_invalid
     }
+
+private fun appLanguageSettingsIntent(packageName: String): Intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", packageName, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
 private const val EXPORT_FILE_NAME = "alchemy-progress.json"
 private const val EXPORT_MIME_TYPE = "application/json"

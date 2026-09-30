@@ -17,6 +17,8 @@ adb devices
 ./gradlew connectedDebugAndroidTest
 ```
 
+Тесты ищут русские тексты: инструментальный раннер `RussianLocaleRunner` сам ставит приложению русский язык, какой бы ни был язык устройства.
+
 ## Эмулятор
 
 ```bash

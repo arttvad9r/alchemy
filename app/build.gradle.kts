@@ -15,7 +15,7 @@ android {
         targetSdk = 36
         versionCode = 2
         versionName = "1.1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.artt.alchemy.RussianLocaleRunner"
     }
 
     // The release key stays out of the repository: its path and passwords come from

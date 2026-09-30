@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,7 +48,9 @@ import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.rowPanel
+import java.util.Locale
 
 @Composable
 fun RecipesScreen(
@@ -61,12 +64,14 @@ fun RecipesScreen(
     var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
     var sort by remember { mutableStateOf(RecipeSort.RECENT) }
     val known = AlchemyCatalog.recipes.filter { recipeKey(it.firstId, it.secondId) in progress.knownRecipeKeys }
-    val recipes = sortRecipes(known, progress.discoveryOrder, sort)
+    val resources = LocalContext.current.resources
+    val locale = Locale.getDefault()
+    val recipes = sortRecipes(known, progress.discoveryOrder, sort, locale, resources::elementName)
         .filter { selectedGroup == null || AlchemyCatalog.elementsById.getValue(it.resultId).group == selectedGroup }
         .filter { recipe ->
             query.isBlank() ||
                 listOf(recipe.firstId, recipe.secondId, recipe.resultId)
-                    .map { AlchemyCatalog.elementsById.getValue(it).name }
+                    .map(resources::elementName)
                     .any { it.contains(query, ignoreCase = true) }
         }
 
@@ -129,6 +134,9 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
     val first = AlchemyCatalog.elementsById.getValue(recipe.firstId)
     val second = AlchemyCatalog.elementsById.getValue(recipe.secondId)
     val result = AlchemyCatalog.elementsById.getValue(recipe.resultId)
+    val firstName = elementName(first.id)
+    val secondName = elementName(second.id)
+    val resultName = elementName(result.id)
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,7 +145,7 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp)
             .testTag("recipe_${recipeKey(recipe.firstId, recipe.secondId)}")
-            .semantics(mergeDescendants = true) { contentDescription = "${first.name} + ${second.name} = ${result.name}" }
+            .semantics(mergeDescendants = true) { contentDescription = "$firstName + $secondName = $resultName" }
     ) {
         // Icons give up size before the names do, so a narrow screen keeps the names readable.
         val iconSize = ((maxWidth - OPERATOR_ICON_SIZE * 2 - ROW_GAP * 5 - NAMES_MIN_WIDTH) / 3).coerceIn(RECIPE_ICON_MIN_SIZE, RECIPE_ICON_SIZE)
@@ -151,13 +159,13 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
                 val nameStyle = MaterialTheme.typography.titleMedium
                 val ingredientsStyle = MaterialTheme.typography.bodySmall
                 Text(
-                    result.name,
+                    resultName,
                     style = nameStyle,
                     maxLines = 2,
                     autoSize = WholeWordsAutoSize(min = NAME_MIN_SIZE, max = nameStyle.fontSize)
                 )
                 Text(
-                    "${first.name} + ${second.name}",
+                    "$firstName + $secondName",
                     style = ingredientsStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 3,

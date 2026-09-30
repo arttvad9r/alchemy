@@ -30,7 +30,6 @@ import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.game.Recipe
-import com.artt.alchemy.game.elementFacts
 import com.artt.alchemy.game.partnerOf
 import com.artt.alchemy.game.recipeKey
 import com.artt.alchemy.ui.components.AlchemyDialog
@@ -40,6 +39,8 @@ import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.RarityBadge
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.elementFact
+import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 
@@ -77,7 +78,7 @@ fun ElementDetailsDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.weight(1f, fill = false).padding(start = 14.dp)) {
                     val nameStyle = MaterialTheme.typography.headlineSmall
                     Text(
-                        element.name,
+                        elementName(element.id),
                         style = nameStyle,
                         color = Gold,
                         maxLines = 2,
@@ -89,7 +90,7 @@ fun ElementDetailsDialog(
                     }
                 }
             }
-            FactText(elementFacts.getValue(element.id), Modifier.padding(top = 8.dp))
+            FactText(elementFact(element.id), Modifier.padding(top = 8.dp))
             if (madeFrom.isNotEmpty()) {
                 LinkSection(R.string.element_made_from) {
                     madeFrom.forEach { recipe ->

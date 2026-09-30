@@ -10,7 +10,6 @@ enum class ElementGroup(val color: Long) {
 
 data class ElementDefinition(
     val id: String,
-    val name: String,
     val group: ElementGroup,
     val color: Long
 )
