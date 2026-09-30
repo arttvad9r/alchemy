@@ -1,6 +1,7 @@
 package com.artt.alchemy.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,8 +15,10 @@ import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.isComplete
+import com.artt.alchemy.data.parsePlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.requestHint
+import com.artt.alchemy.data.toJson
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
 import com.artt.alchemy.game.ElementRarity
@@ -59,8 +62,19 @@ data class AlchemyUiState(
     // Elements found this session that the catalog has not shown yet.
     val freshElementIds: Set<String> = emptySet(),
     // The finished-collection card: raised by the mix that opens the last element, or from the achievements screen.
-    val isCompletionVisible: Boolean = false
+    val isCompletionVisible: Boolean = false,
+    // A save read from a file, waiting for the player to agree to replace the current progress.
+    val pendingImport: PlayerProgress? = null,
+    val transferResult: TransferResult? = null
 )
+
+/** How saving progress to a file or loading it from one ended, shown to the player once. */
+enum class TransferResult {
+    EXPORTED,
+    EXPORT_FAILED,
+    IMPORTED,
+    IMPORT_INVALID
+}
 
 class AlchemyViewModel(application: Application) : AndroidViewModel(application) {
     private val engine = AlchemyEngine(AlchemyCatalog)
@@ -74,6 +88,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     private val sounds = SoundEffects(application)
     private val haptics = Haptics(application)
     private val music = BackgroundMusic(application)
+
+    init {
+        applyVolumes()
+    }
 
     fun onWorkspaceEvent(event: WorkspaceEvent) {
         val result = reduce(state.workspace, event, engine)
@@ -200,8 +218,50 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     fun confirmReset() {
         store.clear()
-        state = AlchemyUiState(progress = initialPlayerProgress(), selectedTab = AppTab.SETTINGS)
-        resumeMusic()
+        replaceProgress(initialPlayerProgress())
+    }
+
+    /** Writes the progress as JSON to the document the player picked. */
+    fun exportProgress(uri: Uri) {
+        val written = runCatching {
+            getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use { it.write(state.progress.toJson().toByteArray()) } != null
+        }.getOrDefault(false)
+        state = state.copy(transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+    }
+
+    /** Reads a save from the picked document; a file that is not a save changes nothing, a good one waits for confirmation. */
+    fun readImport(uri: Uri) {
+        val progress = runCatching {
+            getApplication<Application>().contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() }
+        }.getOrNull()?.let(::parsePlayerProgress)
+        state = if (progress == null) state.copy(transferResult = TransferResult.IMPORT_INVALID) else state.copy(pendingImport = progress)
+    }
+
+    fun dismissImport() {
+        playSound(Sound.CLICK)
+        state = state.copy(pendingImport = null)
+    }
+
+    fun confirmImport() {
+        val progress = state.pendingImport ?: return
+        store.save(progress)
+        replaceProgress(progress)
+        state = state.copy(transferResult = TransferResult.IMPORTED)
+    }
+
+    fun dismissTransferResult() {
+        state = state.copy(transferResult = null)
+    }
+
+    private fun replaceProgress(progress: PlayerProgress) {
+        state = AlchemyUiState(progress = progress, selectedTab = AppTab.SETTINGS)
+        applyVolumes()
+        if (progress.musicEnabled) resumeMusic() else music.pause()
+    }
+
+    private fun applyVolumes() {
+        sounds.level = state.progress.effectsVolume
+        music.level = state.progress.musicVolume
     }
 
     fun setSoundEnabled(enabled: Boolean) {
@@ -211,6 +271,25 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     fun setVibrationEnabled(enabled: Boolean) {
         updateProgress { copy(vibrationEnabled = enabled) }
         vibrate(Haptic.CLICK)
+    }
+
+    fun setMusicVolume(volume: Float) {
+        updateProgress { copy(musicVolume = volume.coerceIn(0f, 1f)) }
+        music.level = state.progress.musicVolume
+    }
+
+    fun setEffectsVolume(volume: Float) {
+        updateProgress { copy(effectsVolume = volume.coerceIn(0f, 1f)) }
+        sounds.level = state.progress.effectsVolume
+    }
+
+    /** The player has let go of the effects slider: a click at the new volume shows what it sounds like. */
+    fun previewEffectsVolume() {
+        playSound(Sound.CLICK)
+    }
+
+    fun setReducedMotion(reduced: Boolean) {
+        updateProgress { copy(reducedMotion = reduced) }
     }
 
     fun setMusicEnabled(enabled: Boolean) {

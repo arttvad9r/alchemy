@@ -66,11 +66,13 @@ fun PlayerProgress.sanitized(): PlayerProgress {
         knownRecipeKeys = knownRecipeKeys.filter { it in AlchemyCatalog.recipeResultsByKey }.toSet(),
         successfulMixCount = successfulMixCount.coerceAtLeast(0),
         mixAttemptCount = mixAttemptCount.coerceAtLeast(0),
-        musicVolume = musicVolume.coerceIn(0f, 1f),
-        effectsVolume = effectsVolume.coerceIn(0f, 1f),
+        musicVolume = musicVolume.toVolume(),
+        effectsVolume = effectsVolume.toVolume(),
         activeHint = activeHint?.takeIf { it.recipeKey in AlchemyCatalog.recipeResultsByKey && it.step in 1..2 }
     ).withoutSolvedHint()
 }
+
+private fun Float.toVolume(): Float = if (isFinite()) coerceIn(0f, 1f) else 1f
 
 private fun PlayerProgress.withoutSolvedHint(): PlayerProgress {
     val hinted = activeHint?.let { recipeForKey(it.recipeKey) } ?: return this

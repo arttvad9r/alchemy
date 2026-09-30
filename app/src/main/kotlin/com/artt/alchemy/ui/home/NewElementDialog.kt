@@ -39,7 +39,9 @@ import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.FactText
 import com.artt.alchemy.ui.components.FinalBadge
 import com.artt.alchemy.ui.components.FramedElementIcon
+import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.RarityBadge
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
@@ -56,13 +58,16 @@ private const val GLOW_ALPHA = 0.85f
 fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick: () -> Unit) {
     val iconIn = remember { Animatable(0f) }
     val badgeIn = remember { Animatable(0f) }
+    val reducedMotion = LocalReducedMotion.current
+    val iconSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+    val badgeSpec = motion(tween<Float>(BADGE_FADE_MILLIS))
     LaunchedEffect(Unit) {
-        delay(ICON_DELAY_MILLIS)
-        iconIn.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        if (!reducedMotion) delay(ICON_DELAY_MILLIS)
+        iconIn.animateTo(1f, iconSpec)
     }
     LaunchedEffect(Unit) {
-        delay(BADGE_DELAY_MILLIS)
-        badgeIn.animateTo(1f, tween(BADGE_FADE_MILLIS))
+        if (!reducedMotion) delay(BADGE_DELAY_MILLIS)
+        badgeIn.animateTo(1f, badgeSpec)
     }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
         // Scrolls on small screens with large text; the button stays below it, always in reach.

@@ -34,8 +34,12 @@ class SoundEffects(context: Context) {
     private val pool = SoundPool.Builder().setMaxStreams(MAX_STREAMS).setAudioAttributes(GameAudioAttributes).build()
     private val ids = Sound.entries.associateWith { pool.load(context, it.res, 1) }
 
+    /** The player's effects volume from 0 to 1, applied to every effect started after it is set. */
+    var level = 1f
+
     fun play(sound: Sound) {
-        pool.play(ids.getValue(sound), EFFECT_VOLUME, EFFECT_VOLUME, 1, 0, 1f)
+        val volume = EFFECT_VOLUME * level
+        pool.play(ids.getValue(sound), volume, volume, 1, 0, 1f)
     }
 
     fun release() = pool.release()
@@ -52,6 +56,18 @@ class BackgroundMusic(private val context: Context) {
     private var upcoming: MediaPlayer? = null
     private var fade: ValueAnimator? = null
     private var volume = 0f
+    private var audible = false
+
+    /** The player's music volume from 0 to 1; a playing track follows it at once. */
+    var level = 1f
+        set(value) {
+            field = value
+            if (!audible) return
+            fade?.cancel()
+            volume = MUSIC_VOLUME * value
+            current?.setVolume(volume, volume)
+            upcoming?.setVolume(volume, volume)
+        }
 
     fun start() {
         val playing = current ?: newPlayer()?.also { first ->
@@ -59,10 +75,12 @@ class BackgroundMusic(private val context: Context) {
             chain(first)
         } ?: return
         if (!playing.isPlaying) playing.start()
-        fadeTo(MUSIC_VOLUME) {}
+        audible = true
+        fadeTo(MUSIC_VOLUME * level) {}
     }
 
     fun pause() {
+        audible = false
         val playing = current?.takeIf { it.isPlaying } ?: return
         fadeTo(0f) { playing.pause() }
     }
