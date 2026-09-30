@@ -19,7 +19,7 @@ class ElementResources(directory: String) {
     fun fact(id: String): String? = strings["element_fact_$id"]
 
     companion object {
-        val russian = ElementResources("values")
-        val english = ElementResources("values-en")
+        val russian = ElementResources("values-ru")
+        val english = ElementResources("values")
     }
 }
