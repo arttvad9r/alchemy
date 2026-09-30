@@ -1,12 +1,26 @@
 package com.artt.alchemy.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -55,8 +69,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -75,6 +92,7 @@ import androidx.compose.ui.zIndex
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.WorkspaceEvent
 import com.artt.alchemy.game.sortElements
@@ -96,6 +114,7 @@ import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.pillBadge
+import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -106,6 +125,9 @@ import kotlinx.coroutines.currentCoroutineContext
 
 private const val EFFECT_DURATION_MILLIS = 700
 private const val DISCOVERY_CARD_AFTER_EFFECT = 0.3f
+
+// An epic or legendary find holds the stage a little longer before its card comes up.
+private const val GRAND_CARD_AFTER_EFFECT = 0.6f
 private const val TRANSITION_DURATION_MILLIS = 450L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
 private const val DRAGGED_TILE_ALPHA = 0.4f
@@ -292,6 +314,7 @@ fun HomeScreen(
                                 DraggablePaletteElement(
                                     element = element,
                                     dimmed = draggedElement?.id == element.id,
+                                    fresh = element.id in state.freshElementIds,
                                     modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
                                     onDragPosition = { position ->
                                         draggedElement = position?.let { element }
@@ -329,6 +352,11 @@ fun HomeScreen(
         val position = dragPosition
         val bounds = homeBounds
         if (element != null && position != null && bounds != null) {
+            // The tile rises out of the palette into the hand: it grows a little and glows in its rarity's colour.
+            val lift = remember(element.id) { Animatable(1f) }
+            val liftSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            LaunchedEffect(element.id) { lift.animateTo(PREVIEW_LIFT_SCALE, liftSpec) }
+            val glow = element.rarity.glowColor
             ElementTile(
                 element = element,
                 modifier = Modifier
@@ -341,6 +369,11 @@ fun HomeScreen(
                     }
                     .width(72.dp)
                     .zIndex(1f)
+                    .graphicsLayer {
+                        scaleX = lift.value
+                        scaleY = lift.value
+                    }
+                    .drawBehind { drawTileGlow(glow, PREVIEW_GLOW_ALPHA) }
                     .testTag("drag_preview")
             )
         }
@@ -348,7 +381,12 @@ fun HomeScreen(
 
     // The discovery card comes up once the flash has shown, while the burst plays on beneath it. The effect is
     // still in the UI state for the first frame, before it is taken to play, so that is checked too.
-    val effectShown by remember { derivedStateOf { LinearOutSlowInEasing.transform(effectTime.value) >= DISCOVERY_CARD_AFTER_EFFECT } }
+    val effectShown by remember {
+        derivedStateOf {
+            val grand = playingEffect?.let { it.rarity >= ElementRarity.EPIC } == true
+            LinearOutSlowInEasing.transform(effectTime.value) >= if (grand) GRAND_CARD_AFTER_EFFECT else DISCOVERY_CARD_AFTER_EFFECT
+        }
+    }
     state.newlyUnlockedId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
         val element = AlchemyCatalog.elementsById.getValue(elementId)
         NewElementDialog(element, onDismiss = onDismissNewElement, onClick = onClick)
@@ -380,14 +418,45 @@ private fun ProgressCounter(unlocked: Int) {
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
         Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
-        Text(
-            text = stringResource(R.string.progress, unlocked, AlchemyCatalog.elements.size),
-            style = MaterialTheme.typography.titleSmall.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal),
-            color = Gold,
-            maxLines = 1,
-            softWrap = false
-        )
+        // The count rolls over like a mechanical counter: up for a find, down after a reset.
+        AnimatedContent(targetState = unlocked, transitionSpec = counterRoll(LocalReducedMotion.current), label = "counter") { count ->
+            Text(
+                text = stringResource(R.string.progress, count, AlchemyCatalog.elements.size),
+                style = MaterialTheme.typography.titleSmall.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal),
+                color = Gold,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
     }
+}
+
+private fun counterRoll(reducedMotion: Boolean): AnimatedContentTransitionScope<Int>.() -> ContentTransform = {
+    if (reducedMotion) {
+        EnterTransition.None togetherWith ExitTransition.None
+    } else {
+        val up = if (targetState > initialState) 1 else -1
+        (slideInVertically(tween(COUNTER_ROLL_MILLIS)) { height -> up * height } + fadeIn(tween(COUNTER_ROLL_MILLIS))) togetherWith
+            (slideOutVertically(tween(COUNTER_ROLL_MILLIS)) { height -> -up * height } + fadeOut(tween(COUNTER_ROLL_MILLIS)))
+    }
+}
+
+/** A soft glow of [color] behind a tile's icon, which is the square at the top of the tile. */
+private fun DrawScope.drawTileGlow(color: Color, alpha: Float) {
+    drawGlow(Offset(size.width / 2, size.width / 2), size.width * TILE_GLOW_SHARE, color, alpha)
+}
+
+/** A slow golden pulse behind a tile, marking it as new. */
+@Composable
+private fun Modifier.freshGlow(): Modifier {
+    val reducedMotion = LocalReducedMotion.current
+    val pulse = rememberInfiniteTransition(label = "fresh").animateFloat(
+        initialValue = FRESH_GLOW_LOW,
+        targetValue = FRESH_GLOW_HIGH,
+        animationSpec = infiniteRepeatable(tween(FRESH_PULSE_MILLIS), RepeatMode.Reverse),
+        label = "freshPulse"
+    )
+    return drawBehind { drawTileGlow(Gold, if (reducedMotion) FRESH_GLOW_HIGH else pulse.value) }
 }
 
 /** Ticks every frame while transitions play, reporting the frame time and how long a transition lasts. */
@@ -408,6 +477,13 @@ private fun TransitionClock(playing: MutableList<PlayingTransition>, onTick: (no
 }
 
 private const val COUNTER_BOUNCE_SCALE = 1.25f
+private const val COUNTER_ROLL_MILLIS = 260
+private const val PREVIEW_LIFT_SCALE = 1.18f
+private const val PREVIEW_GLOW_ALPHA = 0.7f
+private const val TILE_GLOW_SHARE = 0.75f
+private const val FRESH_GLOW_LOW = 0.25f
+private const val FRESH_GLOW_HIGH = 0.75f
+private const val FRESH_PULSE_MILLIS = 1100
 
 private data class PlayingTransition(val transition: ItemTransition, val startMillis: Long, val origin: Offset?)
 
@@ -448,6 +524,7 @@ private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier
 private fun DraggablePaletteElement(
     element: ElementDefinition,
     dimmed: Boolean,
+    fresh: Boolean,
     modifier: Modifier,
     onDragPosition: (Offset?) -> Unit,
     onDrop: (Offset) -> Unit,
@@ -462,7 +539,8 @@ private fun DraggablePaletteElement(
     val alpha by animateFloatAsState(if (dimmed) DRAGGED_TILE_ALPHA else 1f, motion(tween(DRAGGED_TILE_FADE_MILLIS)), label = "tileAlpha")
     ElementTile(
         element = element,
-        modifier = modifier.alpha(alpha).onGloballyPositioned { coordinates = it }
+        // An element found this session glows until the catalog has shown it.
+        modifier = modifier.alpha(alpha).then(if (fresh) Modifier.freshGlow() else Modifier).onGloballyPositioned { coordinates = it }
             .pointerInput(element.id) {
                 var lastPosition: Offset? = null
                 detectDragGestures(
