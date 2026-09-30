@@ -28,16 +28,19 @@ import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
+import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.achievements.AchievementBadge
 import com.artt.alchemy.ui.components.AlchemyButton
 import com.artt.alchemy.ui.components.AlchemyDialog
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.motion
+import com.artt.alchemy.ui.components.shimmer
 import com.artt.alchemy.ui.theme.Gold
 
 private const val BURST_SIZE = 240
 private const val TROPHY_SIZE = 110
 private const val BURST_START_SCALE = 0.4f
+private const val COMPLETION_RAYS = 20
 
 /** The card for a finished collection: a trophy over a golden burst, and how many tries and mixes it took. */
 @Composable
@@ -53,9 +56,16 @@ fun CompletionDialog(progress: PlayerProgress, onDismiss: () -> Unit, onClick: (
                 stringResource(R.string.completion_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Gold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier.shimmer()
             )
             Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()) {
+                RadiantBackdrop(
+                    color = ElementRarity.LEGENDARY.glowColor,
+                    intensity = { entrance.value },
+                    rays = COMPLETION_RAYS,
+                    modifier = Modifier.matchParentSize()
+                )
                 Image(
                     painter = painterResource(R.drawable.fx_discovery_burst_gold),
                     contentDescription = null,

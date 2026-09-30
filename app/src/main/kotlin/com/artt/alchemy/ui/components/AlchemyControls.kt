@@ -3,8 +3,9 @@ package com.artt.alchemy.ui.components
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -126,9 +127,9 @@ private const val SLIDER_TRACK_SHARE = 0.5f
 private val DROPDOWN_CHEVRON_SPACE = 34.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
-private const val DIALOG_ENTRANCE_MILLIS = 200
+private const val DIALOG_DAMPING = 0.68f
 private const val PROGRESS_FILL_MILLIS = 600
-private const val DIALOG_START_SCALE = 0.9f
+private const val DIALOG_START_SCALE = 0.85f
 private val DIALOG_MAX_WIDTH = 480.dp
 
 enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
@@ -282,13 +283,14 @@ fun AlchemyDialog(
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val art = ImageBitmap.imageResource(panelRes)
         val entrance = remember { Animatable(0f) }
-        val entranceSpec = motion(tween<Float>(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+        // A quick pop with a touch of overshoot, like a card laid down with a flourish.
+        val entranceSpec = motion(spring<Float>(dampingRatio = DIALOG_DAMPING, stiffness = Spring.StiffnessMediumLow))
         LaunchedEffect(Unit) { entrance.animateTo(1f, entranceSpec) }
         Box(
             modifier = Modifier
                 .graphicsLayer {
                     val value = entrance.value
-                    alpha = value
+                    alpha = value.coerceIn(0f, 1f)
                     scaleX = DIALOG_START_SCALE + (1f - DIALOG_START_SCALE) * value
                     scaleY = scaleX
                 }
