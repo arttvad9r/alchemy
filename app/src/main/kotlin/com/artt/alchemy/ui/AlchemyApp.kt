@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -64,11 +65,13 @@ import com.artt.alchemy.ui.settings.SettingsScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.backgroundRes
+import com.artt.alchemy.ui.theme.homeDim
 import com.artt.alchemy.ui.theme.panel
 
 // The home scene stays bright; list screens dim it so text keeps its contrast.
-private const val HOME_DIM = 0.2f
 private const val LIST_DIM = 0.7f
+private const val TOP_SCRIM_HEIGHT = 0.22f
+private const val TOP_SCRIM_ALPHA = 0.75f
 private const val UNSELECTED_ICON_ALPHA = 0.6f
 private const val TAB_FADE_MILLIS = 180
 private const val THEME_FADE_MILLIS = 400
@@ -96,11 +99,18 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                     )
                 }
                 val dim by animateFloatAsState(
-                    targetValue = if (state.selectedTab == AppTab.HOME) HOME_DIM else LIST_DIM,
+                    targetValue = if (state.selectedTab == AppTab.HOME) state.progress.theme.homeDim else LIST_DIM,
                     animationSpec = motion(tween(TAB_FADE_MILLIS)),
                     label = "backgroundDim"
                 )
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = dim)))
+                // The status bar and the gold headings sit on the top of the picture, which is bright in some themes.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(TOP_SCRIM_HEIGHT)
+                        .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.background.copy(alpha = TOP_SCRIM_ALPHA), Color.Transparent)))
+                )
                 Scaffold(
                     containerColor = Color.Transparent,
                     bottomBar = { AlchemyNavigationBar(selectedTab = state.selectedTab, onSelect = viewModel::selectTab) }

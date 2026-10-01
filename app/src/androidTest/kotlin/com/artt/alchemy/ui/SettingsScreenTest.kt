@@ -61,7 +61,8 @@ class SettingsScreenTest {
     @Test
     fun chosenThemeSurvivesActivityRecreation() {
         composeRule.onNodeWithTag("nav_settings").performClick()
-        composeRule.onNodeWithTag("settings_theme_aether").performScrollTo().assertIsSelected()
+        // The theme is kept across tests and resets, so start from a known one.
+        composeRule.onNodeWithTag("settings_theme_aether").performScrollTo().performClick()
         composeRule.onNodeWithTag("settings_theme_ember").performScrollTo().performClick()
         composeRule.onNodeWithTag("settings_theme_ember").assertIsSelected()
         composeRule.onNodeWithTag("settings_theme_aether").assertIsNotSelected()

@@ -234,3 +234,11 @@ val AppTheme.backgroundRes: Int
         AppTheme.EMBER -> R.drawable.bg_ember
         AppTheme.VERDANT -> R.drawable.bg_verdant
     }
+
+/** How much the home screen darkens the picture: the brighter the background, the more. */
+val AppTheme.homeDim: Float
+    get() = when (this) {
+        AppTheme.AETHER -> 0.2f
+        AppTheme.EMBER -> 0.3f
+        AppTheme.VERDANT -> 0.45f
+    }

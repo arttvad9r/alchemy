@@ -47,8 +47,6 @@ import com.artt.alchemy.ui.theme.color
 private val FinalBadgeColor = Color(0xFF2A3160)
 private val FinalMarkEdge = Color(0xFF3B2A06)
 
-private val SilhouetteFilter = ColorFilter.tint(Color(0xFF46528F))
-
 // Share of the frame taken by its ornamental border on each side.
 private const val FRAME_INSET = 0.16f
 
@@ -60,7 +58,8 @@ fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silho
     Image(
         painter = painterResource(elementIconRes(element.id)),
         contentDescription = null,
-        colorFilter = if (silhouette) SilhouetteFilter else null,
+        // Locked elements take the theme's outline colour, so they match the card they sit on.
+        colorFilter = if (silhouette) ColorFilter.tint(MaterialTheme.colorScheme.outline) else null,
         modifier = modifier.aspectRatio(1f)
     )
 }

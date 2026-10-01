@@ -122,10 +122,9 @@ THEMED_ART = (
     "field_row", "progress_track", "progress_fill", "slider_knob", "banner_wide", "scene_magic_circle",
     "radio_on", "card_base", "card_common", "card_rare", "card_epic", "card_legendary",
 )
-# Theme -> (target hue in degrees, saturation factor).
-THEME_TINTS = {"ember": (12, 1.0), "verdant": (155, 0.75)}
+# Theme -> (hue in degrees every blue becomes, saturation factor). One hue keeps toggles, sliders and panels alike.
+THEME_TINTS = {"ember": (14, 0.95), "verdant": (152, 0.75)}
 BLUE_HUE_RANGE = (190, 262)
-BLUE_HUE_CENTER = 228
 BLUE_MIN_SATURATION = 0.35
 
 
@@ -141,7 +140,7 @@ def convert_themed_art() -> None:
                     red, green, blue, alpha = pixels[x, y]
                     hue, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
                     if BLUE_HUE_RANGE[0] < hue * 360 < BLUE_HUE_RANGE[1] and saturation > BLUE_MIN_SATURATION:
-                        hue = ((hue * 360 + target - BLUE_HUE_CENTER) % 360) / 360
+                        hue = target / 360
                         red, green, blue = (round(c * 255) for c in colorsys.hls_to_rgb(hue, lightness, saturation * factor))
                         pixels[x, y] = (red, green, blue, alpha)
             image.save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
