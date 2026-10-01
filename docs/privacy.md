@@ -1,6 +1,6 @@
 # Политика конфиденциальности игры «Алхимия»
 
-Действует с 1 октября 2026 года. Разработчик — ARTT (<КОНТАКТ>).
+Действует с 1 октября 2026 года. Разработчик — ARTT (arttvad9r@gmail.com).
 
 **Игра не собирает, не передаёт и не продаёт никакие данные.**
 
@@ -12,13 +12,13 @@
 
 Чтобы удалить все данные игры, сбросьте прогресс в настройках или удалите приложение.
 
-Об изменениях этой политики будет сообщено в описании обновления. Вопросы — на <КОНТАКТ>.
+Об изменениях этой политики будет сообщено в описании обновления. Вопросы — на arttvad9r@gmail.com.
 
 ---
 
 # Privacy policy for Alchemy
 
-Effective October 1, 2026. Developer: ARTT (<КОНТАКТ>).
+Effective October 1, 2026. Developer: ARTT (arttvad9r@gmail.com).
 
 **The game does not collect, share or sell any data.**
 
@@ -30,4 +30,4 @@ Effective October 1, 2026. Developer: ARTT (<КОНТАКТ>).
 
 To delete all game data, reset progress in settings or uninstall the app.
 
-Changes to this policy will be noted in the update description. Questions: <КОНТАКТ>.
+Changes to this policy will be noted in the update description. Questions: arttvad9r@gmail.com.
