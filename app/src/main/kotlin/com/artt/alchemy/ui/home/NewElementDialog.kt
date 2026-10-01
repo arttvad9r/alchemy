@@ -44,6 +44,7 @@ import com.artt.alchemy.ui.components.elementFact
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.rarity
+import com.artt.alchemy.ui.components.shineOnce
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
 
@@ -53,15 +54,28 @@ private const val BADGE_FADE_MILLIS = 250
 private const val ICON_START_SCALE = 0.3f
 private const val GLOW_SIZE = 220
 private const val GLOW_ALPHA = 0.85f
+private const val TITLE_START_SCALE = 0.6f
+private const val ICON_SHINE_DELAY_MILLIS = 520L
+private const val ICON_SHINE_MILLIS = 480
+private const val TITLE_SHINE_DELAY_MILLIS = 260L
 
-/** The card for an element opened for the first time: the icon springs in over a glow, the rarity badge follows. */
+// A legendary find gets more rays than the rest.
+private const val RAYS = 12
+private const val LEGENDARY_RAYS = 18
+
+/**
+ * The card for an element opened for the first time: the title pops, the icon springs in over turning rays in its
+ * rarity's colour and catches the light, and the rarity badge follows.
+ */
 @Composable
 fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick: () -> Unit) {
+    val titleIn = remember { Animatable(0f) }
     val iconIn = remember { Animatable(0f) }
     val badgeIn = remember { Animatable(0f) }
     val reducedMotion = LocalReducedMotion.current
     val iconSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     val badgeSpec = motion(tween<Float>(BADGE_FADE_MILLIS))
+    LaunchedEffect(Unit) { titleIn.animateTo(1f, iconSpec) }
     LaunchedEffect(Unit) {
         if (!reducedMotion) delay(ICON_DELAY_MILLIS)
         iconIn.animateTo(1f, iconSpec)
@@ -73,8 +87,26 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
         // Scrolls on small screens with large text; the button stays below it, always in reach.
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
-            Text(stringResource(R.string.new_element_title), style = MaterialTheme.typography.headlineSmall, color = Gold)
+            Text(
+                stringResource(R.string.new_element_title),
+                style = MaterialTheme.typography.headlineSmall,
+                color = Gold,
+                modifier = Modifier
+                    .graphicsLayer {
+                        val scale = TITLE_START_SCALE + (1f - TITLE_START_SCALE) * titleIn.value
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = titleIn.value.coerceIn(0f, 1f)
+                    }
+                    .shineOnce(delayMillis = TITLE_SHINE_DELAY_MILLIS)
+            )
             Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(top = 16.dp).fillMaxWidth()) {
+                RadiantBackdrop(
+                    color = element.rarity.glowColor,
+                    intensity = { iconIn.value },
+                    rays = if (element.rarity == ElementRarity.LEGENDARY) LEGENDARY_RAYS else RAYS,
+                    modifier = Modifier.matchParentSize()
+                )
                 Image(
                     painter = painterResource(if (element.rarity == ElementRarity.EPIC) R.drawable.fx_glow_purple_orb else R.drawable.fx_glow_gold_orb),
                     contentDescription = null,
@@ -88,6 +120,7 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                         .width(140.dp)
                         .scale(ICON_START_SCALE + (1f - ICON_START_SCALE) * iconIn.value)
                         .graphicsLayer { alpha = iconIn.value.coerceIn(0f, 1f) }
+                        .shineOnce(delayMillis = ICON_SHINE_DELAY_MILLIS, durationMillis = ICON_SHINE_MILLIS)
                 )
             }
             Row(

@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.components.motion
+import com.artt.alchemy.ui.components.shineOnce
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelColor
 import com.artt.alchemy.ui.theme.TitleFontFamily
@@ -41,6 +43,12 @@ private const val SHOWN_MILLIS = 3000L
 private const val LEAVE_MILLIS = 220
 private const val SWIPE_UP_THRESHOLD = 12f
 private const val OFFSCREEN_MARGIN = 100f
+private const val BADGE_DELAY_MILLIS = 120L
+private const val BADGE_START_SCALE = 0.3f
+private const val SHINE_DELAY_MILLIS = 380L
+private const val SHINE_MILLIS = 900
+private const val SHINE_BAND = 0.22f
+private val ToastShineColor = Color(0x55FFF3C4)
 
 /**
  * The banner for an earned achievement. It slides in from the top, stays a few seconds, and leaves by itself,
@@ -49,6 +57,7 @@ private const val OFFSCREEN_MARGIN = 100f
 @Composable
 fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val shown = remember { Animatable(0f) }
+    val badgeIn = remember { Animatable(0f) }
     var leaving by remember { mutableStateOf(false) }
     val enterSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow))
     val leaveSpec = motion(tween<Float>(LEAVE_MILLIS))
@@ -57,6 +66,12 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
         shown.animateTo(1f, enterSpec)
         delay(SHOWN_MILLIS)
         leaving = true
+    }
+    // The medal lands a beat after the banner, with a bounce.
+    val badgeSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+    LaunchedEffect(Unit) {
+        delay(BADGE_DELAY_MILLIS)
+        badgeIn.animateTo(1f, badgeSpec)
     }
     LaunchedEffect(leaving) {
         if (leaving) {
@@ -73,6 +88,7 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
                 alpha = shown.value.coerceIn(0f, 1f)
             }
             .fillMaxWidth()
+            .shineOnce(delayMillis = SHINE_DELAY_MILLIS, durationMillis = SHINE_MILLIS, color = ToastShineColor, bandShare = SHINE_BAND)
             .background(PanelColor.copy(alpha = 1f), RoundedCornerShape(16.dp))
             .border(2.dp, Gold, RoundedCornerShape(16.dp))
             .pointerInput(Unit) { detectTapGestures { leaving = true } }
@@ -80,7 +96,15 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
             .padding(12.dp)
             .testTag("achievement_toast")
     ) {
-        AchievementBadge(completed = true)
+        AchievementBadge(
+            completed = true,
+            modifier = Modifier.graphicsLayer {
+                val scale = BADGE_START_SCALE + (1f - BADGE_START_SCALE) * badgeIn.value
+                scaleX = scale
+                scaleY = scale
+                alpha = badgeIn.value.coerceIn(0f, 1f)
+            }
+        )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(R.string.achievement_unlocked), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(achievement.title), style = MaterialTheme.typography.titleMedium.copy(fontFamily = TitleFontFamily, fontWeight = FontWeight.Normal), color = Gold)

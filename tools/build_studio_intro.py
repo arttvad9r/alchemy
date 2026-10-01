@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 WIDTH, HEIGHT = 720, 1280
-FPS, SECONDS = 30, 3
+FPS, SECONDS = 30, 2.8
 
 
 def silhouette(source, box, size):
@@ -68,30 +68,30 @@ def main():
     ]
     encoder = subprocess.Popen(command, stdin=subprocess.PIPE)
     try:
-        for frame in range(FPS * SECONDS):
+        for frame in range(round(FPS * SECONDS)):
             time = frame / FPS
             canvas = Image.new("RGBA", (WIDTH, HEIGHT), "black")
             for index, (letter, left) in enumerate(letters):
-                elapsed = time - (0.2 + index * 0.07)
+                elapsed = time - (0.05 + index * 0.025)
                 if elapsed < 0:
                     continue
-                progress = smooth(elapsed / 0.24)
+                progress = smooth(elapsed / 0.16)
                 # A small damped rebound makes the flat letters feel playful.
-                bounce = 0 if elapsed < 0.24 else 0.065 * math.exp(-8 * (elapsed - 0.24)) * math.sin(19 * (elapsed - 0.24))
+                bounce = 0 if elapsed < 0.16 else 0.065 * math.exp(-16 * (elapsed - 0.16)) * math.sin(30 * (elapsed - 0.16))
                 scale = 0.78 + 0.22 * progress + bounce
                 tile = letter.resize((round(letter.width * scale), round(letter.height * scale)), Image.Resampling.LANCZOS)
                 tile.putalpha(tile.getchannel("A").point(lambda value: round(value * progress)))
                 x = 90 + left + (letter.width - tile.width) // 2
                 y = 515 + (letter.height - tile.height) // 2 + round(34 * (1 - progress))
                 canvas.alpha_composite(tile, (x, y))
-            reveal = smooth((time - 0.75) / 0.25)
+            reveal = smooth((time - 0.2) / 0.16)
             subtitle = studio.copy()
             subtitle.putalpha(subtitle.getchannel("A").point(lambda value: round(value * reveal)))
             canvas.alpha_composite(subtitle, (185, 716 + round(10 * (1 - reveal))))
             if frame == 45:
                 canvas.convert("RGB").save(poster, optimize=True)
             rgb = canvas.convert("RGB")
-            fade = smooth((SECONDS - 1 / FPS - time) / 0.18)
+            fade = smooth((SECONDS - 1 / FPS - time) / 0.15)
             if fade < 1:
                 rgb = Image.blend(Image.new("RGB", rgb.size, "black"), rgb, fade)
             encoder.stdin.write(rgb.tobytes())

@@ -1,7 +1,6 @@
 package com.artt.alchemy.ui.recipes
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -48,7 +45,9 @@ import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.cascadeIn
 import com.artt.alchemy.ui.components.elementName
+import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rowPanel
 import java.util.Locale
 
@@ -115,8 +114,8 @@ fun RecipesScreen(
                 contentPadding = PaddingValues(vertical = 12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(recipes, key = { recipeKey(it.firstId, it.secondId) }) { recipe ->
-                    RecipeRow(recipe, onClick = { onPlaceRecipe(recipe) })
+                itemsIndexed(recipes, key = { _, recipe -> recipeKey(recipe.firstId, recipe.secondId) }) { index, recipe ->
+                    RecipeRow(recipe, onClick = { onPlaceRecipe(recipe) }, modifier = Modifier.cascadeIn(index))
                 }
             }
         }
@@ -130,7 +129,7 @@ private val RecipeSort.labelRes: Int
     }
 
 @Composable
-private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
+private fun RecipeRow(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val first = AlchemyCatalog.elementsById.getValue(recipe.firstId)
     val second = AlchemyCatalog.elementsById.getValue(recipe.secondId)
     val result = AlchemyCatalog.elementsById.getValue(recipe.resultId)
@@ -138,11 +137,11 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
     val secondName = elementName(second.id)
     val resultName = elementName(result.id)
     BoxWithConstraints(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            // Before the panel, so the whole row sinks under the finger, art and all.
+            .pressClickable(role = Role.Button, pressedScale = ROW_PRESSED_SCALE, onClick = onClick)
             .rowPanel()
-            .clip(RoundedCornerShape(ROW_CORNER))
-            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp)
             .testTag("recipe_${recipeKey(recipe.firstId, recipe.secondId)}")
             .semantics(mergeDescendants = true) { contentDescription = "$firstName + $secondName = $resultName" }
@@ -176,7 +175,7 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit) {
     }
 }
 
-private val ROW_CORNER = 14.dp
+private const val ROW_PRESSED_SCALE = 0.97f
 private val RECIPE_ICON_SIZE = 52.dp
 private val OPERATOR_ICON_SIZE = 22.dp
 private val RECIPE_ICON_MIN_SIZE = 38.dp

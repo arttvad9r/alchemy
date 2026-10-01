@@ -46,10 +46,17 @@ data class WorkspaceResult(
     val attemptedMix: Boolean = false
 )
 
+/** The upper or lower half of the workspace. */
+enum class BoardHalf {
+    UPPER,
+    LOWER
+}
+
 sealed interface WorkspaceEvent {
     data class Spawn(val elementId: String, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
 
-    data class SpawnAutomatically(val elementId: String) : WorkspaceEvent
+    /** Puts the element in the freest spot, outside [keepClear] when that half holds something the player must see. */
+    data class SpawnAutomatically(val elementId: String, val keepClear: BoardHalf? = null) : WorkspaceEvent
 
     data class Move(val instanceId: Long, val xFraction: Float, val yFraction: Float) : WorkspaceEvent
 
