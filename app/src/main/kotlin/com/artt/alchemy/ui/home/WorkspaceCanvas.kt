@@ -38,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
@@ -56,6 +58,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -95,13 +98,14 @@ private const val TARGET_PULSE_MILLIS = 550
 private const val LIFT_SCALE = 0.12f
 private const val LIFT_SHADOW_ALPHA = 0.35f
 private const val TARGET_RING_SHARE = 1.7f
-private const val TARGET_GLOW_SHARE = 1.1f
-private const val TARGET_GLOW_ALPHA = 0.7f
+private const val TARGET_GLOW_SHARE = 1.4f
+private const val TARGET_GLOW_ALPHA = 0.9f
 private const val TARGET_SCALE = 0.08f
 private val TargetGlow = Color(0xFFFFD98A)
+private val TargetRingTint = ColorFilter.tint(Color(0xFFFFCF5C), BlendMode.SrcIn)
 
 // A tapped element flies in from its palette tile at about the tile's size; a dropped one only settles.
-private const val FLY_START_SCALE = 0.8f
+internal const val FLY_START_SCALE = 0.8f
 private const val DROP_START_SCALE = 0.92f
 private const val SWEEP_ALPHA = 0.35f
 
@@ -109,9 +113,11 @@ private const val SWEEP_ALPHA = 0.35f
 private const val REST_SIDE = 0.7f
 private const val REST_TOP = 0.9f
 private const val REST_BOTTOM = 0.95f
+private const val LABEL_EDGE_GAP = 0.1f
 private const val FLY_IN_SPEED = 1.5f
-private const val SHAKE_WAVES = 2.5f
-private const val SHAKE_AMPLITUDE_SHARE = 0.1f
+private const val LANDED_AT = 1f / FLY_IN_SPEED
+private const val SHAKE_WAVES = 3f
+private const val SHAKE_AMPLITUDE_SHARE = 0.22f
 private const val AURA_ALPHA = 0.9f
 private const val STARS_TURN_DEGREES = 40f
 
@@ -148,7 +154,8 @@ private const val RAY_ALPHA = 0.55f
 private const val GRAND_FLASH_SPAN = 0.3f
 private const val GRAND_FLASH_ALPHA = 0.55f
 
-private val NoMatchColors = listOf(Color(0xFF8A90B8), Color(0xFFB9BEDD), Color(0xFF6E7398))
+// Dull and a little rosy: plainly not the light of a mix.
+private val NoMatchColors = listOf(Color(0xFFB98A9E), Color(0xFFD9BCC8), Color(0xFF8A7398))
 private val EmberColors = listOf(Color(0xFFB9BEDD), Color(0xFFFFB27A), Color(0xFF8A90B8))
 private val SparkBlue = Color(0xFF8FB8FF)
 
@@ -162,7 +169,9 @@ fun WorkspaceCanvas(
     effect: CombinationEffect?,
     effectTime: () -> Float,
     transitions: () -> List<TransitionFrame>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // The frame around the canvas: still the board, so an element let go on it stays and settles inside.
+    frameWidth: Dp = 0.dp
 ) {
     val currentItems by rememberUpdatedState(items)
     val currentOnMove by rememberUpdatedState(onMove)
@@ -233,6 +242,7 @@ fun WorkspaceCanvas(
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         BurstOnMix(effect, fx, shake, Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat()), reducedMotion)
         val shakeAmplitude = with(LocalDensity.current) { (if (effect?.rarity == ElementRarity.LEGENDARY) GRAND_SHAKE else EPIC_SHAKE).toPx() }
+        val framePx = with(LocalDensity.current) { frameWidth.toPx() }
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
@@ -251,23 +261,29 @@ fun WorkspaceCanvas(
                             ?: return@awaitEachGesture
                         heldId = item.instanceId
                         currentOnPickUp()
+                        val width = size.width.toFloat()
+                        val height = size.height.toFloat()
+                        // Over the frame the element is still on the board; only past it is it taken away.
+                        val board = Rect(-framePx / width, -framePx / height, 1f + framePx / width, 1f + framePx / height)
+                        val onBoard = { position: Offset -> if (board.contains(position)) Offset(position.x.coerceIn(0f, 1f), position.y.coerceIn(0f, 1f)) else position }
                         try {
                             var lastPosition = down.position
                             val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
                             } ?: return@awaitEachGesture
 
                             drag(dragStart.id) { change ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
                             }
                             val position = normalize(lastPosition, size.width, size.height)
-                            if (position.x in 0f..1f && position.y in 0f..1f) {
-                                // Let go inside: it settles a little in from the edge instead of hanging over the frame.
-                                val resting = restingPosition(position, size.width.toFloat(), size.height.toFloat())
+                            if (board.contains(position)) {
+                                // Let go on the board: it settles in from the edge, name and all, instead of hanging over the frame.
+                                val labelHalf = labelPaint.measureText(context.resources.elementName(item.elementId)) / 2
+                                val resting = restingPosition(onBoard(position), width, height, labelHalf)
                                 currentOnMove(item.instanceId, resting)
                                 currentOnResolve(item.instanceId, resting)
                             } else {
@@ -294,7 +310,8 @@ fun WorkspaceCanvas(
                 val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
                 val iconCenter = iconCenterOf(center, radius, iconSize)
                 drawGlow(iconCenter, iconSize * TARGET_GLOW_SHARE, TargetGlow, TARGET_GLOW_ALPHA * targetPulse)
-                drawCentered(art.energyRing, iconCenter, iconSize * TARGET_RING_SHARE, targetPulse)
+                // The same ring art as the one in hand, but gold, so the two never read as one.
+                drawCentered(art.energyRing, iconCenter, iconSize * TARGET_RING_SHARE, targetPulse, TargetRingTint)
             }
             val motion = ItemMotion(
                 appearing = frames.filter { it.transition.kind == TransitionKind.APPEAR }.associateBy { it.transition.instanceId },
@@ -427,12 +444,12 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     var scale = 1f
     var alpha = 1f
     motion.appearing[item.instanceId]?.let { frame ->
-        scale = lerp(if (frame.origin == null) DROP_START_SCALE else FLY_START_SCALE, 1f, easeOutBack(frame.progress))
-        // A dropped element takes over from the tile in hand at once; a flying one fades in as it leaves the palette.
-        alpha = if (frame.origin == null) 1f else (frame.progress * 4f).coerceAtMost(1f)
-        frame.origin?.let { origin ->
-            val fly = easeOutCubic(frame.progress * FLY_IN_SPEED)
-            center = Offset(lerp(origin.x * size.width, center.x, fly), lerp(origin.y * size.height, center.y, fly))
+        // A flying element is drawn over the whole screen until it lands (see flightOf), then it is simply here.
+        if (frame.origin != null) {
+            if (flightOf(frame.progress) != null) return
+        } else {
+            // A dropped element takes over from the tile in hand at once and only settles.
+            scale = lerp(DROP_START_SCALE, 1f, easeOutBack(frame.progress))
         }
     }
     if (item.instanceId == motion.resultInstanceId) {
@@ -482,13 +499,21 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
 }
 
 private fun DrawScope.drawTransitions(frames: List<TransitionFrame>, art: WorkspaceArt, radius: Float) {
-    frames.forEach { (transition, progress) ->
+    frames.forEach { frame ->
+        val (transition, progress) = frame
         val center = Offset(transition.xFraction * size.width, transition.yFraction * size.height)
         val fade = 1f - progress
         when (transition.kind) {
-            TransitionKind.APPEAR -> drawCentered(art.appearSparkles, center, radius * (1.8f + 1.2f * progress), fade)
+            // A flying element sparkles where it lands, once it has.
+            TransitionKind.APPEAR -> if (frame.origin == null || flightOf(progress) == null) {
+                val local = if (frame.origin == null) progress else ((progress - LANDED_AT) / (1f - LANDED_AT)).coerceIn(0f, 1f)
+                drawCentered(art.appearSparkles, center, radius * (1.8f + 1.2f * local), 1f - local)
+            }
+
             TransitionKind.VANISH -> drawCentered(art.smoke, center, radius * (1.4f + 1.4f * progress), fade * SMOKE_ALPHA)
+
             TransitionKind.SWEEP -> drawCentered(art.smoke, center, radius * (1f + 0.6f * progress), fade * SWEEP_ALPHA)
+
             TransitionKind.SHAKE -> Unit
         }
     }
@@ -569,33 +594,52 @@ private fun DrawScope.drawWatermark(magicCircle: ImageBitmap, seconds: Float, fl
     }
 }
 
-private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float) {
+private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float, colorFilter: ColorFilter? = null) {
     val height = width * image.height / image.width
     drawImage(
         image = image,
         dstOffset = IntOffset((center.x - width / 2).roundToInt(), (center.y - height / 2).roundToInt()),
         dstSize = IntSize(width.roundToInt(), height.roundToInt()),
         alpha = alpha.coerceIn(0f, 1f),
+        colorFilter = colorFilter,
         filterQuality = FilterQuality.Medium
     )
 }
 
 private fun normalize(position: Offset, width: Int, height: Int): Offset = Offset(position.x / width, position.y / height)
 
-/** Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and name clear the edges. */
-internal fun restingPosition(position: Offset, width: Float, height: Float): Offset {
+/**
+ * Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and its name,
+ * [labelHalfWidth] pixels either side of the centre, clear the edges.
+ */
+internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
-    val side = (radius * REST_SIDE / width).coerceAtMost(HALF)
+    val side = (maxOf(radius * REST_SIDE, labelHalfWidth + radius * LABEL_EDGE_GAP) / width).coerceAtMost(HALF)
     val top = (radius * REST_TOP / height).coerceAtMost(HALF)
     val bottom = (radius * REST_BOTTOM / height).coerceAtMost(HALF)
     return Offset(position.x.coerceIn(side, 1f - side), position.y.coerceIn(top, 1f - bottom))
 }
 
-/** Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace), in workspace fractions. */
-internal fun dropPosition(iconCenter: Offset, width: Float, height: Float): Offset {
+/**
+ * Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace, possibly
+ * over the frame), in workspace fractions; [labelHalfWidth] is half its name's width.
+ */
+internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val center = Offset(iconCenter.x, iconCenter.y + radius * ICON_TOP_SHARE - radius * ICON_SHARE)
-    return restingPosition(Offset(center.x / width, center.y / height), width, height)
+    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth)
+}
+
+/**
+ * How far along its flight from the palette an element tapped in is, eased, at this point of its appear transition;
+ * null once it has landed.
+ */
+internal fun flightOf(progress: Float): Float? = (progress * FLY_IN_SPEED).takeIf { it < 1f }?.let(::easeOutCubic)
+
+/** The centre of an element's icon at these workspace fractions, in workspace pixels. */
+internal fun iconCenterAt(xFraction: Float, yFraction: Float, width: Float, height: Float): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    return iconCenterOf(Offset(xFraction * width, yFraction * height), radius, radius * 2 * ICON_SHARE)
 }
 
 /** The side of an element's icon on a workspace of this size, in pixels. */
@@ -669,7 +713,7 @@ private class WorkspaceFx {
             if ((transition.instanceId to transition.kind) in sparked) return@forEach
             val at = Offset(transition.xFraction * size.width, transition.yFraction * size.height)
             when (transition.kind) {
-                TransitionKind.SHAKE -> sparks.burst(iconCenterOf(at, radius, radius * 2 * ICON_SHARE), radius, count = 7, speed = 3f, colors = NoMatchColors, life = 0.4f, gravity = 3f)
+                TransitionKind.SHAKE -> sparks.burst(iconCenterOf(at, radius, radius * 2 * ICON_SHARE), radius, count = 12, speed = 4f, colors = NoMatchColors, life = 0.55f, gravity = 3f)
                 TransitionKind.VANISH -> sparks.burst(at, radius, count = 9, speed = 2.2f, colors = EmberColors, life = 0.7f, gravity = -1.5f)
                 TransitionKind.APPEAR, TransitionKind.SWEEP -> Unit
             }

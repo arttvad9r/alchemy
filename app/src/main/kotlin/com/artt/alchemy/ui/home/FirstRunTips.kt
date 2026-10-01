@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
+import com.artt.alchemy.game.BoardHalf
 import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.ui.TIP_COUNT
 import com.artt.alchemy.ui.components.AlchemyIconButton
@@ -38,10 +39,10 @@ import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.tooltipBackground
 import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.tipHalf
 
 private const val TIP_FADE_MILLIS = 300
 private const val TIP_START_SCALE = 0.85f
-private const val HALF = 0.5f
 private const val HINT_FADE_MILLIS = 250
 private val TIP_MAX_WIDTH = 280.dp
 private val TIP_ICON_SIZE = 30.dp
@@ -108,11 +109,11 @@ fun BoxScope.WorkspaceGuidance(items: List<WorkspaceItem>, tipsVisible: Boolean,
         )
     }
     if (tipsVisible) {
-        // The first tip points down at the palette; the others take the half of the plate with fewer elements in it.
-        val upper = items.count { it.yFraction < HALF }
+        // The first tip points down at the palette; the others take the half of the plate with fewer elements in it,
+        // which elements placed automatically then keep clear of.
         val alignment = when {
             tipStep == 0 -> Alignment.BottomCenter
-            upper <= items.size - upper -> Alignment.TopCenter
+            tipHalf(items) == BoardHalf.UPPER -> Alignment.TopCenter
             else -> Alignment.BottomCenter
         }
         AnimatedContent(

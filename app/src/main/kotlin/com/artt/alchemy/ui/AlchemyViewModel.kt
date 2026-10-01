@@ -106,7 +106,13 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         applyVolumes()
     }
 
-    fun onWorkspaceEvent(event: WorkspaceEvent) {
+    fun onWorkspaceEvent(requested: WorkspaceEvent) {
+        // While a tip sits on the workspace, elements placed automatically land clear of it.
+        val event = if (requested is WorkspaceEvent.SpawnAutomatically && !state.progress.onboardingSeen && state.tipStep > 0) {
+            requested.copy(keepClear = tipHalf(state.workspace.items))
+        } else {
+            requested
+        }
         val result = reduce(state.workspace, event, engine)
         val progress = if (result.attemptedMix) state.progress.recordAttempt(result.combination) else state.progress
         val newlyUnlockedId = result.combination?.resultId?.takeUnless(state.progress.unlockedIds::contains)

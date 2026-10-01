@@ -1,8 +1,11 @@
 package com.artt.alchemy.ui
 
+import com.artt.alchemy.game.BoardHalf
 import com.artt.alchemy.game.WorkspaceEvent
+import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.WorkspaceResult
 import com.artt.alchemy.game.WorkspaceState
+import com.artt.alchemy.game.halfOf
 
 const val TIP_COUNT = 3
 
@@ -19,6 +22,16 @@ fun tipAfter(step: Int, event: WorkspaceEvent, before: WorkspaceState, result: W
     var next = step
     while (next < TIP_COUNT && tipDone(next, placed, result.attemptedMix, removed)) next++
     return next
+}
+
+/**
+ * The half of the workspace where a tip after the first sits: the one with fewer elements in it. Elements placed
+ * automatically keep out of it, so the tip never hides what the player is about to handle.
+ */
+fun tipHalf(items: List<WorkspaceItem>): BoardHalf {
+    val upper = items.count { halfOf(it.yFraction) == BoardHalf.UPPER }
+    val lower = items.count { halfOf(it.yFraction) == BoardHalf.LOWER }
+    return if (upper <= lower) BoardHalf.UPPER else BoardHalf.LOWER
 }
 
 private fun tipDone(step: Int, placed: Boolean, mixed: Boolean, removed: Boolean): Boolean = when (step) {

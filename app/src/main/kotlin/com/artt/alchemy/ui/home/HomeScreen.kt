@@ -89,9 +89,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
@@ -99,6 +102,7 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.WorkspaceEvent
+import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.sortElements
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.CombinationEffect
@@ -121,6 +125,7 @@ import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.pillBadge
 import com.artt.alchemy.ui.components.rarity
+import com.artt.alchemy.ui.theme.BodyFontFamily
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
 import com.artt.alchemy.ui.theme.PanelColor
@@ -165,6 +170,13 @@ fun HomeScreen(
         sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort, Locale.getDefault(), resources::elementName)
     }
     var workspaceBounds by remember { mutableStateOf<Rect?>(null) }
+    val density = LocalDensity.current
+    val frameInsetPx = with(density) { WORKSPACE_FRAME_INSET.toPx() }
+    val labelMeasurer = rememberTextMeasurer()
+    // The bold reading face the workspace draws names in, at its size for these bounds.
+    val workspaceLabelStyle = { bounds: Rect ->
+        TextStyle(fontFamily = BodyFontFamily, fontWeight = FontWeight.Bold, fontSize = with(density) { workspaceLabelSize(bounds.width, bounds.height).toSp() })
+    }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
     var dragPosition by remember { mutableStateOf<Offset?>(null) }
@@ -212,6 +224,10 @@ fun HomeScreen(
         transitionClock = now
         transitionDuration = duration
     }
+    // Every transition at this frame; ones not yet taken to play are drawn from their first frame. Read while drawing
+    // or in the flight overlay only, so the clock's ticks never recompose the whole screen.
+    val transitionFrames = { transitionFramesAt(state.itemTransitions, originFraction, playingTransitions, transitionClock, transitionDuration) }
+    val flightFrames = { transitionFrames().filter { it.origin != null && it.transition.kind == TransitionKind.APPEAR } }
 
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
         Column(modifier = Modifier.fillMaxSize().padding(ScreenPadding)) {
@@ -250,17 +266,8 @@ fun HomeScreen(
                     // A new effect is drawn from its first frame, before it is taken to play.
                     effect = playingEffect ?: state.combinationEffect,
                     effectTime = { if (playingEffect == null) 0f else effectTime.value },
-                    // Transitions not yet taken to play are drawn from their first frame too.
-                    transitions = {
-                        state.itemTransitions.map { TransitionFrame(it, 0f, originFraction.takeIf { _ -> it.kind == TransitionKind.APPEAR }) } +
-                            playingTransitions.map {
-                                TransitionFrame(
-                                    it.transition,
-                                    ((transitionClock - it.startMillis).toFloat() / transitionDuration).coerceIn(0f, 1f),
-                                    it.origin
-                                )
-                            }
-                    }
+                    frameWidth = WORKSPACE_FRAME_INSET,
+                    transitions = transitionFrames
                 )
                 WorkspaceGuidance(
                     items = state.workspace.items,
@@ -325,13 +332,9 @@ fun HomeScreen(
                                     },
                                     onDrop = { drop ->
                                         tapOrigin = null
-                                        workspaceBounds
-                                            ?.takeIf { it.contains(drop) }
-                                            ?.let { bounds ->
-                                                // The element lands where its icon was under the finger, clear of the edges.
-                                                val at = dropPosition(Offset(drop.x - bounds.left, drop.y - bounds.top), bounds.width, bounds.height)
-                                                onEvent(WorkspaceEvent.Spawn(element.id, at.x, at.y))
-                                            }
+                                        paletteDrop(element.id, drop, workspaceBounds, frameInsetPx) { bounds ->
+                                            labelMeasurer.measure(resources.elementName(element.id), workspaceLabelStyle(bounds)).size.width / 2f
+                                        }?.let(onEvent)
                                     },
                                     onTap = { center ->
                                         tapOrigin = center
@@ -347,6 +350,7 @@ fun HomeScreen(
             }
         }
 
+        FlyingElements(flights = flightFrames, items = state.workspace.items, workspace = workspaceBounds, home = homeBounds)
         val element = draggedElement
         val position = dragPosition
         val bounds = homeBounds
@@ -355,41 +359,86 @@ fun HomeScreen(
         }
     }
 
-    // The discovery card comes up once the flash has shown, while the burst plays on beneath it. The effect is
-    // still in the UI state for the first frame, before it is taken to play, so that is checked too.
-    val effectShown by remember {
-        derivedStateOf {
-            val grand = playingEffect?.let { it.rarity >= ElementRarity.EPIC } == true
-            LinearOutSlowInEasing.transform(effectTime.value) >= if (grand) GRAND_CARD_AFTER_EFFECT else DISCOVERY_CARD_AFTER_EFFECT
-        }
-    }
-    (state.reveal as? Reveal.Discovery)?.elementId?.takeIf { state.combinationEffect == null && (playingEffect == null || effectShown) }?.let { elementId ->
-        val element = AlchemyCatalog.elementsById.getValue(elementId)
-        // Keyed, so a card that follows another plays its entrance afresh.
-        key(elementId) { NewElementDialog(element, onDismiss = { onDismissNewElement(elementId) }, onClick = onClick) }
-    }
+    DiscoveryCard(state, playingEffect = { playingEffect }, effectTime = { effectTime.value }, onDismiss = onDismissNewElement, onClick = onClick)
 }
 
 /**
- * The element in hand while it is dragged out of the palette, drawn as it will look on the workspace: its bare icon and
- * name at the workspace's size, centred under the finger at [at] and glowing in its rarity's colour. It rises a little
- * as it leaves the palette and lands without changing shape.
+ * The card for an element just discovered, when it is on stage. It comes up once the flash has shown, while the burst
+ * plays on beneath it; an epic or legendary find holds the stage a little longer. The effect is still in the UI state
+ * for the first frame, before it is taken to play, so that is checked too.
+ */
+@Composable
+private fun DiscoveryCard(
+    state: AlchemyUiState,
+    playingEffect: () -> CombinationEffect?,
+    effectTime: () -> Float,
+    onDismiss: (elementId: String) -> Unit,
+    onClick: () -> Unit
+) {
+    val effectShown by remember {
+        derivedStateOf {
+            val grand = playingEffect()?.let { it.rarity >= ElementRarity.EPIC } == true
+            LinearOutSlowInEasing.transform(effectTime()) >= if (grand) GRAND_CARD_AFTER_EFFECT else DISCOVERY_CARD_AFTER_EFFECT
+        }
+    }
+    val elementId = (state.reveal as? Reveal.Discovery)?.elementId ?: return
+    if (state.combinationEffect != null || (playingEffect() != null && !effectShown)) return
+    // Keyed, so a card that follows another plays its entrance afresh.
+    key(elementId) { NewElementDialog(AlchemyCatalog.elementsById.getValue(elementId), onDismiss = { onDismiss(elementId) }, onClick = onClick) }
+}
+
+/**
+ * The element in hand while it is dragged out of the palette, drawn as it will look on the workspace, centred under the
+ * finger at [at]. It rises a little and glows in its rarity's colour as it leaves the palette, and lands without
+ * changing shape.
  */
 @Composable
 private fun BoxScope.DragPreview(element: ElementDefinition, at: Offset, workspace: Rect?) {
-    val density = LocalDensity.current
-    val iconPx = workspace?.let { workspaceIconSize(it.width, it.height) } ?: with(density) { PREVIEW_FALLBACK_ICON.toPx() }
-    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
     val lift = remember(element.id) { Animatable(1f) }
     val liftSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
     LaunchedEffect(element.id) { lift.animateTo(PREVIEW_LIFT_SCALE, liftSpec) }
+    ElementGhost(element, at, workspace, scale = { lift.value }, glowAlpha = PREVIEW_GLOW_ALPHA, modifier = Modifier.testTag("drag_preview"))
+}
+
+/**
+ * Elements tapped in the palette on their way to the workspace. They fly over everything, the palette panel included,
+ * from the tile tapped to where they land, growing from about the tile's size; the workspace draws them from landing on.
+ */
+@Composable
+private fun BoxScope.FlyingElements(
+    flights: () -> List<TransitionFrame>,
+    items: List<WorkspaceItem>,
+    workspace: Rect?,
+    home: Rect?
+) {
+    val bounds = workspace ?: return
+    val origin = home?.topLeft ?: return
+    flights().forEach { frame ->
+        val start = frame.origin ?: return@forEach
+        val travel = flightOf(frame.progress) ?: return@forEach
+        val elementId = items.find { it.instanceId == frame.transition.instanceId }?.elementId ?: return@forEach
+        val target = iconCenterAt(frame.transition.xFraction, frame.transition.yFraction, bounds.width, bounds.height)
+        val from = Offset(start.x * bounds.width, start.y * bounds.height)
+        val at = Offset(lerp(from.x, target.x, travel), lerp(from.y, target.y, travel)) + bounds.topLeft - origin
+        key(frame.transition.instanceId) {
+            ElementGhost(AlchemyCatalog.elementsById.getValue(elementId), at, workspace, scale = { lerp(FLY_START_SCALE, 1f, travel) }, glowAlpha = 0f)
+        }
+    }
+}
+
+/** An element as the workspace draws it, bare icon and name at the workspace's size, with its icon centred on [at]. */
+@Composable
+private fun BoxScope.ElementGhost(element: ElementDefinition, at: Offset, workspace: Rect?, scale: () -> Float, glowAlpha: Float, modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    val iconPx = workspace?.let { workspaceIconSize(it.width, it.height) } ?: with(density) { PREVIEW_FALLBACK_ICON.toPx() }
+    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
     val glow = element.rarity.glowColor
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .align(Alignment.TopStart)
             .layout { measurable, constraints ->
-                // Centres the icon, not the whole column, under the finger.
+                // Centres the icon, not the whole column, on the point.
                 val placeable = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
                 layout(placeable.width, placeable.height) {
                     placeable.place((at.x - placeable.width / 2f).roundToInt(), (at.y - iconPx / 2f).roundToInt())
@@ -397,17 +446,16 @@ private fun BoxScope.DragPreview(element: ElementDefinition, at: Offset, workspa
             }
             .zIndex(1f)
             .graphicsLayer {
-                scaleX = lift.value
-                scaleY = lift.value
+                scaleX = scale()
+                scaleY = scale()
                 transformOrigin = TransformOrigin(0.5f, iconPx / 2f / size.height.coerceAtLeast(1f))
             }
-            .testTag("drag_preview")
     ) {
         ElementIcon(
             element,
             Modifier
                 .size(with(density) { iconPx.toDp() })
-                .drawBehind { drawGlow(center, size.width * PREVIEW_GLOW_SHARE, glow, PREVIEW_GLOW_ALPHA) }
+                .drawBehind { if (glowAlpha > 0f) drawGlow(center, size.width * PREVIEW_GLOW_SHARE, glow, glowAlpha) }
         )
         Text(
             text = elementName(element.id),
@@ -417,6 +465,26 @@ private fun BoxScope.DragPreview(element: ElementDefinition, at: Offset, workspa
             softWrap = false
         )
     }
+}
+
+/** Every item transition at this frame; ones not yet taken to play are drawn from their first frame. */
+private fun transitionFramesAt(
+    pending: List<ItemTransition>,
+    tapOrigin: Offset?,
+    playing: List<PlayingTransition>,
+    now: Long,
+    duration: Long
+): List<TransitionFrame> = pending.map { TransitionFrame(it, 0f, tapOrigin.takeIf { _ -> it.kind == TransitionKind.APPEAR }) } +
+    playing.map { TransitionFrame(it.transition, ((now - it.startMillis).toFloat() / duration).coerceIn(0f, 1f), it.origin) }
+
+/**
+ * An element dropped from the palette lands where its icon was under the finger, name and all clear of the edges. The
+ * frame round the board counts as the board; a drop anywhere else puts nothing down.
+ */
+private fun paletteDrop(elementId: String, drop: Offset, workspace: Rect?, frameWidth: Float, labelHalfWidth: (Rect) -> Float): WorkspaceEvent? {
+    if (workspace == null || !workspace.inflate(frameWidth).contains(drop)) return null
+    val at = dropPosition(drop - workspace.topLeft, workspace.width, workspace.height, labelHalfWidth(workspace))
+    return WorkspaceEvent.Spawn(elementId, at.x, at.y)
 }
 
 /** How many elements are open out of the whole catalog, on a small panel with a book. */

@@ -1,6 +1,7 @@
 package com.artt.alchemy.game
 
 private const val OVERLAP_DISTANCE_SQUARED = 0.02f
+private const val MIDDLE = 0.5f
 
 private val automaticSpawnCandidates = listOf(
     0.5f to 0.5f,
@@ -23,7 +24,7 @@ fun reduce(state: WorkspaceState, event: WorkspaceEvent, engine: AlchemyEngine):
     }
 
     is WorkspaceEvent.SpawnAutomatically -> {
-        val (xFraction, yFraction) = automaticSpawnPosition(state.items)
+        val (xFraction, yFraction) = automaticSpawnPosition(state.items, event.keepClear)
         reduce(state, WorkspaceEvent.Spawn(event.elementId, xFraction, yFraction), engine)
     }
 
@@ -40,12 +41,24 @@ fun reduce(state: WorkspaceState, event: WorkspaceEvent, engine: AlchemyEngine):
     }
 
     is WorkspaceEvent.Remove -> WorkspaceResult(state.copy(items = state.items.filterNot { it.instanceId == event.instanceId }))
+
     WorkspaceEvent.Clear -> WorkspaceResult(state.copy(items = emptyList()))
+
     is WorkspaceEvent.ResolveOverlap -> resolveOverlap(state, event, engine)
 }
 
-private fun automaticSpawnPosition(items: List<WorkspaceItem>): Pair<Float, Float> = automaticSpawnCandidates.maxBy { (x, y) ->
-    items.minOfOrNull { item -> squaredDistance(item.xFraction, item.yFraction, x, y) } ?: Float.MAX_VALUE
+private fun automaticSpawnPosition(items: List<WorkspaceItem>, keepClear: BoardHalf?): Pair<Float, Float> {
+    val allowed = automaticSpawnCandidates.filterNot { (_, y) -> keepClear != null && halfOf(y) == keepClear }
+    return allowed.maxBy { (x, y) ->
+        items.minOfOrNull { item -> squaredDistance(item.xFraction, item.yFraction, x, y) } ?: Float.MAX_VALUE
+    }
+}
+
+/** The half a row of the workspace lies in; the middle row belongs to neither. */
+fun halfOf(yFraction: Float): BoardHalf? = when {
+    yFraction < MIDDLE -> BoardHalf.UPPER
+    yFraction > MIDDLE -> BoardHalf.LOWER
+    else -> null
 }
 
 private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveOverlap, engine: AlchemyEngine): WorkspaceResult {

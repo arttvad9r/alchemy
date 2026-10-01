@@ -30,6 +30,16 @@ class WorkspaceReducerTest {
     }
 
     @Test
+    fun automatic_spawns_keep_clear_of_the_half_asked_for() {
+        var state = WorkspaceState()
+        repeat(6) { index ->
+            state = reduce(state, WorkspaceEvent.SpawnAutomatically("fire$index", keepClear = BoardHalf.UPPER), engine).workspace
+        }
+
+        assertEquals(true, state.items.none { halfOf(it.yFraction) == BoardHalf.UPPER })
+    }
+
+    @Test
     fun invalid_overlap_keeps_both_workspace_items() {
         val state = WorkspaceState(
             items = listOf(WorkspaceItem(1, "fire", 0.3f, 0.3f), WorkspaceItem(2, "fire", 0.3f, 0.3f)),

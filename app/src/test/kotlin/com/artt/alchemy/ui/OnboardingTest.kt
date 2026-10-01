@@ -2,7 +2,9 @@ package com.artt.alchemy.ui
 
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
+import com.artt.alchemy.game.BoardHalf
 import com.artt.alchemy.game.WorkspaceEvent
+import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.reduce
 import org.junit.Assert.assertEquals
@@ -39,6 +41,13 @@ class OnboardingTest {
         val (_, one) = after(0, WorkspaceState(), WorkspaceEvent.Spawn("fire", 0.5f, 0.5f))
         val (step, _) = after(0, one, WorkspaceEvent.Spawn("water", 0.5f, 0.5f))
         assertEquals(2, step)
+    }
+
+    @Test
+    fun laterTipsTakeTheEmptierHalf() {
+        assertEquals(BoardHalf.UPPER, tipHalf(emptyList()))
+        assertEquals(BoardHalf.LOWER, tipHalf(listOf(WorkspaceItem(1, "fire", 0.2f, 0.1f), WorkspaceItem(2, "water", 0.5f, 0.5f))))
+        assertEquals(BoardHalf.UPPER, tipHalf(listOf(WorkspaceItem(1, "fire", 0.2f, 0.9f))))
     }
 
     @Test
