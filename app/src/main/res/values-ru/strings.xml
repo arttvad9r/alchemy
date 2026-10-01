@@ -103,4 +103,5 @@
         <item quantity="many">Ещё %d неизвестных сочетаний</item>
         <item quantity="other">Ещё %d неизвестных сочетаний</item>
     </plurals>
+    <string name="studio_intro_skip">Пропустить</string>
 </resources>

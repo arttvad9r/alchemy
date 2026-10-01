@@ -7,3 +7,8 @@
 - For workspace mechanics, verify real spawn, drag, overlap resolution, invalid-pair no-op, boundary deletion, tab round-trips, and persistence where relevant.
 - Run `./gradlew qualityCheck testDebugUnitTest assembleDebug` for deterministic verification and the focused Android instrumentation tests for affected UI flows.
 - Delegated agents must work only inside the isolated worktree supplied by Hermes, commit their changes there, and never `cd` back to the main checkout.
+
+## Status
+
+- Studio intro: flat portrait ARTT animation precedes the game; skip/error/backgrounding enter the game, reduced motion shows a still.
+- Branding sources and rebuild instructions: `ART_ASSETS.md`, `tools/build_studio_intro.py`.

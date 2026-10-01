@@ -34,3 +34,10 @@
 5. `05-settings-screen.png` — настройки.
 
 Исходные ZIP-архивы не хранятся в репозитории: их содержимое распаковано в `assets/`, а оригиналы остаются в `/home/artt/Downloads/Alchemy`.
+
+## Заставка студии
+
+`assets/branding/artt_storyboard.png` — исходная раскадровка ARTT Studio, предоставленная автором проекта (ChatGPT).
+`tools/build_studio_intro.py` сохраняет форму букв, убирает каменную текстуру и собирает белый плоский логотип на чёрном фоне:
+`res/raw/artt_intro.mp4` (720×1280, H.264, 30 fps, 3 секунды, без звука) и статичный `res/drawable-nodpi/artt_intro_poster.png` для режима уменьшенного движения.
+Пересборка: `python3 tools/build_studio_intro.py` (Pillow и ffmpeg нужны только для разработки).

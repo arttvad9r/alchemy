@@ -101,4 +101,6 @@
         <item quantity="one">%d more unknown combination</item>
         <item quantity="other">%d more unknown combinations</item>
     </plurals>
+    <string name="studio_intro_skip">Skip</string>
+    <string name="studio_intro_description" translatable="false">ARTT Studio</string>
 </resources>

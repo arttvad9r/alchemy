@@ -1,5 +1,7 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.data.ProgressStore
 import org.junit.rules.RuleChain
@@ -15,4 +17,12 @@ class SkipOnboardingRule : TestWatcher() {
     }
 }
 
-fun skippingOnboarding(rule: TestRule): TestRule = RuleChain.outerRule(SkipOnboardingRule()).around(rule)
+fun skippingOnboarding(rule: AndroidComposeTestRule<*, *>): TestRule = RuleChain.outerRule(SkipOnboardingRule()).around(rule).around(
+    object : TestWatcher() {
+        override fun starting(description: Description) {
+            rule.waitUntil(timeoutMillis = 10000) {
+                rule.onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+    }
+)
