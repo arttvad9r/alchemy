@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Element texts are looked up by name (ElementText.kt), which the release resource shrinker cannot see. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@string/element_name_*,@string/element_fact_*" />
