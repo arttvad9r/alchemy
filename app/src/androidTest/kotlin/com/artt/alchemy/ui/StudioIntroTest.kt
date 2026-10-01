@@ -7,6 +7,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.core.view.allViews
 import androidx.lifecycle.Lifecycle
@@ -70,6 +71,8 @@ class StudioIntroTest {
     @Test
     fun tapsAndBackCannotSkipIntro() {
         composeRule.onNodeWithTag("studio_intro_skip").assertDoesNotExist()
+        composeRule.onNodeWithText("Пропустить").assertDoesNotExist()
+        composeRule.onNodeWithText("Skip").assertDoesNotExist()
         composeRule.onNodeWithTag("studio_intro").performTouchInput { click(center) }
         composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
         composeRule.onNodeWithTag("studio_intro").assertIsDisplayed()

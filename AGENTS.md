@@ -10,5 +10,5 @@
 
 ## Status
 
-- Studio intro: 2.8s flat portrait ARTT animation follows the system splash; no manual skip, background pauses playback, reduced motion shows a still.
+- Studio intro: 2.8s flat portrait ARTT animation follows a plain black system starting window (no game branding); no manual skip, background pauses playback, reduced motion shows a still.
 - Branding sources and rebuild instructions: `ART_ASSETS.md`, `tools/build_studio_intro.py`.

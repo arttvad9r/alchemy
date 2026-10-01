@@ -2,8 +2,6 @@ package com.artt.alchemy
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -30,7 +28,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
         )
-        leaveSplashIntoTheScene(reducedMotion)
+        leaveSystemStartingWindow()
         // A recreated activity shows no splash; a launch that skips it (from a test, say) must not wait forever.
         if (savedInstanceState != null) sceneReady.value = true
         window.decorView.postDelayed({ sceneReady.value = true }, SPLASH_FALLBACK_MILLIS)
@@ -48,36 +46,16 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    // Prepare the studio video behind the spell book; play it once the system splash is gone.
-    private fun leaveSplashIntoTheScene(reducedMotion: Boolean) {
+    // The system starting window is plain black; remove it immediately into the studio intro.
+    private fun leaveSystemStartingWindow() {
         splashScreen.setOnExitAnimationListener { splash ->
-            if (reducedMotion) {
-                splash.remove()
-                sceneReady.value = true
-                return@setOnExitAnimationListener
-            }
-            splash.iconView?.animate()
-                ?.scaleX(SPLASH_ICON_SCALE)
-                ?.scaleY(SPLASH_ICON_SCALE)
-                ?.setDuration(SPLASH_EXIT_MILLIS)
-                ?.setInterpolator(AccelerateInterpolator())
-                ?.start()
-            splash.animate()
-                .alpha(0f)
-                .setDuration(SPLASH_EXIT_MILLIS)
-                .setInterpolator(DecelerateInterpolator())
-                .withEndAction {
-                    splash.remove()
-                    sceneReady.value = true
-                }
-                .start()
+            splash.remove()
+            sceneReady.value = true
         }
     }
 
     private companion object {
         const val INTRO_COMPLETE_KEY = "studio_intro_complete"
-        const val SPLASH_EXIT_MILLIS = 420L
-        const val SPLASH_ICON_SCALE = 1.35f
         const val SPLASH_FALLBACK_MILLIS = 1500L
     }
 }
