@@ -6,6 +6,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,8 +25,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -45,6 +49,7 @@ import com.artt.alchemy.ui.components.AlchemyToggle
 import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.systemAnimationsOff
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.PanelBorderColor
@@ -114,6 +119,7 @@ fun SettingsScreen(
                 label = stringResource(R.string.effects_volume),
                 iconRes = R.drawable.ic_audio,
                 value = state.progress.effectsVolume,
+                muted = !state.progress.soundEnabled,
                 tag = "settings_effects_volume",
                 onChange = onEffectsVolumeChanged,
                 onFinished = onEffectsVolumeFinished
@@ -122,6 +128,7 @@ fun SettingsScreen(
                 label = stringResource(R.string.music_volume),
                 iconRes = R.drawable.ic_music,
                 value = state.progress.musicVolume,
+                muted = !state.progress.musicEnabled,
                 tag = "settings_music_volume",
                 onChange = onMusicVolumeChanged
             )
@@ -267,11 +274,14 @@ private fun VolumeSlider(
     label: String,
     iconRes: Int,
     value: Float,
+    muted: Boolean,
     tag: String,
     onChange: (Float) -> Unit,
     onFinished: () -> Unit = {}
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    // With its sound switched off the slider dims but still moves, so the volume can be set ahead of turning it on.
+    val alpha by animateFloatAsState(if (muted) MUTED_ALPHA else 1f, motion(tween(MUTE_FADE_MILLIS)), label = "muted")
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.alpha(alpha)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
             Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
@@ -300,3 +310,5 @@ private const val EXPORT_FILE_NAME = "alchemy-progress.json"
 private const val EXPORT_MIME_TYPE = "application/json"
 private val IMPORT_MIME_TYPES = arrayOf("application/json", "text/*", "*/*")
 private val SETTING_ICON_SIZE = 32.dp
+private const val MUTED_ALPHA = 0.45f
+private const val MUTE_FADE_MILLIS = 200

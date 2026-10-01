@@ -1,11 +1,16 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
@@ -44,18 +49,21 @@ class FirstRunTest {
     }
 
     @Test
-    fun tipsWalkThroughThreeStepsAndAreDoneAfterTheLast() {
+    fun eachTipGivesWayOnlyOnceThePlayerHasDoneWhatItAsks() {
         launchWith(initialPlayerProgress())
-        composeRule.onNodeWithTag("first_run_tip").assertIsDisplayed()
         composeRule.onNodeWithText(context.getString(R.string.tip_tap)).assertIsDisplayed()
 
+        // A tap on the bubble itself does not move the tips on.
         composeRule.onNodeWithTag("first_run_tip").performClick()
+        composeRule.onNodeWithText(context.getString(R.string.tip_tap)).assertIsDisplayed()
+
+        composeRule.onNodeWithTag("palette_fire").performClick()
         composeRule.onNodeWithText(context.getString(R.string.tip_combine)).assertIsDisplayed()
 
-        composeRule.onNodeWithTag("tip_next").performClick()
+        composeRule.onNodeWithTag("palette_water").dragToWorkspaceCentre()
         composeRule.onNodeWithText(context.getString(R.string.tip_remove)).assertIsDisplayed()
 
-        composeRule.onNodeWithTag("tip_next").performClick()
+        composeRule.onNode(hasTestTag("workspace_item") and hasContentDescription("Пар")).dragAboveWorkspace()
         composeRule.onNodeWithTag("first_run_tip").assertDoesNotExist()
         assertTrue(store.load().onboardingSeen)
     }
@@ -104,8 +112,30 @@ class FirstRunTest {
         composeRule.onNodeWithTag("link_steam").assertExists()
     }
 
+    private fun SemanticsNodeInteraction.dragToWorkspaceCentre() {
+        val source = fetchSemanticsNode().boundsInRoot
+        val workspace = composeRule.onNodeWithTag("home_workspace").fetchSemanticsNode().boundsInRoot
+        performTouchInput {
+            down(center)
+            moveTo(Offset(workspace.center.x - source.left, workspace.center.y - source.top))
+            up()
+        }
+    }
+
+    private fun SemanticsNodeInteraction.dragAboveWorkspace() {
+        val item = fetchSemanticsNode().boundsInRoot
+        val workspace = composeRule.onNodeWithTag("home_workspace").fetchSemanticsNode().boundsInRoot
+        performTouchInput {
+            down(center)
+            moveTo(Offset(center.x, workspace.top - OUTSIDE_MARGIN - item.top))
+            up()
+        }
+    }
+
     private fun launchWith(progress: PlayerProgress) {
         store.save(progress)
         scenario = ActivityScenario.launch(MainActivity::class.java)
     }
 }
+
+private const val OUTSIDE_MARGIN = 40f

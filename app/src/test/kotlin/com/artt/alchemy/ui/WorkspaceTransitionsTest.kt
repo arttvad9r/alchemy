@@ -46,8 +46,8 @@ class WorkspaceTransitionsTest {
 
         assertEquals(
             listOf(
-                ItemTransition(1, TransitionKind.VANISH, 0.2f, 0.2f),
-                ItemTransition(2, TransitionKind.VANISH, 0.8f, 0.8f)
+                ItemTransition(1, TransitionKind.SWEEP, 0.2f, 0.2f),
+                ItemTransition(2, TransitionKind.SWEEP, 0.8f, 0.8f)
             ),
             transitionsFor(state, WorkspaceEvent.Clear)
         )
