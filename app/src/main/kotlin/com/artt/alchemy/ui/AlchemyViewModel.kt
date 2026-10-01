@@ -11,6 +11,7 @@ import com.artt.alchemy.audio.Haptic
 import com.artt.alchemy.audio.Haptics
 import com.artt.alchemy.audio.Sound
 import com.artt.alchemy.audio.SoundEffects
+import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
@@ -307,6 +308,10 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     /** The player has let go of the effects slider: a click at the new volume shows what it sounds like. */
     fun previewEffectsVolume() {
         playSound(Sound.CLICK)
+    }
+
+    fun setTheme(theme: AppTheme) {
+        updateProgress { copy(theme = theme) }
     }
 
     fun setReducedMotion(reduced: Boolean) {

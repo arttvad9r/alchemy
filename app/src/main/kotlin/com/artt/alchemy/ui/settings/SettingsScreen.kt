@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -25,15 +27,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
+import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.TransferResult
@@ -47,8 +53,10 @@ import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.systemAnimationsOff
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelBorderColor
-import com.artt.alchemy.ui.theme.PanelColor
+import com.artt.alchemy.ui.theme.backgroundRes
+import com.artt.alchemy.ui.theme.panel
+import com.artt.alchemy.ui.theme.panelBorder
+import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.roundToInt
 
 @Composable
@@ -63,6 +71,7 @@ fun SettingsScreen(
     onMusicVolumeChanged: (Float) -> Unit,
     onEffectsVolumeChanged: (Float) -> Unit,
     onEffectsVolumeFinished: () -> Unit,
+    onThemeChanged: (AppTheme) -> Unit,
     onReducedMotionChanged: (Boolean) -> Unit,
     onExport: (Uri) -> Unit,
     onImportPicked: (Uri) -> Unit,
@@ -125,6 +134,14 @@ fun SettingsScreen(
                 tag = "settings_music_volume",
                 onChange = onMusicVolumeChanged
             )
+        }
+        SettingsPanel {
+            Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                AppTheme.entries.forEach { theme ->
+                    ThemeCard(theme, selected = theme == state.progress.theme, onSelect = { onThemeChanged(theme) }, modifier = Modifier.weight(1f))
+                }
+            }
         }
         SettingsPanel {
             val reduced = state.progress.reducedMotion ?: systemAnimationsOff(LocalContext.current)
@@ -236,12 +253,48 @@ private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(PanelColor, RoundedCornerShape(20.dp))
-            .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.panel, RoundedCornerShape(20.dp))
+            .border(1.dp, MaterialTheme.colorScheme.panelBorder, RoundedCornerShape(20.dp))
             .padding(16.dp),
         content = content
     )
 }
+
+/** A preview of a theme's background with its name and a radio mark. */
+@Composable
+private fun ThemeCard(theme: AppTheme, selected: Boolean, onSelect: () -> Unit, modifier: Modifier = Modifier) {
+    val name = stringResource(theme.nameRes)
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
+            .testTag("settings_theme_${theme.name.lowercase()}")
+    ) {
+        Image(
+            painter = painterResource(theme.backgroundRes),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(THEME_PREVIEW_RATIO)
+                .clip(shape)
+                .border(if (selected) 2.dp else 1.dp, if (selected) Gold else MaterialTheme.colorScheme.panelBorder, shape)
+        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Image(painterResource(themedArt(if (selected) R.drawable.radio_on else R.drawable.radio_off)), contentDescription = null, modifier = Modifier.size(RADIO_SIZE))
+            Text(name, style = MaterialTheme.typography.labelMedium, maxLines = 1, color = if (selected) Gold else MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+private val AppTheme.nameRes: Int
+    get() = when (this) {
+        AppTheme.AETHER -> R.string.theme_aether
+        AppTheme.EMBER -> R.string.theme_ember
+        AppTheme.VERDANT -> R.string.theme_verdant
+    }
 
 @Composable
 private fun SettingToggle(label: String, iconRes: Int?, enabled: Boolean, tag: String, onChanged: (Boolean) -> Unit) {
@@ -295,6 +348,9 @@ private val TransferResult.messageRes: Int
     }
 
 private fun appLanguageSettingsIntent(packageName: String): Intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", packageName, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+private const val THEME_PREVIEW_RATIO = 0.8f
+private val RADIO_SIZE = 20.dp
 
 private const val EXPORT_FILE_NAME = "alchemy-progress.json"
 private const val EXPORT_MIME_TYPE = "application/json"

@@ -1,11 +1,14 @@
 package com.artt.alchemy.ui.theme
 
+import androidx.annotation.DrawableRes
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
@@ -15,6 +18,7 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
+import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.game.ElementRarity
 
 val Gold = Color(0xFFF3C35B)
@@ -41,11 +45,13 @@ private const val LABEL_LARGE_SP = 17
 private const val LABEL_MEDIUM_SP = 14
 private const val LABEL_SMALL_SP = 12
 
-/** Translucent panel color that lets the scene background show through. */
-val PanelColor = Color(0xD90D1433)
-val PanelBorderColor = Color(0xFF34458F)
+private const val PANEL_ALPHA = 0.85f
 
-private val AlchemyColors = darkColorScheme(
+/** Translucent panel color that lets the scene background show through. */
+val ColorScheme.panel: Color get() = surface.copy(alpha = PANEL_ALPHA)
+val ColorScheme.panelBorder: Color get() = outlineVariant
+
+private val AetherColors = darkColorScheme(
     primary = Color(0xFF6B97FF),
     onPrimary = Color(0xFF06102E),
     primaryContainer = Color(0xFF1D3A8C),
@@ -67,10 +73,95 @@ private val AlchemyColors = darkColorScheme(
     surfaceContainerHigh = Color(0xFF151F48),
     surfaceContainerHighest = Color(0xFF1B2655),
     outline = Color(0xFF4A5AA0),
-    outlineVariant = PanelBorderColor,
+    outlineVariant = Color(0xFF34458F),
     error = Color(0xFFFF6B7A),
     onError = Color(0xFF2D0006)
 )
+
+private val EmberColors = AetherColors.copy(
+    primary = Color(0xFFFF8F5A),
+    onPrimary = Color(0xFF2E0F06),
+    primaryContainer = Color(0xFF8C2D1D),
+    onPrimaryContainer = Color(0xFFFFE1D6),
+    secondaryContainer = Color(0xFF5A2A1D),
+    onSecondaryContainer = Color(0xFFF6E7E2),
+    tertiary = Color(0xFFFFB454),
+    background = Color(0xFF1A0A07),
+    onBackground = Color(0xFFF6E7E2),
+    surface = Color(0xFF2B100C),
+    onSurface = Color(0xFFF6E7E2),
+    surfaceVariant = Color(0xFF3A1812),
+    onSurfaceVariant = Color(0xFFDDBBB0),
+    surfaceContainerLowest = Color(0xFF1A0A07),
+    surfaceContainerLow = Color(0xFF2B100C),
+    surfaceContainer = Color(0xFF331510),
+    surfaceContainerHigh = Color(0xFF3E1A14),
+    surfaceContainerHighest = Color(0xFF4A211A),
+    outline = Color(0xFFA05A46),
+    outlineVariant = Color(0xFF8F3B2A)
+)
+
+private val VerdantColors = AetherColors.copy(
+    primary = Color(0xFF5FD99A),
+    onPrimary = Color(0xFF032016),
+    primaryContainer = Color(0xFF1D6B45),
+    onPrimaryContainer = Color(0xFFD8F7E6),
+    secondaryContainer = Color(0xFF1E5A3F),
+    onSecondaryContainer = Color(0xFFE4F3EB),
+    tertiary = Color(0xFF7BD4E0),
+    background = Color(0xFF06160F),
+    onBackground = Color(0xFFE4F3EB),
+    surface = Color(0xFF0B2419),
+    onSurface = Color(0xFFE4F3EB),
+    surfaceVariant = Color(0xFF133323),
+    onSurfaceVariant = Color(0xFFB4D9C6),
+    surfaceContainerLowest = Color(0xFF06160F),
+    surfaceContainerLow = Color(0xFF0B2419),
+    surfaceContainer = Color(0xFF0F2D1F),
+    surfaceContainerHigh = Color(0xFF14392A),
+    surfaceContainerHighest = Color(0xFF1B4535),
+    outline = Color(0xFF4AA07A),
+    outlineVariant = Color(0xFF2F8F63)
+)
+
+private fun AppTheme.colors() = when (this) {
+    AppTheme.AETHER -> AetherColors
+    AppTheme.EMBER -> EmberColors
+    AppTheme.VERDANT -> VerdantColors
+}
+
+/** The theme being drawn; art and colours that differ per theme read it. */
+val LocalAppTheme = staticCompositionLocalOf { AppTheme.AETHER }
+
+private fun themed(base: Int, ember: Int, verdant: Int) = base to mapOf(AppTheme.EMBER to ember, AppTheme.VERDANT to verdant)
+
+// Blue art with a recoloured copy per theme (see THEMED_ART in tools/build_ui_assets.py).
+private val ThemedArt = mapOf(
+    themed(R.drawable.btn_blue, R.drawable.btn_blue_ember, R.drawable.btn_blue_verdant),
+    themed(R.drawable.dialog_blue, R.drawable.dialog_blue_ember, R.drawable.dialog_blue_verdant),
+    themed(R.drawable.tab_active, R.drawable.tab_active_ember, R.drawable.tab_active_verdant),
+    themed(R.drawable.tab_inactive, R.drawable.tab_inactive_ember, R.drawable.tab_inactive_verdant),
+    themed(R.drawable.toggle_on, R.drawable.toggle_on_ember, R.drawable.toggle_on_verdant),
+    themed(R.drawable.field_search, R.drawable.field_search_ember, R.drawable.field_search_verdant),
+    themed(R.drawable.field_dropdown, R.drawable.field_dropdown_ember, R.drawable.field_dropdown_verdant),
+    themed(R.drawable.field_row, R.drawable.field_row_ember, R.drawable.field_row_verdant),
+    themed(R.drawable.progress_track, R.drawable.progress_track_ember, R.drawable.progress_track_verdant),
+    themed(R.drawable.progress_fill, R.drawable.progress_fill_ember, R.drawable.progress_fill_verdant),
+    themed(R.drawable.slider_knob, R.drawable.slider_knob_ember, R.drawable.slider_knob_verdant),
+    themed(R.drawable.banner_wide, R.drawable.banner_wide_ember, R.drawable.banner_wide_verdant),
+    themed(R.drawable.scene_magic_circle, R.drawable.scene_magic_circle_ember, R.drawable.scene_magic_circle_verdant),
+    themed(R.drawable.radio_on, R.drawable.radio_on_ember, R.drawable.radio_on_verdant),
+    themed(R.drawable.card_base, R.drawable.card_base_ember, R.drawable.card_base_verdant),
+    themed(R.drawable.card_common, R.drawable.card_common_ember, R.drawable.card_common_verdant),
+    themed(R.drawable.card_rare, R.drawable.card_rare_ember, R.drawable.card_rare_verdant),
+    themed(R.drawable.card_epic, R.drawable.card_epic_ember, R.drawable.card_epic_verdant),
+    themed(R.drawable.card_legendary, R.drawable.card_legendary_ember, R.drawable.card_legendary_verdant)
+)
+
+/** The current theme's copy of [res], or [res] itself when it is the same in every theme. */
+@Composable
+@DrawableRes
+fun themedArt(@DrawableRes res: Int): Int = ThemedArt[res]?.get(LocalAppTheme.current) ?: res
 
 @OptIn(ExperimentalTextApi::class)
 private fun alegreya(weight: Int) = Font(R.font.alegreya, FontWeight(weight), variationSettings = FontVariation.Settings(FontVariation.weight(weight)))
@@ -120,10 +211,11 @@ private val AlchemyTypography = Typography().let { base ->
 }
 
 @Composable
-fun AlchemyTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = AlchemyColors, typography = AlchemyTypography) {
+fun AlchemyTheme(theme: AppTheme, content: @Composable () -> Unit) {
+    val colors = theme.colors()
+    MaterialTheme(colorScheme = colors, typography = AlchemyTypography) {
         // Screens draw over the scene image rather than a Surface, so light text must be the default.
-        CompositionLocalProvider(LocalContentColor provides AlchemyColors.onBackground, content = content)
+        CompositionLocalProvider(LocalContentColor provides colors.onBackground, LocalAppTheme provides theme, content = content)
     }
 }
 
@@ -134,4 +226,11 @@ val ElementRarity.color: Color
         ElementRarity.RARE -> Color(0xFF3FA35A)
         ElementRarity.EPIC -> Color(0xFF8B55E0)
         ElementRarity.LEGENDARY -> Color(0xFFD9A53A)
+    }
+
+val AppTheme.backgroundRes: Int
+    get() = when (this) {
+        AppTheme.AETHER -> R.drawable.bg_aether
+        AppTheme.EMBER -> R.drawable.bg_ember
+        AppTheme.VERDANT -> R.drawable.bg_verdant
     }

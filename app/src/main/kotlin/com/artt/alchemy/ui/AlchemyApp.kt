@@ -63,13 +63,15 @@ import com.artt.alchemy.ui.recipes.RecipesScreen
 import com.artt.alchemy.ui.settings.SettingsScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelColor
+import com.artt.alchemy.ui.theme.backgroundRes
+import com.artt.alchemy.ui.theme.panel
 
 // The home scene stays bright; list screens dim it so text keeps its contrast.
 private const val HOME_DIM = 0.2f
 private const val LIST_DIM = 0.7f
 private const val UNSELECTED_ICON_ALPHA = 0.6f
 private const val TAB_FADE_MILLIS = 180
+private const val THEME_FADE_MILLIS = 400
 private val NAV_BAR_HEIGHT = 58.dp
 private val NAV_ICON_SIZE = 26.dp
 
@@ -82,15 +84,17 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
         onPauseOrDispose { viewModel.pauseMusic() }
     }
     val reducedMotion = state.progress.reducedMotion ?: systemAnimationsOff(LocalContext.current)
-    AlchemyTheme {
+    AlchemyTheme(state.progress.theme) {
         CompositionLocalProvider(LocalReducedMotion provides reducedMotion) {
             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                Image(
-                    painter = painterResource(R.drawable.bg_aether),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                Crossfade(targetState = state.progress.theme, animationSpec = motion(tween(THEME_FADE_MILLIS)), label = "themeBackground") { theme ->
+                    Image(
+                        painter = painterResource(theme.backgroundRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
                 val dim by animateFloatAsState(
                     targetValue = if (state.selectedTab == AppTab.HOME) HOME_DIM else LIST_DIM,
                     animationSpec = motion(tween(TAB_FADE_MILLIS)),
@@ -143,6 +147,7 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel()) {
                                 onMusicVolumeChanged = viewModel::setMusicVolume,
                                 onEffectsVolumeChanged = viewModel::setEffectsVolume,
                                 onEffectsVolumeFinished = viewModel::previewEffectsVolume,
+                                onThemeChanged = viewModel::setTheme,
                                 onReducedMotionChanged = viewModel::setReducedMotion,
                                 onExport = viewModel::exportProgress,
                                 onImportPicked = viewModel::readImport,
@@ -186,7 +191,7 @@ private fun AlchemyNavigationBar(selectedTab: AppTab, onSelect: (AppTab) -> Unit
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(PanelColor)
+            .background(MaterialTheme.colorScheme.panel)
             .navigationBarsPadding()
             .height(NAV_BAR_HEIGHT)
             .selectableGroup()

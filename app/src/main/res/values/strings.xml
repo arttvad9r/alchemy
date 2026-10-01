@@ -55,6 +55,10 @@
     <string name="help_text">Tap a discovered element to put it in a free spot on the board, or drag it straight onto the board. Drop one element onto another to get a result. A wrong pair stays unchanged. Drag an element past the edge of the board to remove it.</string>
     <string name="music_volume">Music volume</string>
     <string name="effects_volume">Effects volume</string>
+    <string name="theme">Theme</string>
+    <string name="theme_aether">Aether</string>
+    <string name="theme_ember">Ember</string>
+    <string name="theme_verdant">Verdant</string>
     <string name="language">Language</string>
     <string name="language_hint">Russian or English. The choice opens in the app\'s system settings.</string>
     <string name="language_open">Choose language</string>

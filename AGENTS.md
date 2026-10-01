@@ -12,5 +12,6 @@ Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 
 - Delegated agents must work only inside the isolated worktree they were given, commit their changes there, and never `cd` back to the main checkout.
 
 ## Status
-- Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–8 merged into `master` (up to English localization, 2026-09-30).
-- Next: stage 9, themes. No public release yet.
+- Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–8 merged into `master` (up to English localization, 2026-09-30); stage 9 (themes) on `feat/themes`, verified, awaiting owner approval to merge.
+- Themes: blue art has pre-tinted `*_ember`/`*_verdant` copies built by `tools/build_ui_assets.py` (`THEMED_ART`), picked via `themedArt()`.
+- Next: nothing planned. No public release yet.

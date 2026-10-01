@@ -97,9 +97,9 @@ import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
 import com.artt.alchemy.ui.components.pillBadge
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelBorderColor
-import com.artt.alchemy.ui.theme.PanelColor
 import com.artt.alchemy.ui.theme.TitleFontFamily
+import com.artt.alchemy.ui.theme.panel
+import com.artt.alchemy.ui.theme.panelBorder
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.currentCoroutineContext
@@ -248,8 +248,8 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PanelColor, RoundedCornerShape(20.dp))
-                    .border(1.dp, PanelBorderColor, RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.panel, RoundedCornerShape(20.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.panelBorder, RoundedCornerShape(20.dp))
                     .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {

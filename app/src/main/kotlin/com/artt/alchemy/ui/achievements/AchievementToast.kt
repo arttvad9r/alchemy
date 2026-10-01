@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.PanelColor
 import com.artt.alchemy.ui.theme.TitleFontFamily
 import kotlinx.coroutines.delay
 
@@ -73,7 +72,7 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
                 alpha = shown.value.coerceIn(0f, 1f)
             }
             .fillMaxWidth()
-            .background(PanelColor.copy(alpha = 1f), RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
             .border(2.dp, Gold, RoundedCornerShape(16.dp))
             .pointerInput(Unit) { detectTapGestures { leaving = true } }
             .pointerInput(Unit) { detectVerticalDragGestures { _, dragAmount -> if (dragAmount < -SWIPE_UP_THRESHOLD) leaving = true } }

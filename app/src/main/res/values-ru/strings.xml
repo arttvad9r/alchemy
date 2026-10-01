@@ -55,6 +55,10 @@
     <string name="help_text">Нажмите открытый элемент, чтобы добавить его в свободное место рабочей области, или сразу перетащите его на поле. Наложите элементы один на другой, чтобы получить результат. Неверная пара останется без изменений. Перетащите элемент за границу рабочей области, чтобы удалить его с поля.</string>
     <string name="music_volume">Громкость музыки</string>
     <string name="effects_volume">Громкость эффектов</string>
+    <string name="theme">Тема</string>
+    <string name="theme_aether">Эфир</string>
+    <string name="theme_ember">Жар</string>
+    <string name="theme_verdant">Рощи</string>
     <string name="language">Язык</string>
     <string name="language_hint">Русский или English. Выбор откроется в системных настройках приложения.</string>
     <string name="language_open">Выбрать язык</string>

@@ -9,7 +9,9 @@ import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.recipeKey
 
 enum class AppTheme {
-    AETHER
+    AETHER,
+    EMBER,
+    VERDANT
 }
 
 /** A hint in progress: [step] 1 shows the result and one ingredient, 2 the second ingredient. */

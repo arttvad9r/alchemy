@@ -21,6 +21,8 @@ WEBP_QUALITY = 86
 
 UI_ASSETS = {
     "backgrounds/bg_aether.png": ("bg_aether", 1672),
+    "backgrounds/bg_ember.png": ("bg_ember", 1672),
+    "backgrounds/bg_verdant.png": ("bg_verdant", 1672),
     "ui/icons/home.png": ("nav_home", 128),
     "ui/icons/elements_leaf.png": ("nav_elements", 128),
     "ui/icons/recipes_book.png": ("nav_recipes", 128),
@@ -71,6 +73,8 @@ UI_ASSETS = {
     "ui/icons/hint_bulb.png": ("ic_hint", 96),
     "ui/icons/back.png": ("ic_back", 96),
     "ui/icons/check.png": ("ic_check", 96),
+    "ui/buttons/radio_on.png": ("radio_on", 96),
+    "ui/buttons/radio_off.png": ("radio_off", 96),
     "ui/icons/info.png": ("ic_info", 96),
     "ui/buttons/pill_badge_green.png": ("pill_badge", 256),
     "ui/buttons/tooltip_bubble.png": ("tooltip_bubble", 512),
@@ -110,6 +114,37 @@ SLIDER_KNOB_CENTER = (173, 52)
 SLIDER_KNOB_RADIUS = 42
 SLIDER_KNOB_FEATHER = 6
 SLIDER_KNOB_SIZE = 96
+
+# Blue art that each theme recolours: written next to the original as <name>_<theme>.webp.
+# Only the saturated blues move; gold trim, silver and the green/red accents keep their colour.
+THEMED_ART = (
+    "btn_blue", "dialog_blue", "tab_active", "tab_inactive", "toggle_on", "field_search", "field_dropdown",
+    "field_row", "progress_track", "progress_fill", "slider_knob", "banner_wide", "scene_magic_circle",
+    "radio_on", "card_base", "card_common", "card_rare", "card_epic", "card_legendary",
+)
+# Theme -> (target hue in degrees, saturation factor).
+THEME_TINTS = {"ember": (12, 1.0), "verdant": (155, 0.75)}
+BLUE_HUE_RANGE = (190, 262)
+BLUE_HUE_CENTER = 228
+BLUE_MIN_SATURATION = 0.35
+
+
+def convert_themed_art() -> None:
+    """Hue-shift the blue pixels of THEMED_ART into each theme's colour."""
+    for name in THEMED_ART:
+        source = Image.open(RES_DIR / f"{name}.webp").convert("RGBA")
+        for theme, (target, factor) in THEME_TINTS.items():
+            image = source.copy()
+            pixels = image.load()
+            for y in range(image.height):
+                for x in range(image.width):
+                    red, green, blue, alpha = pixels[x, y]
+                    hue, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+                    if BLUE_HUE_RANGE[0] < hue * 360 < BLUE_HUE_RANGE[1] and saturation > BLUE_MIN_SATURATION:
+                        hue = ((hue * 360 + target - BLUE_HUE_CENTER) % 360) / 360
+                        red, green, blue = (round(c * 255) for c in colorsys.hls_to_rgb(hue, lightness, saturation * factor))
+                        pixels[x, y] = (red, green, blue, alpha)
+            image.save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def trimmed(source: Path) -> Image.Image:
@@ -205,6 +240,7 @@ def main() -> None:
     convert_slider_knob()
     convert_close_icon()
     convert_card_rarities()
+    convert_themed_art()
 
 
 if __name__ == "__main__":

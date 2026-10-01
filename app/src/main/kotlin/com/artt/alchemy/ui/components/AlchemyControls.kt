@@ -72,6 +72,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.roundToInt
 
 private const val PRESS_MILLIS = 90
@@ -140,7 +141,7 @@ enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
 
 @Composable
 fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(style.res)
+    val art = ImageBitmap.imageResource(themedArt(style.res))
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val press by animateFloatAsState(if (pressed) 1f else 0f, motion(tween(PRESS_MILLIS)), label = "buttonPress")
@@ -166,7 +167,7 @@ fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifie
 
 @Composable
 fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(if (selected) R.drawable.tab_active else R.drawable.tab_inactive)
+    val art = ImageBitmap.imageResource(themedArt(if (selected) R.drawable.tab_active else R.drawable.tab_inactive))
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -192,7 +193,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
     ) {
         Crossfade(targetState = checked, animationSpec = motion(tween(PRESS_MILLIS * 2)), label = "toggle") { on ->
             Image(
-                painter = painterResource(if (on) R.drawable.toggle_on else R.drawable.toggle_off),
+                painter = painterResource(themedArt(if (on) R.drawable.toggle_on else R.drawable.toggle_off)),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )
@@ -203,7 +204,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
 /** Single-line Material text field drawn over the search field art, which has the magnifier drawn in. */
 @Composable
 fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(R.drawable.field_search)
+    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_search))
     TextField(
         value = value,
         onValueChange = onValueChange,
@@ -232,7 +233,7 @@ fun <T : Enum<T>> AlchemyDropdown(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int? = null
 ) {
-    val art = ImageBitmap.imageResource(R.drawable.field_dropdown)
+    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_dropdown))
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         Row(
@@ -280,7 +281,7 @@ fun AlchemyDialog(
 ) {
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        val art = ImageBitmap.imageResource(panelRes)
+        val art = ImageBitmap.imageResource(themedArt(panelRes))
         val entrance = remember { Animatable(0f) }
         val entranceSpec = motion(tween<Float>(DIALOG_ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
         LaunchedEffect(Unit) { entrance.animateTo(1f, entranceSpec) }
@@ -344,8 +345,8 @@ fun AlchemyIconButton(
 /** The bar art: an empty track with a glowing fill that grows with [progress] from 0 to 1. */
 @Composable
 fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
-    val track = ImageBitmap.imageResource(R.drawable.progress_track)
-    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
+    val track = ImageBitmap.imageResource(themedArt(R.drawable.progress_track))
+    val fill = ImageBitmap.imageResource(themedArt(R.drawable.progress_fill))
     val fraction = progress.coerceIn(0f, 1f)
     // Starts empty so the fill grows to its value when the bar first appears, then follows changes.
     var target by remember { mutableFloatStateOf(0f) }
@@ -384,9 +385,9 @@ fun AlchemySlider(
     modifier: Modifier = Modifier,
     onValueChangeFinished: () -> Unit = {}
 ) {
-    val track = ImageBitmap.imageResource(R.drawable.progress_track)
-    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
-    val knob = ImageBitmap.imageResource(R.drawable.slider_knob)
+    val track = ImageBitmap.imageResource(themedArt(R.drawable.progress_track))
+    val fill = ImageBitmap.imageResource(themedArt(R.drawable.progress_fill))
+    val knob = ImageBitmap.imageResource(themedArt(R.drawable.slider_knob))
     val fraction = value.coerceIn(0f, 1f)
     val currentChange by rememberUpdatedState(onValueChange)
     val currentFinished by rememberUpdatedState(onValueChangeFinished)
@@ -453,7 +454,7 @@ private fun sliderValueAt(x: Float, width: Float, knobRadius: Float): Float {
 /** Screen title on the ribbon banner, centered at the top of a screen. */
 @Composable
 fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(R.drawable.banner_wide)
+    val art = ImageBitmap.imageResource(themedArt(R.drawable.banner_wide))
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
         Box(
             contentAlignment = Alignment.Center,
@@ -472,7 +473,7 @@ fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
 /** Panel art stretched to the modifier's bounds, keeping corners and edge ornaments intact. */
 @Composable
 fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale: Float = Float.MAX_VALUE): Modifier {
-    val art = ImageBitmap.imageResource(res)
+    val art = ImageBitmap.imageResource(themedArt(res))
     return drawBehind {
         drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height, maxScale), alpha)
     }
@@ -495,7 +496,7 @@ fun Modifier.pillBadge(): Modifier {
 /** A single-line row panel: the art's height follows the row, so the trim keeps its thickness. */
 @Composable
 fun Modifier.rowPanel(): Modifier {
-    val art = ImageBitmap.imageResource(R.drawable.field_row)
+    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_row))
     return drawBehind { drawSliced(art, RowSegments, WholeHeight, size.height / art.height) }
 }
 

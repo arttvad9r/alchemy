@@ -64,6 +64,7 @@ import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.elementIconRes
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
+import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -116,7 +117,7 @@ fun WorkspaceCanvas(
     }
     val art = WorkspaceArt(
         icons = icons,
-        magicCircle = ImageBitmap.imageResource(R.drawable.scene_magic_circle),
+        magicCircle = ImageBitmap.imageResource(themedArt(R.drawable.scene_magic_circle)),
         flash = ImageBitmap.imageResource(R.drawable.fx_combine_flash),
         burst = ImageBitmap.imageResource(R.drawable.fx_success_burst),
         sparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_gold),
