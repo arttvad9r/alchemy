@@ -3,7 +3,6 @@ package com.artt.alchemy.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -132,7 +131,7 @@ fun ElementTile(element: ElementDefinition, modifier: Modifier = Modifier, onCli
         verticalArrangement = Arrangement.spacedBy(ElementTextGap),
         modifier = modifier
             .semantics { contentDescription = name }
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.pressClickable(onClick = onClick) else Modifier)
     ) {
         FramedElementIcon(element, Modifier.fillMaxWidth())
         Text(

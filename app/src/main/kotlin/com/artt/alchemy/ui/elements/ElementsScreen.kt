@@ -3,7 +3,6 @@ package com.artt.alchemy.ui.elements
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -19,7 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,9 +59,11 @@ import com.artt.alchemy.ui.components.FinalMark
 import com.artt.alchemy.ui.components.GroupTabs
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.components.cascadeIn
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
+import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
 import kotlinx.coroutines.delay
@@ -118,8 +119,8 @@ fun ElementsScreen(
             }
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.
-            items(entries.chunked(columns), key = { row -> row.first().id }) { row ->
-                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = ROW_INSET).height(IntrinsicSize.Min).animateItem()) {
+            itemsIndexed(entries.chunked(columns), key = { _, row -> row.first().id }) { index, row ->
+                Row(modifier = Modifier.fillMaxWidth().padding(horizontal = ROW_INSET).height(IntrinsicSize.Min).animateItem().cascadeIn(index)) {
                     row.forEach { element ->
                         val unlocked = element.id in progress.unlockedIds
                         ElementCard(
@@ -169,7 +170,7 @@ private fun ElementCard(
         modifier = modifier
             .padding(CARD_GAP / 2)
             .testTag(if (unlocked) "element_${element.id}" else "element_locked_${element.id}")
-            .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
+            .then(if (onOpen != null) Modifier.pressClickable(onClick = onOpen) else Modifier)
             // The trim takes the rarity colour once the element is open.
             .panelBackground(if (unlocked) element.rarity.cardRes else R.drawable.card_base)
     ) {

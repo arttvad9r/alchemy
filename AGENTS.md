@@ -9,9 +9,10 @@ Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 
 - Run `./gradlew qualityCheck testDebugUnitTest assembleDebug` for deterministic verification and the focused Android instrumentation tests for affected UI flows (`docs/testing.md`).
 - Agents install and test only on an emulator, never on the owner's personal phone even if ADB sees it; the owner checks sound and haptics on the phone.
 - Each feature goes on its own `feat/<name>` branch from `master`; merge after verification and owner approval. No push, tags or releases without explicit permission; user-visible changes go to the «Не выпущено» section of `CHANGELOG.md`.
-- Delegated agents must work only inside the isolated worktree they were given, commit their changes there, and never `cd` back to the main checkout.
+- Delegated agents must work only inside the isolated worktree supplied by Hermes, commit their changes there, and never `cd` back to the main checkout.
 
 ## Status
-- Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–8 merged into `master` (up to English localization, 2026-09-30); stage 9 (themes) on `feat/themes`, verified, awaiting owner approval to merge.
+- Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–9 merged into `master` (themes last, 2026-10-01). No public release yet.
 - Themes: blue art has pre-tinted `*_ember`/`*_verdant` copies built by `tools/build_ui_assets.py` (`THEMED_ART`), picked via `themedArt()`.
-- Next: nothing planned. No public release yet.
+- Studio intro: 2.8s flat portrait ARTT animation follows a plain black system starting window (no game branding); no manual skip, background pauses playback, reduced motion shows a still.
+- Branding sources and rebuild instructions: `ART_ASSETS.md`, `tools/build_studio_intro.py`.

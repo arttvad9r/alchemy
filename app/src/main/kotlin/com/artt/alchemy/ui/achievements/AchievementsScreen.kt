@@ -1,7 +1,6 @@
 package com.artt.alchemy.ui.achievements
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,8 @@ import com.artt.alchemy.data.isComplete
 import com.artt.alchemy.ui.components.AlchemyProgressBar
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
+import com.artt.alchemy.ui.components.cascadeIn
+import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
 
@@ -43,13 +44,14 @@ fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, m
     ) {
         item { ScreenBanner(stringResource(R.string.tab_achievements)) }
         if (progress.isComplete) item { CompletionCard(onOpenCompletion) }
-        items(achievements, key = AchievementDefinition::id) { achievement ->
+        itemsIndexed(achievements, key = { _, achievement -> achievement.id }) { index, achievement ->
             val current = achievement.progressOf(progress)
             val completed = achievement.isCompleted(progress)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
+                    .cascadeIn(index)
                     .fillMaxWidth()
                     .rowPanel()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
@@ -90,8 +92,9 @@ private fun CompletionCard(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
+            // Before the panel, so the whole card sinks under the finger, art and all.
+            .pressClickable(role = Role.Button, pressedScale = ROW_PRESSED_SCALE, onClick = onClick)
             .rowPanel()
-            .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 12.dp)
             .testTag("achievement_completion")
             .clearAndSetSemantics { contentDescription = description }
@@ -121,3 +124,4 @@ fun AchievementBadge(completed: Boolean, modifier: Modifier = Modifier) {
 }
 
 private val BADGE_SIZE = 48.dp
+private const val ROW_PRESSED_SCALE = 0.97f

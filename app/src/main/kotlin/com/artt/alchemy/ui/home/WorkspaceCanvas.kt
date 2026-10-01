@@ -2,6 +2,8 @@ package com.artt.alchemy.ui.home
 
 import android.graphics.Typeface
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
@@ -10,6 +12,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -23,8 +26,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableFloatState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -34,10 +39,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
@@ -49,11 +58,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.core.content.res.ResourcesCompat
 import com.artt.alchemy.R
+import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.WorkspaceItem
 import com.artt.alchemy.game.overlapTarget
@@ -66,8 +78,10 @@ import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlinx.coroutines.delay
 
 private const val ITEM_RADIUS_FRACTION = 0.11f
 private const val LABEL_SIZE_FRACTION = 0.042f
@@ -78,14 +92,35 @@ private const val WATERMARK_SIZE_FRACTION = 0.85f
 private const val WATERMARK_ALPHA = 0.28f
 private const val SMOKE_ALPHA = 0.9f
 private const val HELD_RING_SHARE = 1.45f
+
+// The ring around the element in hand stays faint, so the target it would mix with is what stands out.
+private const val HELD_RING_ALPHA = 0.4f
 private const val TARGET_PULSE_MILLIS = 550
 private const val LIFT_SCALE = 0.12f
 private const val LIFT_SHADOW_ALPHA = 0.35f
 private const val TARGET_RING_SHARE = 1.7f
-private const val APPEAR_START_SCALE = 0.5f
-private const val FLY_IN_SPEED = 1.5f
-private const val SHAKE_WAVES = 2.5f
-private const val SHAKE_AMPLITUDE_SHARE = 0.1f
+private const val TARGET_GLOW_SHARE = 1.4f
+private const val TARGET_GLOW_ALPHA = 0.9f
+private const val TARGET_SCALE = 0.08f
+private val TargetGlow = Color(0xFFFFD98A)
+
+// Recolours the ring by its brightness, so it keeps its shape (a flat tint would turn it into a blob).
+private val TargetRingTint = ColorFilter.colorMatrix(goldFromLuminance(red = 1f, green = 0.8f, blue = 0.36f, boost = 1.7f))
+
+// A tapped element flies in from its palette tile at about the tile's size; a dropped one only settles.
+internal const val FLY_START_SCALE = 0.8f
+private const val DROP_START_SCALE = 0.92f
+private const val SWEEP_ALPHA = 0.35f
+
+// How far inside the edges an element comes to rest, in item radii: its icon and name stay clear of the frame.
+private const val REST_SIDE = 0.7f
+private const val REST_TOP = 0.9f
+private const val REST_BOTTOM = 0.95f
+private const val LABEL_EDGE_GAP = 0.1f
+private const val FLY_IN_SPEED = 1.4f
+private const val LANDED_AT = 1f / FLY_IN_SPEED
+private const val SHAKE_WAVES = 3f
+private const val SHAKE_AMPLITUDE_SHARE = 0.22f
 private const val AURA_ALPHA = 0.9f
 private const val STARS_TURN_DEGREES = 40f
 
@@ -93,6 +128,39 @@ private const val STARS_TURN_DEGREES = 40f
 private const val MERGE_SPAN = 0.25f
 private const val RESULT_APPEAR_START = 0.2f
 private const val RESULT_APPEAR_SPAN = 0.45f
+
+// The scene breathes: the circle turns slowly, items float on the spot, and a discovery wakes the circle up.
+private const val CIRCLE_TURN_DEGREES_PER_SECOND = 2.4f
+private const val CIRCLE_BREATH_SPEED = 0.7f
+private const val CIRCLE_BREATH_ALPHA = 0.05f
+private const val CIRCLE_FLARE_ALPHA = 0.45f
+private const val BOB_SPEED = 1.7f
+private const val BOB_SHARE = 0.045f
+private const val HALO_SHARE = 0.95f
+private const val HALO_ALPHA = 0.85f
+private const val HALO_PULSE = 0.25f
+
+// Sparks thrown when the two sources meet, a little after the effect starts.
+private const val BURST_DELAY_MILLIS = 130L
+private const val SHAKE_MILLIS = 480
+private const val SHAKE_FREQUENCY = 46f
+private const val SHAKE_Y_RATIO = 0.8f
+private const val SHAKE_Y_SHARE = 0.6f
+private val GRAND_SHAKE = 7.dp
+private val EPIC_SHAKE = 4.dp
+
+// Discovery rays and the flash that fills the workspace for an epic or legendary find.
+private const val RAY_COUNT = 14
+private const val RAY_TURN = 0.6f
+private const val RAY_LENGTH_SHARE = 5f
+private const val RAY_ALPHA = 0.55f
+private const val GRAND_FLASH_SPAN = 0.3f
+private const val GRAND_FLASH_ALPHA = 0.55f
+
+// Dull and a little rosy: plainly not the light of a mix.
+private val NoMatchColors = listOf(Color(0xFFFF5C7C), Color(0xFFE0507A), Color(0xFFB8509A))
+private val EmberColors = listOf(Color(0xFFB9BEDD), Color(0xFFFFB27A), Color(0xFF8A90B8))
+private val SparkBlue = Color(0xFF8FB8FF)
 
 @Composable
 fun WorkspaceCanvas(
@@ -104,7 +172,9 @@ fun WorkspaceCanvas(
     effect: CombinationEffect?,
     effectTime: () -> Float,
     transitions: () -> List<TransitionFrame>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // The frame around the canvas: still the board, so an element let go on it stays and settles inside.
+    frameWidth: Dp = 0.dp
 ) {
     val currentItems by rememberUpdatedState(items)
     val currentOnMove by rememberUpdatedState(onMove)
@@ -151,7 +221,12 @@ fun WorkspaceCanvas(
         animationSpec = infiniteRepeatable(tween(TARGET_PULSE_MILLIS), RepeatMode.Reverse),
         label = "targetPulse"
     )
-    val targetPulse = if (LocalReducedMotion.current) 1f else animatedPulse
+    val reducedMotion = LocalReducedMotion.current
+    val targetPulse = if (reducedMotion) 1f else animatedPulse
+
+    val fx = remember { WorkspaceFx() }
+    val clock = rememberWorkspaceClock(fx, reducedMotion)
+    val shake = remember { Animatable(0f) }
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val context = LocalContext.current
@@ -168,11 +243,16 @@ fun WorkspaceCanvas(
     }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        BurstOnMix(effect, fx, shake, Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat()), reducedMotion)
+        val shakeAmplitude = with(LocalDensity.current) { (if (effect?.rarity == ElementRarity.LEGENDARY) GRAND_SHAKE else EPIC_SHAKE).toPx() }
+        val framePx = with(LocalDensity.current) { frameWidth.toPx() }
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("workspace_canvas")
                 .onGloballyPositioned { onBoundsChanged(it.boundsInRoot()) }
+                // After the bounds are taken, so a jolt never reports the workspace as moved.
+                .shaking(shake, shakeAmplitude)
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -184,38 +264,57 @@ fun WorkspaceCanvas(
                             ?: return@awaitEachGesture
                         heldId = item.instanceId
                         currentOnPickUp()
+                        val width = size.width.toFloat()
+                        val height = size.height.toFloat()
+                        // Over the frame the element is still on the board; only past it is it taken away.
+                        val board = Rect(-framePx / width, -framePx / height, 1f + framePx / width, 1f + framePx / height)
+                        val onBoard = { position: Offset -> if (board.contains(position)) Offset(position.x.coerceIn(0f, 1f), position.y.coerceIn(0f, 1f)) else position }
                         try {
                             var lastPosition = down.position
                             val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
                             } ?: return@awaitEachGesture
 
                             drag(dragStart.id) { change ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, normalize(lastPosition, size.width, size.height))
+                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
                             }
                             val position = normalize(lastPosition, size.width, size.height)
-                            currentOnMove(item.instanceId, position)
-                            if (position.x in 0f..1f && position.y in 0f..1f) currentOnResolve(item.instanceId, position)
+                            if (board.contains(position)) {
+                                // Let go on the board: it settles in from the edge, name and all, instead of hanging over the frame.
+                                val labelHalf = labelPaint.measureText(context.resources.elementName(item.elementId)) / 2
+                                val resting = restingPosition(onBoard(position), width, height, labelHalf)
+                                currentOnMove(item.instanceId, resting)
+                                currentOnResolve(item.instanceId, resting)
+                            } else {
+                                currentOnMove(item.instanceId, position)
+                            }
                         } finally {
                             heldId = null
                         }
                     }
                 }
         ) {
-            drawWatermark(art.magicCircle)
-            val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
-            labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
-            val frames = transitions()
+            val seconds = clock.floatValue
             val time = if (effect == null) 0f else effectTime()
+            val flare = if (effect?.isDiscovery == true) sin(PI.toFloat() * time) * CIRCLE_FLARE_ALPHA else 0f
+            drawWatermark(art.magicCircle, seconds, flare)
+            val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
+            val frames = transitions()
             val held = currentItems.find { it.instanceId == heldId }
-            held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }?.let { target ->
+            if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
+            labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
+            val target = held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }
+            target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
                 val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
-                drawCentered(art.energyRing, iconCenterOf(center, radius, iconSize), iconSize * TARGET_RING_SHARE, targetPulse)
+                val iconCenter = iconCenterOf(center, radius, iconSize)
+                drawGlow(iconCenter, iconSize * TARGET_GLOW_SHARE, TargetGlow, TARGET_GLOW_ALPHA * targetPulse)
+                // The same ring art as the one in hand, but gold, so the two never read as one.
+                drawCentered(art.energyRing, iconCenter, iconSize * TARGET_RING_SHARE, targetPulse, TargetRingTint)
             }
             val motion = ItemMotion(
                 appearing = frames.filter { it.transition.kind == TransitionKind.APPEAR }.associateBy { it.transition.instanceId },
@@ -224,14 +323,70 @@ fun WorkspaceCanvas(
                 effectTime = time,
                 heldId = heldId,
                 liftedId = liftedId,
-                lift = lift.value
+                lift = lift.value,
+                seconds = seconds,
+                targetId = target?.instanceId
             )
             // The item in hand is drawn last, so it never slides under the others.
             currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
             drawTransitions(frames, art, radius)
-            effect?.let { drawEffect(it, time, art, radius) }
+            if (!reducedMotion) fx.drawSparks(this, held, radius)
+            effect?.let { drawEffect(it, time, art, radius, fx.rayPath) }
         }
         ItemAccessibilityNodes(items, constraints.maxWidth, constraints.maxHeight)
+    }
+}
+
+/**
+ * One clock for everything alive on the workspace: drifting motes, floating items and sparks, in seconds. The canvas
+ * reads it only while drawing, so a tick redraws the workspace without recomposing it. Reduced motion stops it, and so
+ * do UI tests, which never run infinite animations.
+ */
+@Composable
+private fun rememberWorkspaceClock(fx: WorkspaceFx, reducedMotion: Boolean): MutableFloatState {
+    val clock = remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(reducedMotion) {
+        if (reducedMotion) {
+            fx.sparks.clear()
+            clock.floatValue = 0f
+            return@LaunchedEffect
+        }
+        var last = withInfiniteAnimationFrameNanos { it }
+        while (true) {
+            withInfiniteAnimationFrameNanos { now ->
+                val step = ((now - last) / NANOS_PER_SECOND).coerceIn(0f, MAX_FRAME_STEP)
+                last = now
+                fx.sparks.step(step)
+                clock.floatValue += step
+            }
+        }
+    }
+    return clock
+}
+
+/** Throws a mix's sparks the moment its two sources meet, and jolts the workspace for an epic or legendary find. */
+@Composable
+private fun BurstOnMix(effect: CombinationEffect?, fx: WorkspaceFx, shake: Animatable<Float, AnimationVector1D>, size: Size, reducedMotion: Boolean) {
+    LaunchedEffect(effect?.id) {
+        val current = effect?.takeUnless { reducedMotion } ?: return@LaunchedEffect
+        delay(BURST_DELAY_MILLIS)
+        val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
+        val center = iconCenterOf(Offset(current.xFraction * size.width, current.yFraction * size.height), radius, radius * 2 * ICON_SHARE)
+        fx.burst(current, center, radius)
+        if (current.isDiscovery && current.rarity >= ElementRarity.EPIC) {
+            shake.snapTo(1f)
+            shake.animateTo(0f, tween(SHAKE_MILLIS, easing = LinearEasing))
+        }
+    }
+}
+
+/** Moves the content in a quick decaying tremor while [shake] runs from 1 down to 0, up to [amplitude] pixels. */
+private fun Modifier.shaking(shake: Animatable<Float, AnimationVector1D>, amplitude: Float): Modifier = graphicsLayer {
+    val amount = shake.value
+    if (amount > 0f) {
+        val phase = (1f - amount) * SHAKE_FREQUENCY
+        translationX = sin(phase) * amount * amount * amplitude
+        translationY = cos(phase * SHAKE_Y_RATIO) * amount * amount * amplitude * SHAKE_Y_SHARE
     }
 }
 
@@ -262,7 +417,10 @@ private class ItemMotion(
     val effectTime: Float,
     val heldId: Long?,
     val liftedId: Long?,
-    val lift: Float
+    val lift: Float,
+    val seconds: Float,
+    // The element the one in hand would mix with if let go now.
+    val targetId: Long?
 )
 
 private class WorkspaceArt(
@@ -289,11 +447,12 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     var scale = 1f
     var alpha = 1f
     motion.appearing[item.instanceId]?.let { frame ->
-        scale = lerp(APPEAR_START_SCALE, 1f, easeOutBack(frame.progress))
-        alpha = (frame.progress * 4f).coerceAtMost(1f)
-        frame.origin?.let { origin ->
-            val fly = easeOutCubic(frame.progress * FLY_IN_SPEED)
-            center = Offset(lerp(origin.x * size.width, center.x, fly), lerp(origin.y * size.height, center.y, fly))
+        // A flying element is drawn over the whole screen until it lands (see flightOf), then it is simply here.
+        if (frame.origin != null) {
+            if (flightOf(frame.progress) != null) return
+        } else {
+            // A dropped element takes over from the tile in hand at once and only settles.
+            scale = lerp(DROP_START_SCALE, 1f, easeOutBack(frame.progress))
         }
     }
     if (item.instanceId == motion.resultInstanceId) {
@@ -306,8 +465,19 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     }
     val liftAmount = if (item.instanceId == motion.liftedId) motion.lift else 0f
     scale *= 1f + LIFT_SCALE * liftAmount
+    // The target rises a little to meet the element in hand.
+    if (item.instanceId == motion.targetId) scale *= 1f + TARGET_SCALE
     if (alpha <= 0f || scale <= 0f) return
+    // Each item floats on its own beat; one in hand is held still.
+    val beat = motion.seconds * BOB_SPEED + (item.instanceId % BEAT_SPREAD) * BEAT_STEP
+    center += Offset(0f, sin(beat) * radius * BOB_SHARE * (1f - liftAmount))
     val iconCenter = iconCenterOf(center, radius, iconSize)
+    // Rare and finer elements glow in their colour, so the board shows what is precious at a glance.
+    val rarity = AlchemyCatalog.rarityById.getValue(item.elementId)
+    if (rarity >= ElementRarity.RARE) {
+        val pulse = 1f - HALO_PULSE + HALO_PULSE * sin(beat * 0.5f)
+        drawGlow(iconCenter, iconSize * HALO_SHARE * scale, rarity.glowColor, HALO_ALPHA * alpha * pulse)
+    }
     withTransform({ scale(scale, scale, pivot = iconCenter) }) {
         if (liftAmount > 0f) {
             drawOval(
@@ -316,7 +486,7 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
                 size = Size(iconSize * 0.8f, iconSize * 0.2f)
             )
         }
-        if (item.instanceId == motion.heldId) drawCentered(art.heldRing, iconCenter, iconSize * HELD_RING_SHARE, 1f)
+        if (item.instanceId == motion.heldId) drawCentered(art.heldRing, iconCenter, iconSize * HELD_RING_SHARE, HELD_RING_ALPHA)
         drawImage(
             image = icon,
             dstOffset = IntOffset((center.x - iconSize / 2).roundToInt(), (center.y - radius * ICON_TOP_SHARE).roundToInt()),
@@ -332,18 +502,27 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
 }
 
 private fun DrawScope.drawTransitions(frames: List<TransitionFrame>, art: WorkspaceArt, radius: Float) {
-    frames.forEach { (transition, progress) ->
+    frames.forEach { frame ->
+        val (transition, progress) = frame
         val center = Offset(transition.xFraction * size.width, transition.yFraction * size.height)
         val fade = 1f - progress
         when (transition.kind) {
-            TransitionKind.APPEAR -> drawCentered(art.appearSparkles, center, radius * (1.8f + 1.2f * progress), fade)
+            // A flying element sparkles where it lands, once it has.
+            TransitionKind.APPEAR -> if (frame.origin == null || flightOf(progress) == null) {
+                val local = if (frame.origin == null) progress else ((progress - LANDED_AT) / (1f - LANDED_AT)).coerceIn(0f, 1f)
+                drawCentered(art.appearSparkles, center, radius * (1.8f + 1.2f * local), 1f - local)
+            }
+
             TransitionKind.VANISH -> drawCentered(art.smoke, center, radius * (1.4f + 1.4f * progress), fade * SMOKE_ALPHA)
+
+            TransitionKind.SWEEP -> drawCentered(art.smoke, center, radius * (1f + 0.6f * progress), fade * SWEEP_ALPHA)
+
             TransitionKind.SHAKE -> Unit
         }
     }
 }
 
-private fun DrawScope.drawEffect(effect: CombinationEffect, time: Float, art: WorkspaceArt, radius: Float) {
+private fun DrawScope.drawEffect(effect: CombinationEffect, time: Float, art: WorkspaceArt, radius: Float, rayPath: Path) {
     val progress = LinearOutSlowInEasing.transform(time)
     val center = Offset(effect.xFraction * size.width, effect.yFraction * size.height)
     val fade = 1f - progress
@@ -364,7 +543,7 @@ private fun DrawScope.drawEffect(effect: CombinationEffect, time: Float, art: Wo
         )
     }
     if (effect.isDiscovery) {
-        drawDiscovery(effect.rarity, center, time, art, radius)
+        drawDiscovery(effect.rarity, center, time, art, radius, rayPath)
     } else {
         drawCentered(art.energyRing, center, radius * (1.4f + 2.2f * progress), fade)
     }
@@ -372,10 +551,17 @@ private fun DrawScope.drawEffect(effect: CombinationEffect, time: Float, art: Wo
 }
 
 // A first discovery grows with its rarity: rare adds a shockwave, epic a purple aura, legendary a golden one with turning stars.
-private fun DrawScope.drawDiscovery(rarity: ElementRarity, center: Offset, time: Float, art: WorkspaceArt, radius: Float) {
+private fun DrawScope.drawDiscovery(rarity: ElementRarity, center: Offset, time: Float, art: WorkspaceArt, radius: Float, rayPath: Path) {
     val progress = LinearOutSlowInEasing.transform(time)
     val fade = 1f - progress
     val grand = rarity == ElementRarity.EPIC || rarity == ElementRarity.LEGENDARY
+    // The whole workspace lights up for a moment, then the light gathers into rays around the find.
+    if (grand) {
+        val flash = (1f - time / GRAND_FLASH_SPAN).coerceIn(0f, 1f)
+        drawGlow(center, maxOf(size.width, size.height) * 1.2f, rarity.glowColor, GRAND_FLASH_ALPHA * flash * flash)
+    }
+    val raysIn = (time / MERGE_SPAN).coerceIn(0f, 1f)
+    drawRays(center, radius * RAY_LENGTH_SHARE * (0.5f + 0.5f * raysIn), RAY_COUNT, RAY_TURN * time, rarity.glowColor, RAY_ALPHA * raysIn * fade, rayPath)
     if (grand) {
         val orb = if (rarity == ElementRarity.EPIC) art.purpleOrb else art.goldOrb
         drawCentered(orb, center, radius * (2.2f + progress), fade * AURA_ALPHA)
@@ -399,27 +585,89 @@ private fun easeOutBack(t: Float): Float {
     return 1f + (c1 + 1f) * x * x * x + c1 * x * x
 }
 
+/** A colour matrix that turns every colour into [red], [green], [blue] scaled by its brightness and [boost], keeping alpha. */
+private fun goldFromLuminance(red: Float, green: Float, blue: Float, boost: Float): ColorMatrix {
+    val lr = 0.3f * boost
+    val lg = 0.59f * boost
+    val lb = 0.11f * boost
+    return ColorMatrix(
+        floatArrayOf(
+            lr * red, lg * red, lb * red, 0f, 0f,
+            lr * green, lg * green, lb * green, 0f, 0f,
+            lr * blue, lg * blue, lb * blue, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+}
+
+// Starts gently and arrives gently, so the icon is seen leaving its tile instead of already being half way.
+private fun easeInOut(t: Float): Float = t.coerceIn(0f, 1f).let { it * it * (3f - 2f * it) }
+
 private fun easeOutCubic(t: Float): Float = 1f - (1f - t.coerceIn(0f, 1f)).let { it * it * it }
 
 private fun easeInCubic(t: Float): Float = t * t * t
 
-/** The magic circle as a faint watermark in the middle of the workspace. */
-private fun DrawScope.drawWatermark(magicCircle: ImageBitmap) {
-    drawCentered(magicCircle, center, minOf(size.width, size.height) * WATERMARK_SIZE_FRACTION, WATERMARK_ALPHA)
+/** The magic circle as a faint watermark in the middle of the workspace, slowly turning and breathing; [flare] brightens it. */
+private fun DrawScope.drawWatermark(magicCircle: ImageBitmap, seconds: Float, flare: Float) {
+    val alpha = WATERMARK_ALPHA + CIRCLE_BREATH_ALPHA * sin(seconds * CIRCLE_BREATH_SPEED) + flare
+    withTransform({ rotate(seconds * CIRCLE_TURN_DEGREES_PER_SECOND, center) }) {
+        drawCentered(magicCircle, center, minOf(size.width, size.height) * WATERMARK_SIZE_FRACTION, alpha)
+    }
 }
 
-private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float) {
+private fun DrawScope.drawCentered(image: ImageBitmap, center: Offset, width: Float, alpha: Float, colorFilter: ColorFilter? = null) {
     val height = width * image.height / image.width
     drawImage(
         image = image,
         dstOffset = IntOffset((center.x - width / 2).roundToInt(), (center.y - height / 2).roundToInt()),
         dstSize = IntSize(width.roundToInt(), height.roundToInt()),
         alpha = alpha.coerceIn(0f, 1f),
+        colorFilter = colorFilter,
         filterQuality = FilterQuality.Medium
     )
 }
 
 private fun normalize(position: Offset, width: Int, height: Int): Offset = Offset(position.x / width, position.y / height)
+
+/**
+ * Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and its name,
+ * [labelHalfWidth] pixels either side of the centre, clear the edges.
+ */
+internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    val side = (maxOf(radius * REST_SIDE, labelHalfWidth + radius * LABEL_EDGE_GAP) / width).coerceAtMost(HALF)
+    val top = (radius * REST_TOP / height).coerceAtMost(HALF)
+    val bottom = (radius * REST_BOTTOM / height).coerceAtMost(HALF)
+    return Offset(position.x.coerceIn(side, 1f - side), position.y.coerceIn(top, 1f - bottom))
+}
+
+/**
+ * Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace, possibly
+ * over the frame), in workspace fractions; [labelHalfWidth] is half its name's width.
+ */
+internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    val center = Offset(iconCenter.x, iconCenter.y + radius * ICON_TOP_SHARE - radius * ICON_SHARE)
+    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth)
+}
+
+/**
+ * How far along its flight from the palette an element tapped in is, eased, at this point of its appear transition;
+ * null once it has landed.
+ */
+internal fun flightOf(progress: Float): Float? = (progress * FLY_IN_SPEED).takeIf { it < 1f }?.let(::easeInOut)
+
+/** The centre of an element's icon at these workspace fractions, in workspace pixels. */
+internal fun iconCenterAt(xFraction: Float, yFraction: Float, width: Float, height: Float): Offset {
+    val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
+    return iconCenterOf(Offset(xFraction * width, yFraction * height), radius, radius * 2 * ICON_SHARE)
+}
+
+/** The side of an element's icon on a workspace of this size, in pixels. */
+internal fun workspaceIconSize(width: Float, height: Float): Float = minOf(width, height) * ITEM_RADIUS_FRACTION * 2 * ICON_SHARE
+
+/** The size of an element's name on a workspace of this size, in pixels. */
+internal fun workspaceLabelSize(width: Float, height: Float): Float = minOf(width, height) * LABEL_SIZE_FRACTION
 
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x
@@ -430,3 +678,67 @@ private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float,
 private fun itemRadiusSquared(width: Int, height: Int): Float = minOf(width, height).let { it * ITEM_RADIUS_FRACTION }.let { it * it }
 
 private const val LABEL_WEIGHT = 700
+private const val HALF = 0.5f
+private const val NANOS_PER_SECOND = 1_000_000_000f
+
+// A long pause (the app in the background, a dropped frame) moves sparks at most this far in one step.
+private const val MAX_FRAME_STEP = 0.05f
+
+// Neighbouring items float out of step with each other.
+private const val BEAT_SPREAD = 7L
+private const val BEAT_STEP = 0.9f
+
+/** What lives on the workspace between the game's events: its sparks, motes and the reusable ray geometry. */
+private class WorkspaceFx {
+    val sparks = Sparks()
+    val motes = Motes()
+    val rayPath = Path()
+
+    // Refusals and removals already given their sparks, so a transition throws them once.
+    private var sparked = emptySet<Pair<Long, TransitionKind>>()
+
+    /** The sparks of a mix: more, faster and longer-lived the rarer its result, and always more for a discovery. */
+    fun burst(effect: CombinationEffect, center: Offset, radius: Float) {
+        val colors = effect.rarity.sparkColors
+        if (!effect.isDiscovery) {
+            sparks.burst(center, radius, count = 14, speed = 5f, colors = colors, life = 0.55f)
+            return
+        }
+        val tier = effect.rarity.ordinal
+        sparks.burst(center, radius, count = 22 + tier * 8, speed = 6.5f + tier, colors = colors, life = 0.8f + tier * 0.1f, gravity = 1.2f)
+        if (effect.rarity >= ElementRarity.EPIC) {
+            // A second, slower cloud that hangs in the air like dust.
+            sparks.burst(center, radius, count = 30, speed = 2.5f, colors = colors, life = 1.4f, gravity = -0.3f)
+        }
+    }
+
+    /** The motes behind the items, and the sparks for any refusal or removal that has just begun. */
+    fun drawAmbience(scope: DrawScope, frames: List<TransitionFrame>, seconds: Float, radius: Float) {
+        motes.draw(scope, seconds, radius)
+        emitFor(frames, scope.size, radius)
+    }
+
+    /** The sparks over the items, fed by a trail behind the element in hand, which glows in its rarity's colour. */
+    fun drawSparks(scope: DrawScope, held: WorkspaceItem?, radius: Float) {
+        val trail = held?.let { Offset(it.xFraction * scope.size.width, it.yFraction * scope.size.height) }
+        val color = held?.let { AlchemyCatalog.rarityById.getValue(it.elementId).glowColor } ?: SparkBlue
+        sparks.trail(trail?.let { iconCenterOf(it, radius, radius * 2 * ICON_SHARE) }, radius, color)
+        sparks.draw(scope)
+    }
+
+    /** Throws a fizzle of dull sparks when a mix is refused and a puff of embers when an item is swept away. */
+    private fun emitFor(frames: List<TransitionFrame>, size: Size, radius: Float) {
+        val current = frames.mapTo(HashSet()) { it.transition.instanceId to it.transition.kind }
+        frames.forEach { frame ->
+            val transition = frame.transition
+            if ((transition.instanceId to transition.kind) in sparked) return@forEach
+            val at = Offset(transition.xFraction * size.width, transition.yFraction * size.height)
+            when (transition.kind) {
+                TransitionKind.SHAKE -> sparks.burst(iconCenterOf(at, radius, radius * 2 * ICON_SHARE), radius, count = 12, speed = 4f, colors = NoMatchColors, life = 0.55f, gravity = 3f)
+                TransitionKind.VANISH -> sparks.burst(at, radius, count = 9, speed = 2.2f, colors = EmberColors, life = 0.7f, gravity = -1.5f)
+                TransitionKind.APPEAR, TransitionKind.SWEEP -> Unit
+            }
+        }
+        sparked = current
+    }
+}

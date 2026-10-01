@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.components.WholeWordsAutoSize
+import com.artt.alchemy.ui.components.shimmer
 
 private val TitleGradient = Brush.verticalGradient(listOf(Color(0xFFFFEFB8), Color(0xFFF3C35B), Color(0xFFD08A26)))
 private val TitleShadowOffset = Offset(0f, 3f)
@@ -48,7 +49,9 @@ fun GameTitle(modifier: Modifier = Modifier) {
                     lineHeight = TITLE_SIZE
                 ),
                 maxLines = 1,
-                autoSize = WholeWordsAutoSize(min = TITLE_MIN_SIZE, max = TITLE_SIZE)
+                autoSize = WholeWordsAutoSize(min = TITLE_MIN_SIZE, max = TITLE_SIZE),
+                // Now and then a gleam runs across the gold, as over polished metal.
+                modifier = Modifier.shimmer()
             )
             Text(
                 text = stringResource(R.string.app_tagline),

@@ -2,15 +2,18 @@ package com.artt.alchemy.ui
 
 import android.app.Application
 import android.net.Uri
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.artt.alchemy.audio.BackgroundMusic
+import com.artt.alchemy.audio.ComboStreak
 import com.artt.alchemy.audio.Haptic
 import com.artt.alchemy.audio.Haptics
 import com.artt.alchemy.audio.Sound
 import com.artt.alchemy.audio.SoundEffects
+import com.artt.alchemy.audio.panAt
 import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
@@ -31,7 +34,12 @@ import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
 
-const val TIP_COUNT = 3
+private const val CENTER = 0.5f
+
+// How long the music stays lowered under each big moment.
+private const val DISCOVER_DUCK_MILLIS = 1300L
+private const val GRAND_DUCK_MILLIS = 2600L
+private const val ACHIEVEMENT_DUCK_MILLIS = 2000L
 
 enum class AppTab {
     HOME,
@@ -56,22 +64,22 @@ data class AlchemyUiState(
     val progress: PlayerProgress,
     val workspace: WorkspaceState = WorkspaceState(),
     val selectedTab: AppTab = AppTab.HOME,
-    val newlyUnlockedId: String? = null,
     val combinationEffect: CombinationEffect? = null,
     val itemTransitions: List<ItemTransition> = emptyList(),
     val isResetConfirmationVisible: Boolean = false,
-    // Ids of achievements earned and not yet announced; the first one is on screen.
-    val achievementQueue: List<String> = emptyList(),
+    // Discovery cards, the finished collection and achievement banners waiting their turn; the first one is on stage.
+    val reveals: List<Reveal> = emptyList(),
     // Elements found this session that the catalog has not shown yet.
     val freshElementIds: Set<String> = emptySet(),
-    // The finished-collection card: raised by the mix that opens the last element, or from the achievements screen.
-    val isCompletionVisible: Boolean = false,
     // A save read from a file, waiting for the player to agree to replace the current progress.
     val pendingImport: PlayerProgress? = null,
     val transferResult: TransferResult? = null,
     // The first-run tip on screen while the progress has not marked them seen.
     val tipStep: Int = 0
-)
+) {
+    /** The reveal on stage now, if any. */
+    val reveal: Reveal? get() = reveals.firstOrNull()
+}
 
 /** How saving progress to a file or loading it from one ended, shown to the player once. */
 enum class TransferResult {
@@ -93,12 +101,19 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     private val sounds = SoundEffects(application)
     private val haptics = Haptics(application)
     private val music = BackgroundMusic(application)
+    private val streak = ComboStreak()
 
     init {
         applyVolumes()
     }
 
-    fun onWorkspaceEvent(event: WorkspaceEvent) {
+    fun onWorkspaceEvent(requested: WorkspaceEvent) {
+        // While a tip sits on the workspace, elements placed automatically land clear of it.
+        val event = if (requested is WorkspaceEvent.SpawnAutomatically && !state.progress.onboardingSeen && state.tipStep > 0) {
+            requested.copy(keepClear = tipHalf(state.workspace.items))
+        } else {
+            requested
+        }
         val result = reduce(state.workspace, event, engine)
         val progress = if (result.attemptedMix) state.progress.recordAttempt(result.combination) else state.progress
         val newlyUnlockedId = result.combination?.resultId?.takeUnless(state.progress.unlockedIds::contains)
@@ -118,19 +133,27 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         }
 
         val transitions = itemTransitions(state.workspace, result, event)
-        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let(::play)
+        // Heard from where it happened: the mix, or the item that came, went or was refused.
+        val where = effect?.xFraction ?: transitions.firstOrNull()?.xFraction ?: CENTER
+        workspaceFeedback(event, state.workspace, result, discovered = newlyUnlockedId?.let(AlchemyCatalog.rarityById::getValue))?.let { play(it, where) }
 
-        if (progress != state.progress) store.save(progress)
+        // The tips follow what the player does; after the last one they are done for good.
+        val tipStep = if (progress.onboardingSeen) state.tipStep else tipAfter(state.tipStep, event, state.workspace, result)
+        val onboarded = if (tipStep >= TIP_COUNT) progress.copy(onboardingSeen = true) else progress
+        val reveals = listOfNotNull(newlyUnlockedId?.let(Reveal::Discovery)) +
+            listOfNotNull(Reveal.Completion.takeIf { progress.isComplete && !state.progress.isComplete }) +
+            newlyCompletedAchievements(state.progress, progress).map(Reveal::Achievement)
+
+        if (onboarded != state.progress) store.save(onboarded)
         state = state.copy(
             combinationEffect = effect ?: state.combinationEffect,
             // Transitions pile up until Home takes them, so none is lost between frames.
             itemTransitions = if (transitions.isEmpty()) state.itemTransitions else state.itemTransitions + transitions,
-            progress = progress,
+            progress = onboarded,
             workspace = result.workspace,
-            newlyUnlockedId = newlyUnlockedId ?: state.newlyUnlockedId,
             freshElementIds = newlyUnlockedId?.let { state.freshElementIds + it } ?: state.freshElementIds,
-            achievementQueue = state.achievementQueue + newlyCompletedAchievements(state.progress, progress),
-            isCompletionVisible = state.isCompletionVisible || (progress.isComplete && !state.progress.isComplete)
+            reveals = state.reveals.enqueue(reveals),
+            tipStep = tipStep.coerceAtMost(TIP_COUNT - 1)
         )
     }
 
@@ -141,7 +164,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** Asks for a hint, or for the next step of the one already shown. */
     fun requestHint() {
-        playSound(Sound.CLICK)
+        playSound(Sound.HINT)
         updateProgress { requestHint() }
     }
 
@@ -177,6 +200,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** An element was taken in hand, from the palette or on the workspace. */
     fun onPickUp() {
+        playSound(Sound.PICKUP)
         vibrate(Haptic.TICK)
     }
 
@@ -186,27 +210,22 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** The achievement banner came on screen: the reward chime and a tap. */
     fun onAchievementShown() {
-        playSound(Sound.DISCOVER)
-        vibrate(Haptic.CLICK)
+        playSound(Sound.ACHIEVEMENT)
+        vibrate(Haptic.ACHIEVEMENT)
+        music.duck(ACHIEVEMENT_DUCK_MILLIS)
     }
 
-    fun dismissAchievement() {
-        state = state.copy(achievementQueue = state.achievementQueue.drop(1))
+    fun dismissAchievement(id: String) {
+        dismiss(Reveal.Achievement(id))
     }
 
     fun showCompletion() {
         playSound(Sound.CLICK)
-        state = state.copy(isCompletionVisible = true)
+        state = state.copy(reveals = state.reveals.enqueue(listOf(Reveal.Completion)))
     }
 
     fun dismissCompletion() {
-        state = state.copy(isCompletionVisible = false)
-    }
-
-    /** Moves to the next first-run tip; after the last one the tips are done. */
-    fun nextTip() {
-        playSound(Sound.CLICK)
-        if (state.tipStep >= TIP_COUNT - 1) skipTips() else state = state.copy(tipStep = state.tipStep + 1)
+        dismiss(Reveal.Completion)
     }
 
     fun skipTips() {
@@ -224,8 +243,12 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         if (state.freshElementIds.isNotEmpty()) state = state.copy(freshElementIds = emptySet())
     }
 
-    fun dismissNewElement() {
-        state = state.copy(newlyUnlockedId = null)
+    fun dismissNewElement(elementId: String) {
+        dismiss(Reveal.Discovery(elementId))
+    }
+
+    private fun dismiss(reveal: Reveal) {
+        state = state.copy(reveals = state.reveals - reveal)
     }
 
     fun requestReset() {
@@ -337,17 +360,39 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         music.release()
     }
 
-    private fun play(feedback: GameFeedback) {
-        val (sound, haptic) = when (feedback) {
-            GameFeedback.PLACE -> Sound.PLACE to Haptic.TICK
-            GameFeedback.COMBINE -> Sound.COMBINE to Haptic.CLICK
-            GameFeedback.DISCOVER -> Sound.DISCOVER to Haptic.DOUBLE
-            GameFeedback.DISCOVER_GRAND -> Sound.DISCOVER to Haptic.HEAVY
-            GameFeedback.NO_MATCH -> Sound.NO_MATCH to Haptic.TICK
-            GameFeedback.REMOVE -> Sound.REMOVE to Haptic.TICK
-            GameFeedback.CLEAR -> Sound.REMOVE to Haptic.CLICK
+    private fun play(feedback: GameFeedback, xFraction: Float) {
+        val pan = panAt(xFraction)
+        when (feedback) {
+            GameFeedback.PLACE -> feedback(Sound.PLACE, Haptic.TICK, pan)
+
+            // Mixes in quick succession climb in pitch, so a good run sounds like one.
+            GameFeedback.COMBINE -> feedback(Sound.COMBINE, Haptic.CLICK, pan, streak.hit(SystemClock.uptimeMillis()))
+
+            GameFeedback.DISCOVER -> {
+                streak.hit(SystemClock.uptimeMillis())
+                feedback(Sound.DISCOVER, Haptic.DISCOVER, pan)
+                music.duck(DISCOVER_DUCK_MILLIS)
+            }
+
+            GameFeedback.DISCOVER_GRAND -> {
+                streak.hit(SystemClock.uptimeMillis())
+                feedback(Sound.DISCOVER_GRAND, Haptic.DISCOVER_GRAND, pan)
+                music.duck(GRAND_DUCK_MILLIS)
+            }
+
+            GameFeedback.NO_MATCH -> {
+                streak.reset()
+                feedback(Sound.NO_MATCH, Haptic.TICK, pan)
+            }
+
+            GameFeedback.REMOVE -> feedback(Sound.REMOVE, Haptic.TICK, pan)
+
+            GameFeedback.CLEAR -> feedback(Sound.WHOOSH, Haptic.CLICK, 0f)
         }
-        sound?.let(::playSound)
+    }
+
+    private fun feedback(sound: Sound, haptic: Haptic, pan: Float, semitones: Int = 0) {
+        if (state.progress.soundEnabled) sounds.play(sound, pan, semitones.toFloat())
         vibrate(haptic)
     }
 
