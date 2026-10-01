@@ -38,9 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
@@ -102,7 +102,9 @@ private const val TARGET_GLOW_SHARE = 1.4f
 private const val TARGET_GLOW_ALPHA = 0.9f
 private const val TARGET_SCALE = 0.08f
 private val TargetGlow = Color(0xFFFFD98A)
-private val TargetRingTint = ColorFilter.tint(Color(0xFFFFCF5C), BlendMode.SrcIn)
+
+// Recolours the ring by its brightness, so it keeps its shape (a flat tint would turn it into a blob).
+private val TargetRingTint = ColorFilter.colorMatrix(goldFromLuminance(red = 1f, green = 0.8f, blue = 0.36f, boost = 1.7f))
 
 // A tapped element flies in from its palette tile at about the tile's size; a dropped one only settles.
 internal const val FLY_START_SCALE = 0.8f
@@ -114,7 +116,7 @@ private const val REST_SIDE = 0.7f
 private const val REST_TOP = 0.9f
 private const val REST_BOTTOM = 0.95f
 private const val LABEL_EDGE_GAP = 0.1f
-private const val FLY_IN_SPEED = 1.5f
+private const val FLY_IN_SPEED = 1.4f
 private const val LANDED_AT = 1f / FLY_IN_SPEED
 private const val SHAKE_WAVES = 3f
 private const val SHAKE_AMPLITUDE_SHARE = 0.22f
@@ -155,7 +157,7 @@ private const val GRAND_FLASH_SPAN = 0.3f
 private const val GRAND_FLASH_ALPHA = 0.55f
 
 // Dull and a little rosy: plainly not the light of a mix.
-private val NoMatchColors = listOf(Color(0xFFB98A9E), Color(0xFFD9BCC8), Color(0xFF8A7398))
+private val NoMatchColors = listOf(Color(0xFFFF5C7C), Color(0xFFE0507A), Color(0xFFB8509A))
 private val EmberColors = listOf(Color(0xFFB9BEDD), Color(0xFFFFB27A), Color(0xFF8A90B8))
 private val SparkBlue = Color(0xFF8FB8FF)
 
@@ -582,6 +584,24 @@ private fun easeOutBack(t: Float): Float {
     return 1f + (c1 + 1f) * x * x * x + c1 * x * x
 }
 
+/** A colour matrix that turns every colour into [red], [green], [blue] scaled by its brightness and [boost], keeping alpha. */
+private fun goldFromLuminance(red: Float, green: Float, blue: Float, boost: Float): ColorMatrix {
+    val lr = 0.3f * boost
+    val lg = 0.59f * boost
+    val lb = 0.11f * boost
+    return ColorMatrix(
+        floatArrayOf(
+            lr * red, lg * red, lb * red, 0f, 0f,
+            lr * green, lg * green, lb * green, 0f, 0f,
+            lr * blue, lg * blue, lb * blue, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+}
+
+// Starts gently and arrives gently, so the icon is seen leaving its tile instead of already being half way.
+private fun easeInOut(t: Float): Float = t.coerceIn(0f, 1f).let { it * it * (3f - 2f * it) }
+
 private fun easeOutCubic(t: Float): Float = 1f - (1f - t.coerceIn(0f, 1f)).let { it * it * it }
 
 private fun easeInCubic(t: Float): Float = t * t * t
@@ -634,7 +654,7 @@ internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, label
  * How far along its flight from the palette an element tapped in is, eased, at this point of its appear transition;
  * null once it has landed.
  */
-internal fun flightOf(progress: Float): Float? = (progress * FLY_IN_SPEED).takeIf { it < 1f }?.let(::easeOutCubic)
+internal fun flightOf(progress: Float): Float? = (progress * FLY_IN_SPEED).takeIf { it < 1f }?.let(::easeInOut)
 
 /** The centre of an element's icon at these workspace fractions, in workspace pixels. */
 internal fun iconCenterAt(xFraction: Float, yFraction: Float, width: Float, height: Float): Offset {

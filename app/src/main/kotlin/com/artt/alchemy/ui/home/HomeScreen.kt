@@ -139,7 +139,9 @@ private const val DISCOVERY_CARD_AFTER_EFFECT = 0.3f
 
 // An epic or legendary find holds the stage a little longer before its card comes up.
 private const val GRAND_CARD_AFTER_EFFECT = 0.6f
-private const val TRANSITION_DURATION_MILLIS = 450L
+
+// Long enough for a tapped element to fly from its tile across the screen and then sparkle where it lands.
+private const val TRANSITION_DURATION_MILLIS = 650L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
 private const val DRAGGED_TILE_ALPHA = 0.4f
 private const val DRAGGED_TILE_FADE_MILLIS = 120

@@ -3,13 +3,21 @@ package com.artt.alchemy.ui.home
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.lerp
 import com.artt.alchemy.game.ElementRarity
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -244,12 +252,33 @@ internal fun DrawScope.drawRays(center: Offset, length: Float, count: Int, turn:
 /** A soft round glow of [color] around [center], brightest in the middle. */
 internal fun DrawScope.drawGlow(center: Offset, radius: Float, color: Color, alpha: Float) {
     if (alpha <= 0f || radius <= 0f) return
-    val brush = Brush.radialGradient(
-        0f to color.copy(alpha = alpha.coerceIn(0f, 1f)),
-        0.5f to color.copy(alpha = alpha.coerceIn(0f, 1f) * 0.3f),
-        1f to color.copy(alpha = 0f),
-        center = center,
-        radius = radius
+    // One white glow drawn once and tinted per use: a gradient shader per glow per frame was the costliest thing here.
+    val side = (radius * 2).roundToInt()
+    drawImage(
+        image = GlowSprite,
+        dstOffset = IntOffset((center.x - radius).roundToInt(), (center.y - radius).roundToInt()),
+        dstSize = IntSize(side, side),
+        alpha = alpha.coerceIn(0f, 1f),
+        colorFilter = ColorFilter.tint(color),
+        blendMode = BlendMode.Plus
     )
-    drawCircle(brush, radius, center, blendMode = BlendMode.Plus)
+}
+
+private const val GLOW_SPRITE_SIZE = 128
+private const val GLOW_MIDDLE_ALPHA = 0.3f
+
+// Brightest in the middle, a third of that halfway out, nothing at the edge.
+private val GlowSprite: ImageBitmap by lazy {
+    val bitmap = ImageBitmap(GLOW_SPRITE_SIZE, GLOW_SPRITE_SIZE)
+    val middle = Offset(GLOW_SPRITE_SIZE / 2f, GLOW_SPRITE_SIZE / 2f)
+    val paint = Paint().apply {
+        shader = RadialGradientShader(
+            center = middle,
+            radius = GLOW_SPRITE_SIZE / 2f,
+            colors = listOf(Color.White, Color.White.copy(alpha = GLOW_MIDDLE_ALPHA), Color.Transparent),
+            colorStops = listOf(0f, 0.5f, 1f)
+        )
+    }
+    Canvas(bitmap).drawCircle(middle, GLOW_SPRITE_SIZE / 2f, paint)
+    bitmap
 }
