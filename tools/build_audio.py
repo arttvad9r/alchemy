@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Put the sounds used by the app from assets/audio into app/src/main/res/raw.
 
-The Stable Audio files are already cut, looped and encoded as picked, and the procedural ones come
-out of tools/build_procedural_audio.py ready to use, so both are copied as is;
+The Stable Audio files are already cut, levelled, looped and encoded as picked, so they are copied as is;
 the Kenney effect becomes mono Ogg Vorbis with a soft onset. Sources and licenses are listed in
 assets/audio/README.md.
 
@@ -25,11 +24,11 @@ COPIED = {
     "stable-audio/click.ogg": "sfx_click",
     "stable-audio/page.ogg": "sfx_page",
     "stable-audio/music.ogg": "music_background",
-    "procedural/pickup.ogg": "sfx_pickup",
-    "procedural/whoosh.ogg": "sfx_whoosh",
-    "procedural/hint.ogg": "sfx_hint",
-    "procedural/achievement.ogg": "sfx_achievement",
-    "procedural/discover_grand.ogg": "sfx_discover_grand",
+    "stable-audio/pickup.ogg": "sfx_pickup",
+    "stable-audio/whoosh.ogg": "sfx_whoosh",
+    "stable-audio/hint.ogg": "sfx_hint",
+    "stable-audio/achievement.ogg": "sfx_achievement",
+    "stable-audio/discover_grand.ogg": "sfx_discover_grand",
 }
 
 # Heard on every repeat combination, so it gets a soft onset and no bright top and never clicks.

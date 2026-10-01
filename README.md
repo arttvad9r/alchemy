@@ -57,6 +57,6 @@ ALCHEMY_RELEASE_KEY_PASSWORD=...
 Код и графика распространяются под лицензией [MIT](LICENSE).
 
 - Графика (иллюстрации элементов, фоны, интерфейс) сгенерирована с помощью ChatGPT.
-- Звуковые эффекты и музыка сгенерированы моделью Stable Audio 3 (Stability AI); один эффект — от [Kenney](https://kenney.nl), CC0; пять эффектов синтезированы скриптом `tools/build_procedural_audio.py`.
+- Звуковые эффекты и музыка сгенерированы моделью Stable Audio 3 (Stability AI); один эффект — от [Kenney](https://kenney.nl), CC0.
 
 Подробности о звуках — в [assets/audio/README.md](assets/audio/README.md).
