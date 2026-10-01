@@ -36,6 +36,7 @@ class RecipesPaletteTest {
         original = store.load()
         store.save(initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam")).copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
     }
 
     @After

@@ -43,6 +43,7 @@ class SettingsTransferTest {
         original = store.load()
         store.save(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
         composeRule.onNodeWithTag("nav_settings").performClick()
     }
 

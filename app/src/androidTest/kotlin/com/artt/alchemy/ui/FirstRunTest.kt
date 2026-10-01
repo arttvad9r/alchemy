@@ -6,7 +6,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -136,9 +135,7 @@ class FirstRunTest {
     private fun launchWith(progress: PlayerProgress) {
         store.save(progress)
         scenario = ActivityScenario.launch(MainActivity::class.java)
-        composeRule.waitUntil(timeoutMillis = 10000) {
-            composeRule.onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty()
-        }
+        composeRule.waitForScene()
     }
 }
 

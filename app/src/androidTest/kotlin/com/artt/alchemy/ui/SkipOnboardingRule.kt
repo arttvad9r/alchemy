@@ -1,6 +1,7 @@
 package com.artt.alchemy.ui
 
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.data.ProgressStore
@@ -17,12 +18,13 @@ class SkipOnboardingRule : TestWatcher() {
     }
 }
 
+/** Waits out the studio intro: until the game's navigation bar is on screen, taps have nothing to land on. */
+fun ComposeTestRule.waitForScene() {
+    waitUntil(timeoutMillis = 10000) { onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty() }
+}
+
 fun skippingOnboarding(rule: AndroidComposeTestRule<*, *>): TestRule = RuleChain.outerRule(SkipOnboardingRule()).around(rule).around(
     object : TestWatcher() {
-        override fun starting(description: Description) {
-            rule.waitUntil(timeoutMillis = 10000) {
-                rule.onAllNodesWithTag("nav_home").fetchSemanticsNodes().isNotEmpty()
-            }
-        }
+        override fun starting(description: Description) = rule.waitForScene()
     }
 )

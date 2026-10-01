@@ -79,6 +79,7 @@ class ElementLinksScreenTest {
     private fun launchWith(progress: PlayerProgress) {
         store.save(progress.copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
     }
 
     private fun everythingOpen(): PlayerProgress = AlchemyCatalog.recipes.fold(initialPlayerProgress()) { progress, recipe ->

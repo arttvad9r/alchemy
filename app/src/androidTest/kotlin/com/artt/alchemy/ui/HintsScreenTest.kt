@@ -38,6 +38,7 @@ class HintsScreenTest {
         original = store.load()
         store.save(initialPlayerProgress().copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
     }
 
     @After

@@ -88,6 +88,7 @@ class CompletionScreenTest {
             )
         )
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
         return recipe
     }
 
