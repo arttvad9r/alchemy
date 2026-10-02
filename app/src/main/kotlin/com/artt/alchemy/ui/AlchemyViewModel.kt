@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.artt.alchemy.audio.BackgroundMusic
 import com.artt.alchemy.audio.ComboStreak
 import com.artt.alchemy.audio.Haptic
@@ -33,8 +34,15 @@ import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val CENTER = 0.5f
+private const val MAX_IMPORT_BYTES = 256 * 1024
 
 // How long the music stays lowered under each big moment.
 private const val DISCOVER_DUCK_MILLIS = 1300L
@@ -97,6 +105,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         private set
 
     private var combinationEffectCount = 0L
+    private var transferJob: Job? = null
 
     private val sounds = SoundEffects(application)
     private val haptics = Haptics(application)
@@ -268,18 +277,51 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
     /** Writes the progress as JSON to the document the player picked. */
     fun exportProgress(uri: Uri) {
-        val written = runCatching {
-            getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use { it.write(state.progress.toJson().toByteArray()) } != null
-        }.getOrDefault(false)
-        state = state.copy(transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+        val progress = state.progress
+        transferJob?.cancel()
+        transferJob = viewModelScope.launch {
+            val written = try {
+                withContext(Dispatchers.IO) {
+                    getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use {
+                        ensureActive()
+                        it.write(progress.toJson().toByteArray())
+                    } != null
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                false
+            }
+            state = state.copy(transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+        }
     }
 
     /** Reads a save from the picked document; a file that is not a save changes nothing, a good one waits for confirmation. */
     fun readImport(uri: Uri) {
-        val progress = runCatching {
-            getApplication<Application>().contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() }
-        }.getOrNull()?.let(::parsePlayerProgress)
-        state = if (progress == null) state.copy(transferResult = TransferResult.IMPORT_INVALID) else state.copy(pendingImport = progress)
+        transferJob?.cancel()
+        transferJob = viewModelScope.launch {
+            val progress = try {
+                withContext(Dispatchers.IO) {
+                    getApplication<Application>().contentResolver.openInputStream(uri)?.use { input ->
+                        // Read one byte beyond the limit to reject oversized documents without trusting provider metadata.
+                        val bytes = ByteArray(MAX_IMPORT_BYTES + 1)
+                        var count = 0
+                        while (count < bytes.size) {
+                            ensureActive()
+                            val read = input.read(bytes, count, bytes.size - count)
+                            if (read < 0) break
+                            count += read
+                        }
+                        if (count > MAX_IMPORT_BYTES) null else parsePlayerProgress(bytes.decodeToString(0, count))
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                null
+            }
+            state = if (progress == null) state.copy(transferResult = TransferResult.IMPORT_INVALID) else state.copy(pendingImport = progress)
+        }
     }
 
     fun dismissImport() {
@@ -299,6 +341,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun replaceProgress(progress: PlayerProgress) {
+        transferJob?.cancel()
         state = AlchemyUiState(progress = progress, selectedTab = AppTab.SETTINGS)
         applyVolumes()
         if (progress.musicEnabled) resumeMusic() else music.pause()
