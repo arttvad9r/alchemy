@@ -36,12 +36,12 @@ private const val TRAIL_LIFE = 0.3f
 private const val MOTES_FADE_IN_SECONDS = 1.5f
 
 // Ambient motes drifting up through the workspace.
-private const val MOTE_COUNT = 26
+private const val MOTE_COUNT = 20
 private const val MOTE_TRAVEL = 1.3f
 private const val MOTE_EDGE = 0.15f
 private const val MOTE_GLOW_SHARE = 5f
-private const val MOTE_GLOW_ALPHA = 0.55f
-private const val MOTE_CORE_ALPHA = 0.8f
+private const val MOTE_GLOW_ALPHA = 0.35f
+private const val MOTE_CORE_ALPHA = 0.65f
 private const val MOTE_CORE_SHARE = 0.55f
 
 // Rays are this share of the gap between them.
@@ -49,7 +49,6 @@ private const val RAY_WIDTH_SHARE = 0.34f
 
 private val SparkWhite = Color(0xFFFFFFFF)
 private val MoteGold = Color(0xFFFFD98A)
-private val MoteViolet = Color(0xFFC9A4FF)
 
 /** The glowing colour of a rarity in effects: brighter than its badge, so it reads as light on the dark workspace. */
 internal val ElementRarity.glowColor: Color
@@ -185,7 +184,7 @@ private class Mote(val x: Float, val start: Float, val speed: Float, val sway: F
 
 /** Specks of light drifting slowly up through the workspace and twinkling, always the same for the same time; [tint] is the theme's own speck. */
 class Motes(tint: Color) {
-    private val colors = listOf(MoteGold, MoteGold, tint, tint, MoteViolet)
+    private val colors = listOf(MoteGold, MoteGold, tint, tint)
     private val motes = Random(SEED).let { random ->
         List(MOTE_COUNT) {
             Mote(

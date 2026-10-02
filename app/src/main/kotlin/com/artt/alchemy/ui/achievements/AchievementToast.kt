@@ -96,6 +96,7 @@ fun AchievementToast(achievement: AchievementDefinition, onShown: () -> Unit, on
             .testTag("achievement_toast")
     ) {
         AchievementBadge(
+            iconRes = achievement.iconRes,
             completed = true,
             modifier = Modifier.graphicsLayer {
                 val scale = BADGE_START_SCALE + (1f - BADGE_START_SCALE) * badgeIn.value

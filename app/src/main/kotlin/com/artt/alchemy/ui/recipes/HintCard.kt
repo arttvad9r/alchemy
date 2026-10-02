@@ -48,7 +48,7 @@ fun HintCard(progress: PlayerProgress, onRequestHint: () -> Unit, onPlaceHint: (
                     .rowPanel()
                     .clip(RoundedCornerShape(ROW_CORNER))
                     .clickable(role = Role.Button, onClick = onRequestHint)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .padding(horizontal = 14.dp, vertical = 8.dp)
                     .testTag("hint_request")
             ) {
                 Image(painterResource(R.drawable.ic_hint), contentDescription = null, modifier = Modifier.size(BULB_SIZE))
@@ -69,7 +69,7 @@ fun HintCard(progress: PlayerProgress, onRequestHint: () -> Unit, onPlaceHint: (
             .fillMaxWidth()
             .rowPanel()
             .clip(RoundedCornerShape(ROW_CORNER))
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
             .testTag("hint_card")
     ) {
         Row(
@@ -116,7 +116,7 @@ private fun UnknownSlot() {
 }
 
 private val ROW_CORNER = 14.dp
-private val HINT_ICON_SIZE = 44.dp
-private val OPERATOR_SIZE = 22.dp
-private val BULB_SIZE = 32.dp
+private val HINT_ICON_SIZE = 40.dp
+private val OPERATOR_SIZE = 20.dp
+private val BULB_SIZE = 28.dp
 private val ICON_GAP = 6.dp

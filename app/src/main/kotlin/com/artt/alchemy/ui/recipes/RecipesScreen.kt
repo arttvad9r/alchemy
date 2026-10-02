@@ -111,8 +111,8 @@ fun RecipesScreen(
             }
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(vertical = 8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 itemsIndexed(recipes, key = { _, recipe -> recipeKey(recipe.firstId, recipe.secondId) }) { index, recipe ->
@@ -143,7 +143,7 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = 
             // Before the panel, so the whole row sinks under the finger, art and all.
             .pressClickable(role = Role.Button, pressedScale = ROW_PRESSED_SCALE, onClick = onClick)
             .rowPanel()
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 9.dp)
             .testTag("recipe_${recipeKey(recipe.firstId, recipe.secondId)}")
             .semantics(mergeDescendants = true) { contentDescription = "$firstName + $secondName = $resultName" }
     ) {
@@ -177,9 +177,9 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = 
 }
 
 private const val ROW_PRESSED_SCALE = 0.97f
-private val RECIPE_ICON_SIZE = 52.dp
-private val OPERATOR_ICON_SIZE = 22.dp
-private val RECIPE_ICON_MIN_SIZE = 38.dp
+private val RECIPE_ICON_SIZE = 46.dp
+private val OPERATOR_ICON_SIZE = 20.dp
+private val RECIPE_ICON_MIN_SIZE = 35.dp
 private val ROW_GAP = 6.dp
 private val NAMES_MIN_WIDTH = 116.dp
 private val NAME_MIN_SIZE = 10.sp

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -124,7 +123,8 @@ private const val PROGRESS_INSET_Y = 7f
 private val SEARCH_ICON_SPACE = 60.dp
 private val DROPDOWN_HEIGHT = 40.dp
 private val SLIDER_HEIGHT = 36.dp
-private const val SLIDER_TRACK_SHARE = 0.5f
+private val SLIDER_TRACK_HEIGHT = 12.dp
+private val SLIDER_KNOB_DIAMETER = 30.dp
 private val DROPDOWN_CHEVRON_SPACE = 34.dp
 
 private const val DIALOG_WIDTH_FRACTION = 0.9f
@@ -188,6 +188,7 @@ fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: M
 @Composable
 fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
     Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .size(width = 64.dp, height = 34.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
@@ -196,7 +197,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
             Image(
                 painter = painterResource(themedArt(if (on) R.drawable.toggle_on else R.drawable.toggle_off)),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.size(width = 60.dp, height = 32.dp)
             )
         }
     }
@@ -358,7 +359,7 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
     val shown by animateFloatAsState(target, motion(tween(PROGRESS_FILL_MILLIS)), label = "progressFill")
     Box(
         modifier = modifier
-            .height(16.dp)
+            .height(13.dp)
             .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) }
             .drawBehind {
                 val scale = size.height / track.height
@@ -408,19 +409,19 @@ fun AlchemySlider(
             }
             .pointerInput(Unit) {
                 detectTapGestures {
-                    currentChange(sliderValueAt(it.x, size.width.toFloat(), size.height / 2f))
+                    currentChange(sliderValueAt(it.x, size.width.toFloat(), SLIDER_KNOB_DIAMETER.toPx() / 2f))
                     currentFinished()
                 }
             }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(onDragEnd = { currentFinished() }, onDragCancel = { currentFinished() }) { change, _ ->
                     change.consume()
-                    currentChange(sliderValueAt(change.position.x, size.width.toFloat(), size.height / 2f))
+                    currentChange(sliderValueAt(change.position.x, size.width.toFloat(), SLIDER_KNOB_DIAMETER.toPx() / 2f))
                 }
             }
             .drawBehind {
-                val knobRadius = size.height / 2f
-                val trackHeight = size.height * SLIDER_TRACK_SHARE
+                val knobRadius = SLIDER_KNOB_DIAMETER.toPx() / 2f
+                val trackHeight = SLIDER_TRACK_HEIGHT.toPx()
                 val trackTop = (size.height - trackHeight) / 2f
                 val scale = trackHeight / track.height
                 drawSliced(track, CapSegments, WholeHeight, scale, topLeft = Offset(0f, trackTop), target = Size(size.width, trackHeight))
@@ -442,7 +443,7 @@ fun AlchemySlider(
                 val knobSize = (knobRadius * 2).roundToInt()
                 drawImage(
                     image = knob,
-                    dstOffset = IntOffset((knobCenterX - knobRadius).roundToInt(), 0),
+                    dstOffset = IntOffset((knobCenterX - knobRadius).roundToInt(), ((size.height - knobSize) / 2f).roundToInt()),
                     dstSize = IntSize(knobSize, knobSize),
                     filterQuality = FilterQuality.Medium
                 )

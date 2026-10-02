@@ -20,6 +20,23 @@ RES_DIR = ROOT / "app/src/main/res/drawable-nodpi"
 VISIBLE_ALPHA = 16
 WEBP_QUALITY = 86
 
+# Ordinary controls should read as surfaces, not as rewards. Their transparent bloom and brightest
+# blue highlights are restrained here so selected, rare and discovery states keep the strongest light.
+RESTRAINED_UI_ART = {
+    "btn_blue",
+    "dialog_blue",
+    "tab_active",
+    "tab_inactive",
+    "toggle_on",
+    "toggle_off",
+    "field_search",
+    "field_dropdown",
+    "field_row",
+    "frame_base",
+    "frame_common",
+    "banner_wide",
+}
+
 UI_ASSETS = {
     "backgrounds/bg_aether.png": ("bg_aether", 1672),
     "backgrounds/bg_ember.png": ("bg_ember", 1672),
@@ -92,7 +109,7 @@ CLOSE_WHITE_SATURATION = 0.35
 CARD = "ui/panels_states/card_base.png"
 # The card's silver trim, recoloured per rarity: (drawable, hue, saturation).
 CARD_RARITIES = (
-    ("card_common", 0.61, 0.75),
+    ("card_common", 0.61, 0.52),
     ("card_rare", 0.37, 0.6),
     ("card_epic", 0.75, 0.75),
     ("card_legendary", 0.115, 0.75),
@@ -245,6 +262,33 @@ def trimmed(source: Path) -> Image.Image:
     return image.crop(visible.getbbox())
 
 
+def restrained_ui_art(image: Image.Image, strength: float = 1.0) -> Image.Image:
+    """Reduce baked-in bloom and cyan glare while preserving the shape and opaque painted details."""
+    image = image.copy()
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            red, green, blue, alpha = pixels[x, y]
+            if alpha == 0:
+                continue
+
+            # Bloom lives mostly in the translucent fringe around the painted control.
+            if alpha < 220:
+                fringe = alpha / 220
+                alpha = round(alpha * (0.68 + 0.32 * fringe) ** strength)
+
+            hue, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+            if BLUE_HUE_RANGE[0] < hue * 360 < BLUE_HUE_RANGE[1] and saturation > BLUE_MIN_SATURATION:
+                saturation *= 1 - 0.16 * strength
+                bright_share = min(1.0, max(0.0, (lightness - 0.45) / 0.55))
+                lightness *= 1 - 0.07 * strength * bright_share
+                red_f, green_f, blue_f = colorsys.hls_to_rgb(hue, lightness, saturation)
+                red, green, blue = (round(channel * 255) for channel in (red_f, green_f, blue_f))
+
+            pixels[x, y] = (red, green, blue, alpha)
+    return image
+
+
 def convert(source: Path, name: str, max_side: int) -> None:
     image = trimmed(source)
     scale = min(1.0, max_side / max(image.size))
@@ -253,6 +297,8 @@ def convert(source: Path, name: str, max_side: int) -> None:
     if name in BACKGROUND_GRADES:
         colour, brightness = BACKGROUND_GRADES[name]
         image = ImageEnhance.Brightness(ImageEnhance.Color(image).enhance(colour)).enhance(brightness)
+    if name in RESTRAINED_UI_ART:
+        image = restrained_ui_art(image)
     image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
@@ -292,7 +338,7 @@ def convert_card_rarities() -> None:
                     if trim_saturation < CARD_TRIM_MAX_SATURATION and lightness > CARD_TRIM_MIN_LIGHTNESS:
                         r, g, b = colorsys.hls_to_rgb(hue, lightness * CARD_TRIM_LIGHTNESS, saturation)
                         pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
-            image.save(RES_DIR / f"{name}{suffix}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+            restrained_ui_art(image, 0.65).save(RES_DIR / f"{name}{suffix}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def convert_progress_bar() -> None:
@@ -305,13 +351,13 @@ def convert_progress_bar() -> None:
     track.paste(cap.transpose(Image.FLIP_LEFT_RIGHT), (0, 0))
     track.paste(middle.resize((width - 2 * PROGRESS_TRACK_CAP, height)), (PROGRESS_TRACK_CAP, 0))
     track.paste(cap, (width - PROGRESS_TRACK_CAP, 0))
-    track.save(RES_DIR / "progress_track.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    restrained_ui_art(track, 1.0).save(RES_DIR / "progress_track.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
     fill = bar.crop(PROGRESS_FILL_BOX)
     mask = Image.new("L", fill.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, fill.width - 1, fill.height - 1), radius=PROGRESS_FILL_RADIUS, fill=255)
     fill.putalpha(ImageChops.multiply(fill.getchannel("A"), mask))
-    fill.save(RES_DIR / "progress_fill.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    restrained_ui_art(fill, 0.8).save(RES_DIR / "progress_fill.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def convert_slider_knob() -> None:
@@ -326,7 +372,7 @@ def convert_slider_knob() -> None:
     mask = mask.filter(ImageFilter.GaussianBlur(SLIDER_KNOB_FEATHER / 2))
     knob.putalpha(ImageChops.multiply(knob.getchannel("A"), mask))
     knob = knob.resize((SLIDER_KNOB_SIZE, SLIDER_KNOB_SIZE), Image.LANCZOS)
-    knob.save(RES_DIR / "slider_knob.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    restrained_ui_art(knob, 1.0).save(RES_DIR / "slider_knob.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def main() -> None:

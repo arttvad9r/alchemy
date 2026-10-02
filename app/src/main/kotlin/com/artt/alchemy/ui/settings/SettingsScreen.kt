@@ -256,12 +256,13 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.panel, RoundedCornerShape(20.dp))
-            .border(1.dp, MaterialTheme.colorScheme.panelBorder, RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.panel, shape)
+            .border(1.dp, MaterialTheme.colorScheme.panelBorder, shape)
             .padding(16.dp),
         content = content
     )
