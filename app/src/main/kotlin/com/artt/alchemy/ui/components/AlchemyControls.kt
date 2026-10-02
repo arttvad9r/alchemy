@@ -122,7 +122,7 @@ private const val PROGRESS_INSET_Y = 7f
 
 private val SEARCH_ICON_SPACE = 60.dp
 private val DROPDOWN_HEIGHT = 40.dp
-private val SLIDER_HEIGHT = 44.dp
+private val SLIDER_HEIGHT = 36.dp
 private val SLIDER_TRACK_HEIGHT = 12.dp
 private val SLIDER_KNOB_DIAMETER = 30.dp
 private val DROPDOWN_CHEVRON_SPACE = 34.dp
@@ -190,7 +190,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(width = 64.dp, height = 48.dp)
+            .size(width = 64.dp, height = 34.dp)
             .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
     ) {
         Crossfade(targetState = checked, animationSpec = motion(tween(PRESS_MILLIS * 2)), label = "toggle") { on ->
