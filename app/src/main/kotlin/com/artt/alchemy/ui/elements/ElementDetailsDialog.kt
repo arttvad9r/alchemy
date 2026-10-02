@@ -117,6 +117,7 @@ fun ElementDetailsDialog(
             }
             val note = when {
                 allUses.isEmpty() -> stringResource(R.string.element_final_note)
+                ElementLinks.isExhausted(element.id, progress.unlockedIds) -> stringResource(R.string.element_exhausted_note)
                 allUses.size > knownUses.size -> pluralStringResource(R.plurals.element_unknown_combinations, allUses.size - knownUses.size, allUses.size - knownUses.size)
                 else -> null
             }

@@ -47,4 +47,19 @@ class ElementLinksTest {
         assertFalse("steam" in ElementLinks.finalElementIds)
         assertTrue(ElementLinks.finalElementIds.all { it !in ElementLinks.recipesByIngredient })
     }
+
+    @Test
+    fun an_element_is_exhausted_once_everything_it_makes_is_open() {
+        val base = AlchemyCatalog.baseElementIds
+        assertFalse("steam" in ElementLinks.exhaustedIds(base + "steam"))
+        assertTrue("steam" in ElementLinks.exhaustedIds(base + "steam" + "cloud"))
+    }
+
+    @Test
+    fun open_final_elements_are_exhausted_and_closed_elements_never_are() {
+        val open = AlchemyCatalog.baseElementIds + "steam"
+        assertTrue(ElementLinks.exhaustedIds(open).all { it in open })
+        val finalId = ElementLinks.finalElementIds.first()
+        assertTrue(finalId in ElementLinks.exhaustedIds(setOf(finalId)))
+    }
 }

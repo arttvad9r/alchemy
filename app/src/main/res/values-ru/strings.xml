@@ -100,6 +100,8 @@
     <string name="element_made_from">Получен из</string>
     <string name="element_used_in">Участвует в</string>
     <string name="element_final_note">Больше ни с чем не сочетается</string>
+    <string name="element_exhausted">Исчерпан</string>
+    <string name="element_exhausted_note">Всё, что из него получается, уже открыто</string>
     <plurals name="element_unknown_combinations">
         <item quantity="one">Ещё %d неизвестное сочетание</item>
         <item quantity="few">Ещё %d неизвестных сочетания</item>

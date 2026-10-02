@@ -100,6 +100,8 @@
     <string name="element_made_from">Made from</string>
     <string name="element_used_in">Used in</string>
     <string name="element_final_note">Does not combine with anything else</string>
+    <string name="element_exhausted">Used up</string>
+    <string name="element_exhausted_note">Everything it makes is already discovered</string>
     <plurals name="element_unknown_combinations">
         <item quantity="one">%d more unknown combination</item>
         <item quantity="other">%d more unknown combinations</item>
