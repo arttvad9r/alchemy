@@ -763,7 +763,23 @@ internal fun workspaceLabelSize(width: Float, height: Float, density: Density = 
 }
 
 /** Coordinates of a label baseline before the item's visual scale is applied. */
-internal fun workspaceLabelPosition(icon: Rect, label: Rect, board: Size, scale: Float = 1f, gap: Float = 0f): Offset = Offset(icon.center.x, icon.bottom - label.top)
+internal fun workspaceLabelPosition(icon: Rect, label: Rect, board: Size, scale: Float = 1f, gap: Float = 0f): Offset {
+    val pivot = icon.center
+    // Text is drawn inside the same scale transform as the icon; keep its transformed bounds on the board.
+    val bounds = Rect(
+        pivot.x - pivot.x / scale,
+        pivot.y - pivot.y / scale,
+        pivot.x + (board.width - pivot.x) / scale,
+        pivot.y + (board.height - pivot.y) / scale
+    )
+    val below = icon.bottom - label.top
+    val baseline = if (below + label.bottom <= bounds.bottom) below else icon.top - label.bottom - gap
+    val minX = (bounds.left - label.left).coerceAtMost(bounds.center.x)
+    val maxX = (bounds.right - label.right).coerceAtLeast(bounds.center.x)
+    val minY = (bounds.top - label.top).coerceAtMost(bounds.center.y)
+    val maxY = (bounds.bottom - label.bottom).coerceAtLeast(bounds.center.y)
+    return Offset(pivot.x.coerceIn(minX, maxX), baseline.coerceIn(minY, maxY))
+}
 
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x
