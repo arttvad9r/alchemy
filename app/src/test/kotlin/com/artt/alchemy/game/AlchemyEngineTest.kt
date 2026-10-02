@@ -9,11 +9,25 @@ class AlchemyEngineTest {
     private val engine = AlchemyEngine(AlchemyCatalog)
 
     @Test
-    fun catalog_has_180_unique_elements_and_176_unique_recipe_pairs() {
+    fun catalog_has_180_unique_elements_176_curated_recipes_and_unique_pairs() {
         assertEquals(180, AlchemyCatalog.elements.size)
         assertEquals(180, AlchemyCatalog.elements.map(ElementDefinition::id).toSet().size)
-        assertEquals(176, AlchemyCatalog.recipes.size)
-        assertEquals(176, AlchemyCatalog.recipes.map { recipeKey(it.firstId, it.secondId) }.toSet().size)
+        assertEquals(176, curatedRecipes().size)
+        assertEquals(AlchemyCatalog.recipes.size, AlchemyCatalog.recipes.map { recipeKey(it.firstId, it.secondId) }.toSet().size)
+    }
+
+    @Test
+    fun alternative_recipes_make_the_same_elements_as_curated_ones() {
+        assertEquals("stone", engine.combine("lava", "water"))
+        assertEquals("glass", engine.combine("sand", "lightning"))
+        assertEquals("wave", engine.combine("ocean", "moon"))
+    }
+
+    @Test
+    fun alternative_recipes_keep_every_rarity_and_never_make_an_ingredient_from_itself() {
+        val curated = recipeDepths(AlchemyCatalog.baseElementIds, curatedRecipes()).mapValues { (_, depth) -> rarityForDepth(depth) }
+        assertEquals(curated, AlchemyCatalog.rarityById)
+        assertTrue(AlchemyCatalog.recipes.none { it.resultId == it.firstId || it.resultId == it.secondId })
     }
 
     @Test

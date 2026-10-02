@@ -193,11 +193,11 @@ object AlchemyCatalog {
             check(baseElementIds.all(definitions::containsKey)) { "Base elements must exist" }
         }
 
-    val recipes: List<Recipe> = curatedRecipes()
+    val recipes: List<Recipe> = allRecipes()
 
     val recipeResultsByKey: Map<String, String> =
         recipes.associate { recipe -> recipeKey(recipe.firstId, recipe.secondId) to recipe.resultId }.also { results ->
-            check(recipes.size == 176) { "Catalog must contain exactly 176 recipes" }
+            check(curatedRecipes().size == 176) { "Catalog must contain exactly 176 curated recipes" }
             check(results.size == recipes.size) { "Recipe ingredient pairs must be unique" }
             check(
                 recipes.all { recipe ->
@@ -213,7 +213,10 @@ object AlchemyCatalog {
             check(depths.keys == elementsById.keys) { "Every element must be reachable from the base elements" }
         }
 
-    val rarityById: Map<String, ElementRarity> = depthById.mapValues { (_, depth) -> rarityForDepth(depth) }
+    val rarityById: Map<String, ElementRarity> = depthById.mapValues { (_, depth) -> rarityForDepth(depth) }.also { rarities ->
+        val curated = recipeDepths(baseElementIds, curatedRecipes()).mapValues { (_, depth) -> rarityForDepth(depth) }
+        check(rarities == curated) { "Alternative recipes must not change any element's rarity" }
+    }
 
     private fun element(id: String, group: ElementGroup, color: Long = group.color): ElementDefinition = ElementDefinition(id = id, group = group, color = color)
 }

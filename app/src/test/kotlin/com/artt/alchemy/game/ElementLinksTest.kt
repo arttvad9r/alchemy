@@ -7,8 +7,8 @@ import org.junit.Test
 
 class ElementLinksTest {
     @Test
-    fun exactly_77_elements_are_final() {
-        assertEquals(77, ElementLinks.finalElementIds.size)
+    fun exactly_39_elements_are_final() {
+        assertEquals(39, ElementLinks.finalElementIds.size)
     }
 
     @Test
@@ -17,9 +17,11 @@ class ElementLinksTest {
     }
 
     @Test
-    fun every_element_that_is_not_base_has_exactly_one_source_recipe() {
+    fun every_element_that_is_not_base_has_exactly_one_curated_recipe() {
+        val curatedByResult = curatedRecipes().groupBy(Recipe::resultId)
         AlchemyCatalog.elements.map(ElementDefinition::id).filterNot(AlchemyCatalog.baseElementIds::contains).forEach { id ->
-            assertEquals(id, 1, ElementLinks.recipesByResult[id].orEmpty().size)
+            assertEquals(id, 1, curatedByResult[id].orEmpty().size)
+            assertTrue(id, ElementLinks.recipesByResult.getValue(id).first() == curatedByResult.getValue(id).single())
         }
     }
 
