@@ -106,4 +106,8 @@
         <item quantity="many">Ещё %d неизвестных сочетаний</item>
         <item quantity="other">Ещё %d неизвестных сочетаний</item>
     </plurals>
+    <string name="workspace_mix">Смешать с другим элементом</string>
+    <string name="workspace_remove">Удалить элемент</string>
+    <string name="workspace_choose_partner">С чем смешать «%1$s»?</string>
+    <string name="workspace_no_partner">Добавьте ещё один элемент из палитры для смешивания.</string>
 </resources>

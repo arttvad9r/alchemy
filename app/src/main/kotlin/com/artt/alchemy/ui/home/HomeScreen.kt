@@ -265,6 +265,7 @@ fun HomeScreen(
                     items = state.workspace.items,
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
+                    onRemove = { id -> onEvent(WorkspaceEvent.Remove(id)) },
                     onPickUp = onPickUp,
                     onBoundsChanged = { workspaceBounds = it },
                     // A new effect is drawn from its first frame, before it is taken to play.

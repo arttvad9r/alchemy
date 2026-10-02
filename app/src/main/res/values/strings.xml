@@ -105,4 +105,8 @@
         <item quantity="other">%d more unknown combinations</item>
     </plurals>
     <string name="studio_intro_description" translatable="false">ARTT Studio</string>
+    <string name="workspace_mix">Mix with another element</string>
+    <string name="workspace_remove">Remove element</string>
+    <string name="workspace_choose_partner">Mix %1$s with:</string>
+    <string name="workspace_no_partner">Add another element from the palette to mix.</string>
 </resources>
