@@ -20,6 +20,14 @@ public final class TransferTestProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+        String marker = uri.getQueryParameter("marker");
+        if (marker != null) {
+            try (FileOutputStream output = new FileOutputStream(new File(getContext().getCacheDir(), marker))) {
+                output.write(1);
+            } catch (IOException error) {
+                throw new FileNotFoundException(error.getMessage());
+            }
+        }
         String delayMillis = uri.getQueryParameter("delayMillis");
         try {
             Thread.sleep(delayMillis == null ? 0L : Long.parseLong(delayMillis));

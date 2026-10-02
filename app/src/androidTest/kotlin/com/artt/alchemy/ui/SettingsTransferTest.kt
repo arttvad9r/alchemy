@@ -250,14 +250,18 @@ class SettingsTransferTest {
 
     @Test
     fun resettingWhileExportOpensTheDocumentStillWritesTheRequestedSnapshot() {
-        val uri = delayedDocument("export-before-reset-${SystemClock.elapsedRealtime()}.json")
+        val suffix = SystemClock.elapsedRealtime()
+        val marker = "export-opened-$suffix"
+        val uri = delayedDocument("export-before-reset-$suffix.json").buildUpon().appendQueryParameter("marker", marker).build()
         val expected = initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true)
         scenario.onActivity { activity ->
-            val model = ViewModelProvider(activity)[AlchemyViewModel::class.java]
-            model.exportProgress(uri)
-            model.confirmReset()
+            ViewModelProvider(activity)[AlchemyViewModel::class.java].exportProgress(uri)
         }
-
+        val markerUri = uri.buildUpon().clearQuery().path(marker).build()
+        composeRule.waitUntil(5_000) {
+            runCatching { context.contentResolver.openInputStream(markerUri)?.use { it.read() == 1 } }.getOrDefault(false) == true
+        }
+        scenario.onActivity { activity -> ViewModelProvider(activity)[AlchemyViewModel::class.java].confirmReset() }
         val immediateUri = uri.buildUpon().clearQuery().build()
         var exported: PlayerProgress? = null
         composeRule.waitUntil(5_000) {
