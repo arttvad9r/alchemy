@@ -113,6 +113,7 @@ private const val HELD_RING_SHARE = 1.45f
 
 // The ring around the element in hand stays faint, so the target it would mix with is what stands out.
 private const val HELD_RING_ALPHA = 0.4f
+private const val LEAVING_ALPHA = 0.35f
 private const val TARGET_PULSE_MILLIS = 550
 private const val LIFT_SCALE = 0.12f
 private const val LIFT_SHADOW_ALPHA = 0.35f
@@ -200,6 +201,11 @@ fun WorkspaceCanvas(
     val currentOnResolve by rememberUpdatedState(onResolve)
     val currentOnPickUp by rememberUpdatedState(onPickUp)
     var heldId by remember { mutableStateOf<Long?>(null) }
+    // Where the element in hand is while it is dragged, in workspace fractions on the board. The game hears of the move
+    // only when it is let go, so a drag redraws the canvas without recomposing the screen around it.
+    var heldAt by remember { mutableStateOf<Offset?>(null) }
+    // The finger has left the board: let go now, the element is taken away; brought back, it stays.
+    var heldOff by remember { mutableStateOf(false) }
     var selectedId by remember { mutableStateOf<Long?>(null) }
     val iconIds = (items.map(WorkspaceItem::elementId) + effect?.sources.orEmpty().map { it.elementId }).distinct()
     val icons = iconIds.associateWith { elementId ->
@@ -290,19 +296,24 @@ fun WorkspaceCanvas(
                         val height = size.height.toFloat()
                         // Over the frame the element is still on the board; only past it is it taken away.
                         val board = Rect(-framePx / width, -framePx / height, 1f + framePx / width, 1f + framePx / height)
-                        val onBoard = { position: Offset -> if (board.contains(position)) Offset(position.x.coerceIn(0f, 1f), position.y.coerceIn(0f, 1f)) else position }
+                        val onBoard = { position: Offset -> Offset(position.x.coerceIn(0f, 1f), position.y.coerceIn(0f, 1f)) }
+                        val follow = { position: Offset ->
+                            val at = normalize(position, size.width, size.height)
+                            heldAt = onBoard(at)
+                            heldOff = !board.contains(at)
+                        }
                         try {
                             var lastPosition = down.position
                             val dragStart = awaitTouchSlopOrCancellation(down.id) { change, _ ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
+                                follow(lastPosition)
                             } ?: return@awaitEachGesture
 
                             drag(dragStart.id) { change ->
                                 change.consume()
                                 lastPosition = change.position
-                                currentOnMove(item.instanceId, onBoard(normalize(lastPosition, size.width, size.height)))
+                                follow(lastPosition)
                             }
                             val position = normalize(lastPosition, size.width, size.height)
                             if (board.contains(position)) {
@@ -312,10 +323,14 @@ fun WorkspaceCanvas(
                                 currentOnMove(item.instanceId, resting)
                                 currentOnResolve(item.instanceId, resting)
                             } else {
+                                // Taken away from the edge where it left the board, so it vanishes where it was last seen.
+                                currentOnMove(item.instanceId, onBoard(position))
                                 currentOnMove(item.instanceId, position)
                             }
                         } finally {
                             heldId = null
+                            heldAt = null
+                            heldOff = false
                         }
                     }
                 }
@@ -326,10 +341,11 @@ fun WorkspaceCanvas(
             drawWatermark(art.magicCircle, seconds, flare)
             val radius = minOf(size.width, size.height) * ITEM_RADIUS_FRACTION
             val frames = transitions()
-            val held = currentItems.find { it.instanceId == heldId }
+            val shown = withHeldAt(currentItems, heldId, heldAt)
+            val held = shown.find { it.instanceId == heldId }
             if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
             labelPaint.textSize = workspaceLabelSize(size.width, size.height, density)
-            val target = held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }
+            val target = held?.takeUnless { heldOff }?.let { mixTarget(shown, it, labelPaint, context.resources.elementName(it.elementId)) }
             target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
                 val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
@@ -347,10 +363,11 @@ fun WorkspaceCanvas(
                 liftedId = liftedId,
                 lift = lift.value,
                 seconds = seconds,
-                targetId = target?.instanceId
+                targetId = target?.instanceId,
+                leavingId = heldId.takeIf { heldOff }
             )
             // The item in hand is drawn last, so it never slides under the others.
-            currentItems.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
+            shown.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
             drawTransitions(frames, art, radius)
             if (!reducedMotion) fx.drawSparks(this, held, radius)
             effect?.let { drawEffect(it, time, art, radius, fx.rayPath) }
@@ -371,6 +388,17 @@ fun WorkspaceCanvas(
         },
         onDismiss = { selectedId = null }
     )
+}
+
+/** [items] with the one in hand where the finger has taken it. */
+private fun withHeldAt(items: List<WorkspaceItem>, heldId: Long?, at: Offset?): List<WorkspaceItem> = items.map {
+    if (it.instanceId == heldId && at != null) it.copy(xFraction = at.x, yFraction = at.y) else it
+}
+
+/** What [held] would mix with if let go now: judged where it would come to rest, as the mix itself is. */
+private fun DrawScope.mixTarget(items: List<WorkspaceItem>, held: WorkspaceItem, labelPaint: android.graphics.Paint, name: String): WorkspaceItem? {
+    val resting = restingPosition(Offset(held.xFraction, held.yFraction), size.width, size.height, labelPaint.measureText(name) / 2, labelPaint.fontSpacing)
+    return overlapTarget(items, held.instanceId, resting.x, resting.y)
 }
 
 /**
@@ -508,7 +536,9 @@ private class ItemMotion(
     val lift: Float,
     val seconds: Float,
     // The element the one in hand would mix with if let go now.
-    val targetId: Long?
+    val targetId: Long?,
+    // The element in hand while the finger is off the board, fading to show it would be taken away.
+    val leavingId: Long?
 )
 
 private class WorkspaceArt(
@@ -555,6 +585,7 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
     scale *= 1f + LIFT_SCALE * liftAmount
     // The target rises a little to meet the element in hand.
     if (item.instanceId == motion.targetId) scale *= 1f + TARGET_SCALE
+    if (item.instanceId == motion.leavingId) alpha *= LEAVING_ALPHA
     if (alpha <= 0f || scale <= 0f) return
     // Each item floats on its own beat; one in hand is held still.
     val beat = motion.seconds * BOB_SPEED + (item.instanceId % BEAT_SPREAD) * BEAT_STEP

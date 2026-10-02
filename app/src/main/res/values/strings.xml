@@ -30,6 +30,7 @@
     <string name="hint_request">Hint</string>
     <string name="hint_more">Show the second element</string>
     <string name="hint_place">Hint: %1$s and %2$s. Place on the board</string>
+    <string name="nothing_found">Nothing found</string>
     <string name="no_known_recipes">No recipes discovered yet</string>
     <string name="achievement_first_unlocks">First discoveries</string>
     <string name="achievement_mixes">Successful combinations</string>

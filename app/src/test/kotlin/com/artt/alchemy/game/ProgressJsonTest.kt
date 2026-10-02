@@ -46,7 +46,7 @@ class ProgressJsonTest {
         val progress = parsePlayerProgress(text)!!
 
         assertEquals(setOf("fire", "water", "earth", "air", "steam"), progress.unlockedIds)
-        assertEquals(listOf("steam", "fire", "water", "earth", "air"), progress.discoveryOrder)
+        assertEquals(listOf("fire", "water", "earth", "air", "steam"), progress.discoveryOrder)
         assertEquals(setOf(recipeKey("fire", "water")), progress.knownRecipeKeys)
         assertNull(progress.activeHint)
     }

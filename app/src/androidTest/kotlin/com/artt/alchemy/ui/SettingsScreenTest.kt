@@ -41,8 +41,6 @@ class SettingsScreenTest {
     @Test
     fun feedbackSettingsPersistAcrossActivityRecreation() {
         composeRule.onNodeWithTag("nav_settings").performClick()
-        composeRule.onNodeWithTag("settings_reset").performScrollTo().performClick()
-        composeRule.onNodeWithText("Сбросить").performClick()
 
         composeRule.onNodeWithTag("settings_sound").performScrollTo().performClick()
         composeRule.onNodeWithTag("settings_vibration").performScrollTo().performClick()

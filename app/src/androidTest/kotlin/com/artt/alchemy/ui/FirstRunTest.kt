@@ -20,6 +20,7 @@ import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.Combination
+import com.artt.alchemy.game.WorkspaceState
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -39,6 +40,8 @@ class FirstRunTest {
     @Before
     fun rememberProgress() {
         store = ProgressStore(context)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
         original = store.load()
     }
 

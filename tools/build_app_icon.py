@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the foreground layer of the adaptive launcher icon from the spellbook element icon.
+"""Build the foreground and monochrome layers of the adaptive launcher icon from the spellbook element icon.
 
 The layer is the 108dp adaptive canvas at xxxhdpi. Launchers show its middle 72dp through a mask
 of their own shape and some zoom in further, so the book, glow included, is scaled to stay inside
@@ -10,7 +10,7 @@ Usage: python3 tools/build_app_icon.py  (requires pillow; run after tools/build_
 
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "app/src/main/res"
@@ -23,6 +23,11 @@ SAFE_RADIUS_DP = 33
 # Keeps the glow a little clear of the safe circle's edge.
 SAFE_MARGIN_DP = 2
 VISIBLE_ALPHA = 40
+# The themed (monochrome) icon keeps only the book's solid body, as its soft glow would read as a blurred disc, with
+# the bright moon and star of the cover cut out of it so the shape still reads as the spellbook.
+SOLID_ALPHA = 200
+CUT_LUMINANCE = 165
+SMOOTHING = 7
 
 
 def reach(image: Image.Image) -> float:
@@ -46,6 +51,12 @@ def main() -> None:
     layer = Image.new("RGBA", (CANVAS, CANVAS))
     layer.paste(book, ((CANVAS - side) // 2, (CANVAS - side) // 2), book)
     layer.save(RES / "drawable-nodpi/ic_launcher_foreground.webp", "WEBP", quality=90, method=6)
+    # Android 13+ themed icons tint this layer by its alpha alone.
+    solid = layer.getchannel("A").point(lambda alpha: 255 if alpha >= SOLID_ALPHA else 0)
+    dark = layer.convert("L").point(lambda luminance: 255 if luminance < CUT_LUMINANCE else 0).filter(ImageFilter.MedianFilter(SMOOTHING))
+    monochrome = Image.new("RGBA", layer.size, (255, 255, 255, 0))
+    monochrome.putalpha(ImageChops.multiply(solid, dark))
+    monochrome.save(RES / "drawable-nodpi/ic_launcher_monochrome.webp", "WEBP", lossless=True)
 
 
 if __name__ == "__main__":

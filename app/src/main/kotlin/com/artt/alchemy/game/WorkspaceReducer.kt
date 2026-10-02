@@ -23,9 +23,11 @@ fun reduce(state: WorkspaceState, event: WorkspaceEvent, engine: AlchemyEngine):
         )
     }
 
+    // A tapped element is only put down: on a crowded workspace its spot may touch a neighbour, but it never mixes there.
     is WorkspaceEvent.SpawnAutomatically -> {
         val (xFraction, yFraction) = automaticSpawnPosition(state.items, event.keepClear)
-        reduce(state, WorkspaceEvent.Spawn(event.elementId, xFraction, yFraction), engine)
+        val item = WorkspaceItem(state.nextInstanceId, event.elementId, xFraction, yFraction)
+        WorkspaceResult(state.copy(items = state.items + item, nextInstanceId = state.nextInstanceId + 1))
     }
 
     is WorkspaceEvent.Move -> {
@@ -77,10 +79,16 @@ private fun resolveOverlap(state: WorkspaceState, event: WorkspaceEvent.ResolveO
     )
 }
 
-/** The item a dragged one dropped at this position would mix with, by the same rule the reducer applies. */
-fun overlapTarget(items: List<WorkspaceItem>, draggedInstanceId: Long, xFraction: Float, yFraction: Float): WorkspaceItem? = items.firstOrNull { item ->
-    item.instanceId != draggedInstanceId &&
-        squaredDistance(item.xFraction, item.yFraction, xFraction, yFraction) <= OVERLAP_DISTANCE_SQUARED
-}
+/**
+ * The item a dragged one dropped at this position would mix with, by the same rule the reducer applies: the nearest in
+ * reach, and of equally near ones the last added, which is drawn on top.
+ */
+fun overlapTarget(items: List<WorkspaceItem>, draggedInstanceId: Long, xFraction: Float, yFraction: Float): WorkspaceItem? = items
+    .asReversed()
+    .filter { it.instanceId != draggedInstanceId }
+    .map { it to squaredDistance(it.xFraction, it.yFraction, xFraction, yFraction) }
+    .filter { (_, distance) -> distance <= OVERLAP_DISTANCE_SQUARED }
+    .minByOrNull { (_, distance) -> distance }
+    ?.first
 
 private fun squaredDistance(firstX: Float, firstY: Float, secondX: Float, secondY: Float): Float = (firstX - secondX) * (firstX - secondX) + (firstY - secondY) * (firstY - secondY)

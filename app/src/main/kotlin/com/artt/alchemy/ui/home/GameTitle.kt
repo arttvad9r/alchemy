@@ -9,8 +9,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -68,12 +73,16 @@ private fun Wordmark(modifier: Modifier) {
                 // Now and then a gleam runs across the gold, as over polished metal.
                 modifier = Modifier.shimmer()
             )
+            // The motto is shown whole or not at all: cut short, it reads as a mistake.
+            var taglineFits by remember { mutableStateOf(true) }
             Text(
                 text = stringResource(R.string.app_tagline),
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = TAGLINE_SIZE, fontWeight = FontWeight.Medium, shadow = titleShadow),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
-                autoSize = WholeWordsAutoSize(min = TAGLINE_MIN_SIZE, max = TAGLINE_SIZE)
+                autoSize = WholeWordsAutoSize(min = TAGLINE_MIN_SIZE, max = TAGLINE_SIZE),
+                onTextLayout = { taglineFits = !it.hasVisualOverflow },
+                modifier = Modifier.alpha(if (taglineFits) 1f else 0f)
             )
         }
     }

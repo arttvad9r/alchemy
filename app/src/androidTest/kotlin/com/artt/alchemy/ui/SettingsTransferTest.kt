@@ -22,6 +22,7 @@ import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.parsePlayerProgress
 import com.artt.alchemy.data.toJson
+import com.artt.alchemy.game.WorkspaceState
 import java.io.File
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -43,6 +44,8 @@ class SettingsTransferTest {
     @Before
     fun startWithFreshProgress() {
         store = ProgressStore(context)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
         original = store.load()
         store.save(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -119,7 +122,8 @@ class SettingsTransferTest {
         composeRule.onNodeWithTag("transfer_ok").performClick()
 
         assertTrue("steam" in store.load().unlockedIds)
-        assertEquals(0.3f, store.load().musicVolume, 0.001f)
+        // The file brings progress; the volume stays as set on this device.
+        assertEquals(1f, store.load().musicVolume, 0.001f)
         assertNull(store.load().activeHint)
     }
 
@@ -163,7 +167,7 @@ class SettingsTransferTest {
             val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
             assertNull(state.pendingImport)
             assertNull(state.transferResult)
-            assertEquals(initialPlayerProgress(), state.progress)
+            assertEquals(initialPlayerProgress().copy(reducedMotion = false), state.progress)
         }
     }
 
@@ -273,7 +277,7 @@ class SettingsTransferTest {
         assertEquals(expected, exported)
         scenario.onActivity { activity ->
             val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
-            assertEquals(initialPlayerProgress(), state.progress)
+            assertEquals(initialPlayerProgress().copy(reducedMotion = false), state.progress)
             assertNull(state.pendingImport)
             assertNull(state.transferResult)
         }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,20 +61,21 @@ fun RecipesScreen(
     onPlaceHint: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var query by remember { mutableStateOf("") }
-    var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
-    var sort by remember { mutableStateOf(RecipeSort.RECENT) }
-    val known = AlchemyCatalog.recipes.filter { recipeKey(it.firstId, it.secondId) in progress.knownRecipeKeys }
+    var query by rememberSaveable { mutableStateOf("") }
+    var selectedGroup by rememberSaveable { mutableStateOf<ElementGroup?>(null) }
+    var sort by rememberSaveable { mutableStateOf(RecipeSort.RECENT) }
     val resources = LocalContext.current.resources
-    val locale = Locale.getDefault()
-    val recipes = sortRecipes(known, progress.discoveryOrder, sort, locale, resources::elementName)
-        .filter { selectedGroup == null || AlchemyCatalog.elementsById.getValue(it.resultId).group == selectedGroup }
-        .filter { recipe ->
-            query.isBlank() ||
-                listOf(recipe.firstId, recipe.secondId, recipe.resultId)
-                    .map(resources::elementName)
-                    .any { it.contains(query, ignoreCase = true) }
-        }
+    val known = remember(progress.knownRecipeKeys) { AlchemyCatalog.recipes.filter { recipeKey(it.firstId, it.secondId) in progress.knownRecipeKeys } }
+    val recipes = remember(known, progress.discoveryOrder, sort, selectedGroup, query, resources) {
+        sortRecipes(known, progress.discoveryOrder, sort, Locale.getDefault(), resources::elementName)
+            .filter { selectedGroup == null || AlchemyCatalog.elementsById.getValue(it.resultId).group == selectedGroup }
+            .filter { recipe ->
+                query.isBlank() ||
+                    listOf(recipe.firstId, recipe.secondId, recipe.resultId)
+                        .map(resources::elementName)
+                        .any { it.contains(query, ignoreCase = true) }
+            }
+    }
 
     Column(modifier = modifier.fillMaxSize().testTag("screen_recipes").padding(ScreenPadding)) {
         ScreenBanner(stringResource(R.string.tab_recipes), Modifier.padding(bottom = 8.dp))
@@ -107,7 +109,8 @@ fun RecipesScreen(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = stringResource(R.string.no_known_recipes), modifier = Modifier.padding(24.dp))
+                // No recipe known yet, or none that the search and the group let through.
+                Text(text = stringResource(if (known.isEmpty()) R.string.no_known_recipes else R.string.nothing_found), modifier = Modifier.padding(24.dp))
             }
         } else {
             LazyColumn(

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
 import com.artt.alchemy.data.ProgressStore
+import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.ui.waitForScene
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -29,6 +30,8 @@ class BackgroundMusicTest {
     val chain: RuleChain = RuleChain.outerRule(object : TestWatcher() {
         override fun starting(description: Description) {
             val store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+            // A workspace left by another test would lie on this one's board.
+            store.saveWorkspace(WorkspaceState())
             store.save(store.load().copy(onboardingSeen = true, reducedMotion = true, musicEnabled = false))
         }
     }).around(composeRule)

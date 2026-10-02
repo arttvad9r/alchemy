@@ -16,6 +16,7 @@ import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.Combination
+import com.artt.alchemy.game.WorkspaceState
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -33,6 +34,8 @@ class RecipesPaletteTest {
     @Before
     fun rememberProgress() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
         original = store.load()
         store.save(initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam")).copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)

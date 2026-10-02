@@ -7,6 +7,7 @@ Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 
 - Before claiming an interaction fix complete, verify observable behavior on an emulator. Build success alone is not acceptance.
 - For workspace mechanics, verify real spawn, drag, overlap resolution, invalid-pair no-op, boundary deletion, tab round-trips, and persistence where relevant.
 - Run `./gradlew qualityCheck testDebugUnitTest assembleDebug` for deterministic verification and the focused Android instrumentation tests for affected UI flows (`docs/testing.md`).
+- The workspace is saved next to the progress (`ProgressStore.saveWorkspace`) and survives restarts; instrumentation tests that launch the game must start from a known state — `SkipOnboardingRule` does that and restores the device's progress afterwards.
 - Save imports are bounded to 256 KiB and run off the main thread; exporting writes the requested snapshot even when progress is reset. Keep transfer results mutually exclusive.
 - Agents install and test only on an emulator, never on the owner's personal phone even if ADB sees it; the owner checks sound and haptics on the phone.
 - Each feature goes on its own `feat/<name>` branch from `master`; merge after verification and owner approval. No push, tags or releases without explicit permission; user-visible changes go to the «Не выпущено» section of `CHANGELOG.md`.

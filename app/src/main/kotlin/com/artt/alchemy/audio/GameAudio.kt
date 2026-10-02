@@ -145,6 +145,10 @@ private class AudioFocus(context: Context, onChange: (Int) -> Unit) {
 class BackgroundMusic(private val context: Context) {
     private var current: MediaPlayer? = null
     private var upcoming: MediaPlayer? = null
+
+    // Players are prepared off the main thread; one still preparing is kept so it can be released.
+    private val preparing = HashSet<MediaPlayer>()
+    private var released = false
     private var fade: ValueAnimator? = null
     private var volume = 0f
     private var audible = false
@@ -195,14 +199,25 @@ class BackgroundMusic(private val context: Context) {
 
     private fun play(fadeMillis: Long) {
         introPlayed = true
-        val playing = current ?: newPlayer()?.also { first ->
-            current = first
-            chain(first)
-        } ?: return
-        if (!playing.isPlaying) playing.start()
         audible = true
         handler.removeCallbacks(restore)
+        val playing = current
+        if (playing == null) {
+            startFirstPlayer()
+        } else if (!playing.isPlaying) {
+            playing.start()
+        }
+        // The fade runs on the volume alone, so a player still preparing joins it where it has got to.
         fadeTo(MUSIC_VOLUME * level, fadeMillis) {}
+    }
+
+    private fun startFirstPlayer() {
+        if (preparing.isNotEmpty()) return
+        newPlayer { first ->
+            current = first
+            chain(first)
+            if (audible) first.start()
+        }
     }
 
     private fun silence() {
@@ -243,8 +258,11 @@ class BackgroundMusic(private val context: Context) {
         focus.abandon()
         fade?.cancel()
         fade = null
+        released = true
         current?.release()
         upcoming?.release()
+        preparing.forEach(MediaPlayer::release)
+        preparing.clear()
         current = null
         upcoming = null
     }
@@ -258,14 +276,33 @@ class BackgroundMusic(private val context: Context) {
     // Looping a single MediaPlayer leaves an audible gap at the loop point. A second player, already
     // prepared, takes over the moment the first ends, so the track repeats without a break.
     private fun chain(player: MediaPlayer) {
-        val next = newPlayer()
-        upcoming = next
-        next?.let(player::setNextMediaPlayer)
+        newPlayer { next ->
+            // The track may have ended, or the music been released, while the next player was preparing.
+            when {
+                current === player -> {
+                    upcoming = next
+                    player.setNextMediaPlayer(next)
+                }
+
+                // The track ended before its successor was ready: the successor carries on, after a short gap.
+                current == null -> {
+                    current = next
+                    chain(next)
+                    if (audible) next.start()
+                }
+
+                else -> next.release()
+            }
+        }
         player.setOnCompletionListener { finished ->
             finished.release()
             current = upcoming
             upcoming = null
-            current?.let { nextPlayer ->
+            val nextPlayer = current
+            if (nextPlayer == null) {
+                // The next player is still preparing and takes over when ready; if it failed, start afresh.
+                if (audible) startFirstPlayer()
+            } else {
                 // setNextMediaPlayer starts this player automatically, even during a pending pause.
                 if (!audible && nextPlayer.isPlaying) nextPlayer.pause()
                 chain(nextPlayer)
@@ -273,8 +310,32 @@ class BackgroundMusic(private val context: Context) {
         }
     }
 
-    private fun newPlayer(): MediaPlayer? = MediaPlayer.create(context, R.raw.music_background, MusicAttributes, 0)
-        ?.apply { setVolume(volume, volume) }
+    /** Prepares a player of the track off the main thread and hands it over, at the current volume, once it is ready. */
+    private fun newPlayer(onReady: (MediaPlayer) -> Unit) {
+        val player = MediaPlayer()
+        try {
+            player.setAudioAttributes(MusicAttributes)
+            context.resources.openRawResourceFd(R.raw.music_background).use { player.setDataSource(it) }
+        } catch (_: Exception) {
+            player.release()
+            return
+        }
+        preparing += player
+        player.setOnPreparedListener { ready ->
+            preparing -= ready
+            if (released) {
+                ready.release()
+            } else {
+                ready.setVolume(volume, volume)
+                onReady(ready)
+            }
+        }
+        player.setOnErrorListener { failed, _, _ ->
+            preparing -= failed
+            false
+        }
+        player.prepareAsync()
+    }
 
     private fun fadeTo(target: Float, millis: Long, onEnd: () -> Unit) {
         fade?.cancel()

@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,16 +80,18 @@ fun ElementsScreen(
     // What was new when the catalog opened stays marked until it is left.
     val fresh = remember { freshIds }
     DisposableEffect(Unit) { onDispose(onSeen) }
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     // Cards opened one from another, so back returns to the previous one.
     var openedCards by remember { mutableStateOf(emptyList<ElementDefinition>()) }
-    var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
+    var selectedGroup by rememberSaveable { mutableStateOf<ElementGroup?>(null) }
     val resources = LocalContext.current.resources
     // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
-    val entries = AlchemyCatalog.elements.filter { element ->
-        (selectedGroup == null || element.group == selectedGroup) &&
-            (query.isBlank() || (element.id in progress.unlockedIds && resources.elementName(element.id).contains(query, ignoreCase = true)))
-    }.sortedBy { it.id !in progress.unlockedIds }
+    val entries = remember(progress.unlockedIds, selectedGroup, query, resources) {
+        AlchemyCatalog.elements.filter { element ->
+            (selectedGroup == null || element.group == selectedGroup) &&
+                (query.isBlank() || (element.id in progress.unlockedIds && resources.elementName(element.id).contains(query, ignoreCase = true)))
+        }.sortedBy { it.id !in progress.unlockedIds }
+    }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // Four columns on a compact phone; long names shrink to whole words, wider screens get more.
@@ -116,6 +119,15 @@ fun ElementsScreen(
                     tagPrefix = "elements_group",
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+            }
+            if (entries.isEmpty()) {
+                item {
+                    Text(
+                        stringResource(R.string.nothing_found),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(24.dp).testTag("elements_nothing_found")
+                    )
+                }
             }
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.

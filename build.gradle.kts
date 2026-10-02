@@ -2,7 +2,6 @@
 plugins {
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.compose.compiler) apply false
-  alias(libs.plugins.kotlin.serialization) apply false
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply false
     id("dev.detekt") version "2.0.0-alpha.2" apply false
 }

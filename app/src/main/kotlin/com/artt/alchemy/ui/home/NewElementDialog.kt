@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -94,6 +95,8 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
     // Holds what the card last drew, so it can be shared as a picture; a new capture redraws it first.
     val cardLayer = rememberGraphicsLayer()
     var captures by remember { mutableIntStateOf(0) }
+    // One share at a time: a second tap while the picture is being made would open a second share sheet.
+    var sharing by remember { mutableStateOf(false) }
     val shareText = stringResource(R.string.share_discovery_text, elementName(element.id), storeLink(context))
     LaunchedEffect(Unit) { titleIn.animateTo(1f, iconSpec) }
     LaunchedEffect(Unit) {
@@ -104,7 +107,8 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
         if (!reducedMotion) delay(BADGE_DELAY_MILLIS)
         badgeIn.animateTo(1f, badgeSpec)
     }
-    AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
+    // A touch beside the card, likely meant for the workspace, must not throw a discovery away unseen.
+    AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold, dismissOnClickOutside = false) {
         // Scrolls on small screens with large text; the button stays below it, always in reach.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -173,10 +177,17 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                     stringResource(R.string.share),
                     ButtonStyle.BLUE,
                     onClick = {
-                        scope.launch {
-                            captures++
-                            withFrameNanos { }
-                            shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
+                        if (!sharing) {
+                            sharing = true
+                            scope.launch {
+                                try {
+                                    captures++
+                                    withFrameNanos { }
+                                    shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
+                                } finally {
+                                    sharing = false
+                                }
+                            }
                         }
                     },
                     modifier = Modifier.weight(1f).testTag("share_discovery")

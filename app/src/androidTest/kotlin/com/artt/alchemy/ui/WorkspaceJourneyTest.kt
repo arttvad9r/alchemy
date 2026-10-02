@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import com.artt.alchemy.MainActivity
 import org.junit.Rule
@@ -74,6 +75,27 @@ class WorkspaceJourneyTest {
         }
 
         composeRule.onNodeWithTag("drag_preview").assertIsDisplayed()
+    }
+
+    @Test
+    fun anElementTakenPastTheEdgeStaysIfBroughtBackAndGoesIfLetGoThere() {
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        val fire = hasTestTag("workspace_item") and hasContentDescription("Огонь")
+
+        composeRule.onNode(fire).performTouchInput {
+            down(center)
+            moveTo(Offset(-2000f, center.y))
+            moveTo(center)
+            up()
+        }
+        composeRule.onNode(fire).assertIsDisplayed()
+
+        composeRule.onNode(fire).performTouchInput {
+            down(center)
+            moveTo(Offset(-2000f, center.y))
+            up()
+        }
+        composeRule.onNode(fire).assertDoesNotExist()
     }
 
     private fun SemanticsNodeInteraction.dragIntoWorkspace(targetXFraction: Float) {
