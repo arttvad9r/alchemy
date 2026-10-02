@@ -31,6 +31,7 @@ class StudioIntroTest {
             val store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
             // A workspace left by another test would lie on this one's board.
             store.saveWorkspace(WorkspaceState())
+            store.saveTipStep(0)
             store.save(store.load().copy(onboardingSeen = true, reducedMotion = description.methodName == "reducedMotionShowsStillThenEntersGame"))
         }
     }).around(composeRule)

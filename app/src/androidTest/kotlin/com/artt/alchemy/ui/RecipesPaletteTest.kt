@@ -36,6 +36,7 @@ class RecipesPaletteTest {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
         // A workspace left by another test would lie on this one's board.
         store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         original = store.load()
         store.save(initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam")).copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)

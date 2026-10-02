@@ -182,6 +182,14 @@ class ProgressStore(context: Context) {
         preferences.edit { putString(KEY_WORKSPACE, items) }
     }
 
+    /** The first-run tip on screen, kept so the tips go on where they were left after the app is closed. */
+    fun saveTipStep(step: Int) {
+        preferences.edit { putInt(KEY_TIP_STEP, step) }
+    }
+
+    /** The saved tip, or null if none was kept (saves from before tips were kept). */
+    fun loadTipStep(): Int? = if (preferences.contains(KEY_TIP_STEP)) preferences.getInt(KEY_TIP_STEP, 0).coerceAtLeast(0) else null
+
     /** The saved workspace, without elements that are unknown or not open in [unlockedIds] and with positions on the board. */
     fun loadWorkspace(unlockedIds: Set<String>): WorkspaceState {
         val items = preferences.getString(KEY_WORKSPACE, null).orEmpty().split(ITEM_SEPARATOR).mapNotNull { entry ->
@@ -206,6 +214,7 @@ class ProgressStore(context: Context) {
         const val SEPARATOR = ","
         const val ITEM_SEPARATOR = ";"
         const val KEY_WORKSPACE = "workspace"
+        const val KEY_TIP_STEP = "tip_step"
         const val PREFERENCES_NAME = "alchemy_progress"
         const val KEY_UNLOCKED_IDS = "unlocked_ids"
         const val KEY_DISCOVERY_ORDER = "discovery_order"

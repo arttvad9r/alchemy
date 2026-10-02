@@ -19,6 +19,7 @@ class ProgressStoreTest {
     @After
     fun clearWorkspace() {
         store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
     }
 
     @Test
@@ -37,5 +38,12 @@ class ProgressStoreTest {
         store.saveWorkspace(WorkspaceState(listOf(WorkspaceItem(1, "fire", 0.5f, 0.5f), WorkspaceItem(2, "steam", 0.5f, 0.5f)), nextInstanceId = 3))
 
         assertEquals(listOf("fire"), store.loadWorkspace(AlchemyCatalog.baseElementIds).items.map { it.elementId })
+    }
+
+    @Test
+    fun theTipOnScreenIsKept() {
+        store.saveTipStep(2)
+
+        assertEquals(2, store.loadTipStep())
     }
 }

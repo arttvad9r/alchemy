@@ -25,12 +25,14 @@ class SkipOnboardingRule : TestWatcher() {
     override fun starting(description: Description) {
         original = store.load()
         store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         store.save(initialPlayerProgress().copy(onboardingSeen = true))
     }
 
     override fun finished(description: Description) {
         original?.let(store::save)
         store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
     }
 }
 

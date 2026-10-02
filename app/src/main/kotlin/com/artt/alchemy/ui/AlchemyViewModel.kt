@@ -106,8 +106,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     var state by mutableStateOf(
         store.load().let { progress ->
             val workspace = store.loadWorkspace(progress.unlockedIds)
-            // Elements kept on the workspace show the first tip, to put one down, is already done.
-            AlchemyUiState(progress = progress, workspace = workspace, tipStep = if (workspace.items.isEmpty()) 0 else 1)
+            // Without a kept tip, elements on the workspace show the first one, to put one down, is already done.
+            val tipStep = store.loadTipStep() ?: if (workspace.items.isEmpty()) 0 else 1
+            AlchemyUiState(progress = progress, workspace = workspace, tipStep = tipStep.coerceAtMost(TIP_COUNT - 1))
         }
     )
         private set
@@ -164,6 +165,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
 
         if (onboarded != state.progress) store.save(onboarded)
         if (result.workspace != state.workspace) store.saveWorkspace(result.workspace)
+        if (tipStep != state.tipStep) store.saveTipStep(tipStep.coerceAtMost(TIP_COUNT - 1))
         state = state.copy(
             combinationEffect = effect ?: state.combinationEffect,
             // Transitions pile up until Home takes them, so none is lost between frames.
@@ -256,6 +258,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         playSound(Sound.CLICK)
         updateProgress { copy(onboardingSeen = false) }
         state = state.copy(tipStep = 0)
+        store.saveTipStep(0)
     }
 
     fun markElementsSeen() {
@@ -365,6 +368,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         transferGeneration++
         state = AlchemyUiState(progress = progress, selectedTab = AppTab.SETTINGS)
         store.saveWorkspace(state.workspace)
+        store.saveTipStep(state.tipStep)
         applyVolumes()
         if (progress.musicEnabled) resumeMusic() else music.pause()
     }

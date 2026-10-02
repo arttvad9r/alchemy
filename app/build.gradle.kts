@@ -13,8 +13,8 @@ android {
         applicationId = "com.artt.alchemy"
         minSdk = 31
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.1.1"
+        versionCode = 4
+        versionName = "1.2.0"
         testInstrumentationRunner = "com.artt.alchemy.RussianLocaleRunner"
     }
 
