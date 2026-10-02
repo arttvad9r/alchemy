@@ -109,6 +109,13 @@ class WorkspaceTransitionsTest {
     }
 
     @Test
+    fun accessible_mix_uses_both_ingredients_at_their_original_positions() {
+        val state = WorkspaceState(items = listOf(WorkspaceItem(1, "water", 0.7f, 0.5f), WorkspaceItem(2, "fire", 0.3f, 0.5f)), nextInstanceId = 3)
+        val sources = effectSources(state, reduce(state, WorkspaceEvent.ResolveOverlap(2, 0.7f, 0.5f), engine))
+        assertEquals(listOf(EffectSource("water", 0.7f, 0.5f), EffectSource("fire", 0.3f, 0.5f)), sources)
+    }
+
+    @Test
     fun no_combination_has_no_sources() {
         val state = WorkspaceState(items = listOf(WorkspaceItem(1, "fire", 0.1f, 0.1f)), nextInstanceId = 2)
 
