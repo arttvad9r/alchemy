@@ -31,9 +31,9 @@ enum class Sound(@param:RawRes val res: Int, val pitchSpread: Float = 0f, val ga
     PLACE(R.raw.sfx_place, 0.06f),
     COMBINE(R.raw.sfx_combine, 0.02f, gain = 0.5f),
     DISCOVER(R.raw.sfx_discover),
-    DISCOVER_GRAND(R.raw.sfx_discover_grand, gain = 0.85f),
+    DISCOVER_GRAND(R.raw.sfx_discover_grand),
     NO_MATCH(R.raw.sfx_no_match, 0.04f),
-    REMOVE(R.raw.sfx_remove, 0.06f, gain = 0.65f),
+    REMOVE(R.raw.sfx_remove, 0.06f),
     CLICK(R.raw.sfx_click, 0.05f),
     PAGE(R.raw.sfx_page, 0.03f),
     PICKUP(R.raw.sfx_pickup, 0.08f),
@@ -103,7 +103,7 @@ class SoundEffects(context: Context) {
         const val MAX_STREAMS = 8
 
         // Leaves headroom for several effects and the music sounding at once.
-        const val EFFECT_VOLUME = 0.6f
+        const val EFFECT_VOLUME = 0.42f
 
         // The playback rates SoundPool accepts.
         const val MIN_RATE = 0.5f
@@ -278,7 +278,7 @@ class BackgroundMusic(private val context: Context) {
 
     private companion object {
         // Quiet enough to sit under the effects.
-        const val MUSIC_VOLUME = 0.26f
+        const val MUSIC_VOLUME = 0.13f
         const val FADE_IN_MILLIS = 900L
         const val FADE_OUT_MILLIS = 600L
         const val FADE_IN_CURVE = 1.6f
