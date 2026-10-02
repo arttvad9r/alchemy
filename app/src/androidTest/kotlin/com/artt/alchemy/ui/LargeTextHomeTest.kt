@@ -6,8 +6,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.hasScrollToIndexAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
@@ -47,6 +50,9 @@ class LargeTextHomeTest {
             }
         }
         listOf("Открытые элементы", "Воздух", "Земля", "Огонь", "Вода").forEach { text ->
+            if (text != "Открытые элементы") {
+                composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text))
+            }
             val layouts = mutableListOf<TextLayoutResult>()
             composeRule.onNodeWithText(text, useUnmergedTree = true)
                 .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }

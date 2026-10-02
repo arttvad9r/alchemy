@@ -289,41 +289,20 @@ fun HomeScreen(
                     .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
                 val largeText = LocalDensity.current.fontScale >= 1.5f
-                val sortControl: @Composable () -> Unit = {
-                    AlchemyDropdown(
-                        options = ElementSort.entries,
-                        selected = paletteSort,
-                        label = { stringResource(it.labelRes) },
-                        onSelect = onPaletteSort,
-                        tag = "palette_sort",
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
-                    val titleStyle = MaterialTheme.typography.titleMedium
-                    Text(
-                        text = stringResource(R.string.palette_title),
-                        style = titleStyle,
-                        maxLines = if (largeText) 2 else 1,
-                        autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
-                        modifier = Modifier.weight(1f).padding(end = 8.dp)
-                    )
-                    if (!largeText) sortControl()
-                    ProgressCounter(unlocked = unlockedIds.size)
-                }
-                if (largeText) sortControl()
+                val columns = if (largeText) 3 else PALETTE_COLUMNS
+                PaletteHeader(paletteSort, onPaletteSort, unlockedIds.size, largeText)
                 val paletteState = rememberLazyGridState()
                 val labelHeight = with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() }
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                     // Whole rows include labels; large text leaves more room for the workspace.
-                    val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (PALETTE_COLUMNS - 1)) / PALETTE_COLUMNS
+                    val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (columns - 1)) / columns
                     val rowHeight = tileWidth + ElementTextGap + labelHeight * if (largeText) 2 else 1
                     val rows = if (largeText) 1 else PALETTE_ROWS
                     val paletteHeight = rowHeight * rows + PALETTE_GAP * (rows - 1) + PALETTE_VERTICAL_PADDING * 2
                     Box(modifier = Modifier.fillMaxWidth().height(paletteHeight).testTag("palette_grid")) {
                         LazyVerticalGrid(
                             state = paletteState,
-                            columns = GridCells.Fixed(PALETTE_COLUMNS),
+                            columns = GridCells.Fixed(columns),
                             horizontalArrangement = Arrangement.spacedBy(PALETTE_GAP),
                             verticalArrangement = Arrangement.spacedBy(PALETTE_GAP),
                             contentPadding = PaddingValues(top = PALETTE_VERTICAL_PADDING, end = PALETTE_END_PADDING, bottom = PALETTE_VERTICAL_PADDING),
@@ -370,6 +349,40 @@ fun HomeScreen(
     }
 
     DiscoveryCard(state, playingEffect = { playingEffect }, effectTime = { effectTime.value }, onDismiss = onDismissNewElement, onClick = onClick)
+}
+
+@Composable
+private fun PaletteHeader(paletteSort: ElementSort, onPaletteSort: (ElementSort) -> Unit, unlockedCount: Int, largeText: Boolean) {
+    val sortControl: @Composable () -> Unit = {
+        AlchemyDropdown(
+            options = ElementSort.entries,
+            selected = paletteSort,
+            label = { stringResource(it.labelRes) },
+            onSelect = onPaletteSort,
+            tag = "palette_sort",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+    }
+    val title: @Composable (Modifier) -> Unit = { modifier ->
+        val titleStyle = MaterialTheme.typography.titleMedium
+        Text(
+            text = stringResource(R.string.palette_title),
+            style = titleStyle,
+            maxLines = 1,
+            autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
+            modifier = modifier.padding(end = 8.dp)
+        )
+    }
+    if (largeText) title(Modifier.fillMaxWidth())
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
+        if (largeText) {
+            Box(Modifier.weight(1f)) { sortControl() }
+        } else {
+            title(Modifier.weight(1f))
+            sortControl()
+        }
+        ProgressCounter(unlocked = unlockedCount)
+    }
 }
 
 /**
