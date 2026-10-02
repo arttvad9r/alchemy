@@ -92,6 +92,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -177,7 +178,7 @@ fun HomeScreen(
     val labelMeasurer = rememberTextMeasurer()
     // The bold reading face the workspace draws names in, at its size for these bounds.
     val workspaceLabelStyle = { bounds: Rect ->
-        TextStyle(fontFamily = BodyFontFamily, fontWeight = FontWeight.Bold, fontSize = with(density) { workspaceLabelSize(bounds.width, bounds.height).toSp() })
+        TextStyle(fontFamily = BodyFontFamily, fontWeight = FontWeight.Bold, fontSize = with(density) { workspaceLabelSize(bounds.width, bounds.height, density).toSp() })
     }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
@@ -263,6 +264,7 @@ fun HomeScreen(
                     items = state.workspace.items,
                     onMove = { id, position -> onEvent(WorkspaceEvent.Move(id, position.x, position.y)) },
                     onResolve = { id, position -> onEvent(WorkspaceEvent.ResolveOverlap(id, position.x, position.y)) },
+                    onRemove = { id -> onEvent(WorkspaceEvent.Remove(id)) },
                     onPickUp = onPickUp,
                     onBoundsChanged = { workspaceBounds = it },
                     // A new effect is drawn from its first frame, before it is taken to play.
@@ -286,36 +288,21 @@ fun HomeScreen(
                     .border(1.dp, MaterialTheme.colorScheme.panelBorder, RoundedCornerShape(20.dp))
                     .padding(start = 12.dp, top = 10.dp, end = 8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
-                    val titleStyle = MaterialTheme.typography.titleMedium
-                    Text(
-                        text = stringResource(R.string.palette_title),
-                        style = titleStyle,
-                        maxLines = 1,
-                        autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
-                        modifier = Modifier.weight(1f).padding(end = 8.dp)
-                    )
-                    AlchemyDropdown(
-                        options = ElementSort.entries,
-                        selected = paletteSort,
-                        label = { stringResource(it.labelRes) },
-                        onSelect = onPaletteSort,
-                        tag = "palette_sort",
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    ProgressCounter(unlocked = unlockedIds.size)
-                }
+                val largeText = LocalDensity.current.fontScale >= 1.5f
+                val columns = if (largeText) 3 else PALETTE_COLUMNS
+                PaletteHeader(paletteSort, onPaletteSort, unlockedIds.size, largeText)
                 val paletteState = rememberLazyGridState()
                 val labelHeight = with(LocalDensity.current) { MaterialTheme.typography.labelSmall.lineHeight.toDp() }
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    // Exactly two whole rows, labels included, so no row is ever cut through its names.
-                    val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (PALETTE_COLUMNS - 1)) / PALETTE_COLUMNS
-                    val rowHeight = tileWidth + ElementTextGap + labelHeight
-                    val paletteHeight = rowHeight * PALETTE_ROWS + PALETTE_GAP * (PALETTE_ROWS - 1) + PALETTE_VERTICAL_PADDING * 2
+                    // Whole rows include labels; large text leaves more room for the workspace.
+                    val tileWidth = (maxWidth - PALETTE_END_PADDING - PALETTE_GAP * (columns - 1)) / columns
+                    val rowHeight = tileWidth + ElementTextGap + labelHeight * if (largeText) 2 else 1
+                    val rows = if (largeText) 1 else PALETTE_ROWS
+                    val paletteHeight = rowHeight * rows + PALETTE_GAP * (rows - 1) + PALETTE_VERTICAL_PADDING * 2
                     Box(modifier = Modifier.fillMaxWidth().height(paletteHeight).testTag("palette_grid")) {
                         LazyVerticalGrid(
                             state = paletteState,
-                            columns = GridCells.Fixed(PALETTE_COLUMNS),
+                            columns = GridCells.Fixed(columns),
                             horizontalArrangement = Arrangement.spacedBy(PALETTE_GAP),
                             verticalArrangement = Arrangement.spacedBy(PALETTE_GAP),
                             contentPadding = PaddingValues(top = PALETTE_VERTICAL_PADDING, end = PALETTE_END_PADDING, bottom = PALETTE_VERTICAL_PADDING),
@@ -335,7 +322,7 @@ fun HomeScreen(
                                     onDrop = { drop ->
                                         tapOrigin = null
                                         paletteDrop(element.id, drop, workspaceBounds, frameInsetPx) { bounds ->
-                                            labelMeasurer.measure(resources.elementName(element.id), workspaceLabelStyle(bounds)).size.width / 2f
+                                            labelMeasurer.measure(resources.elementName(element.id), workspaceLabelStyle(bounds)).size
                                         }?.let(onEvent)
                                     },
                                     onTap = { center ->
@@ -362,6 +349,40 @@ fun HomeScreen(
     }
 
     DiscoveryCard(state, playingEffect = { playingEffect }, effectTime = { effectTime.value }, onDismiss = onDismissNewElement, onClick = onClick)
+}
+
+@Composable
+private fun PaletteHeader(paletteSort: ElementSort, onPaletteSort: (ElementSort) -> Unit, unlockedCount: Int, largeText: Boolean) {
+    val sortControl: @Composable () -> Unit = {
+        AlchemyDropdown(
+            options = ElementSort.entries,
+            selected = paletteSort,
+            label = { stringResource(it.labelRes) },
+            onSelect = onPaletteSort,
+            tag = "palette_sort",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+    }
+    val title: @Composable (Modifier) -> Unit = { modifier ->
+        val titleStyle = MaterialTheme.typography.titleMedium
+        Text(
+            text = stringResource(R.string.palette_title),
+            style = titleStyle,
+            maxLines = 1,
+            autoSize = WholeWordsAutoSize(min = PALETTE_TITLE_MIN_SIZE, max = titleStyle.fontSize),
+            modifier = modifier.padding(end = 8.dp)
+        )
+    }
+    if (largeText) title(Modifier.fillMaxWidth())
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 4.dp)) {
+        if (largeText) {
+            Box(Modifier.weight(1f)) { sortControl() }
+        } else {
+            title(Modifier.weight(1f))
+            sortControl()
+        }
+        ProgressCounter(unlocked = unlockedCount)
+    }
 }
 
 /**
@@ -433,7 +454,7 @@ private fun BoxScope.FlyingElements(
 private fun BoxScope.ElementGhost(element: ElementDefinition, at: Offset, workspace: Rect?, scale: () -> Float, glowAlpha: Float, modifier: Modifier = Modifier) {
     val density = LocalDensity.current
     val iconPx = workspace?.let { workspaceIconSize(it.width, it.height) } ?: with(density) { PREVIEW_FALLBACK_ICON.toPx() }
-    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
+    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height, density).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
     val glow = element.rarity.glowColor
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -483,9 +504,10 @@ private fun transitionFramesAt(
  * An element dropped from the palette lands where its icon was under the finger, name and all clear of the edges. The
  * frame round the board counts as the board; a drop anywhere else puts nothing down.
  */
-private fun paletteDrop(elementId: String, drop: Offset, workspace: Rect?, frameWidth: Float, labelHalfWidth: (Rect) -> Float): WorkspaceEvent? {
+private fun paletteDrop(elementId: String, drop: Offset, workspace: Rect?, frameWidth: Float, labelSize: (Rect) -> IntSize): WorkspaceEvent? {
     if (workspace == null || !workspace.inflate(frameWidth).contains(drop)) return null
-    val at = dropPosition(drop - workspace.topLeft, workspace.width, workspace.height, labelHalfWidth(workspace))
+    val label = labelSize(workspace)
+    val at = dropPosition(drop - workspace.topLeft, workspace.width, workspace.height, label.width / 2f, label.height.toFloat())
     return WorkspaceEvent.Spawn(elementId, at.x, at.y)
 }
 

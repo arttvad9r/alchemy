@@ -20,10 +20,15 @@ import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableFloatState
@@ -56,12 +61,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.core.content.res.ResourcesCompat
 import com.artt.alchemy.R
@@ -72,6 +85,9 @@ import com.artt.alchemy.game.overlapTarget
 import com.artt.alchemy.ui.CombinationEffect
 import com.artt.alchemy.ui.TransitionFrame
 import com.artt.alchemy.ui.TransitionKind
+import com.artt.alchemy.ui.components.AlchemyButton
+import com.artt.alchemy.ui.components.AlchemyDialog
+import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.elementIconRes
 import com.artt.alchemy.ui.components.elementName
@@ -169,6 +185,7 @@ fun WorkspaceCanvas(
     items: List<WorkspaceItem>,
     onMove: (instanceId: Long, position: Offset) -> Unit,
     onResolve: (instanceId: Long, position: Offset) -> Unit,
+    onRemove: (instanceId: Long) -> Unit,
     onPickUp: () -> Unit,
     onBoundsChanged: (Rect) -> Unit,
     effect: CombinationEffect?,
@@ -183,6 +200,7 @@ fun WorkspaceCanvas(
     val currentOnResolve by rememberUpdatedState(onResolve)
     val currentOnPickUp by rememberUpdatedState(onPickUp)
     var heldId by remember { mutableStateOf<Long?>(null) }
+    var selectedId by remember { mutableStateOf<Long?>(null) }
     val iconIds = (items.map(WorkspaceItem::elementId) + effect?.sources.orEmpty().map { it.elementId }).distinct()
     val icons = iconIds.associateWith { elementId ->
         key(elementId) { ImageBitmap.imageResource(elementIconRes(elementId)) }
@@ -233,6 +251,7 @@ fun WorkspaceCanvas(
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val context = LocalContext.current
+    val density = LocalDensity.current
     val labelPaint = remember(labelColor) {
         android.graphics.Paint().apply {
             color = labelColor
@@ -259,7 +278,7 @@ fun WorkspaceCanvas(
                 .pointerInput(Unit) {
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        val item = currentItems
+                        val item = currentItems.asReversed()
                             .minByOrNull { candidate -> distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) }
                             ?.takeIf { candidate ->
                                 distanceSquared(candidate, down.position, size.width.toFloat(), size.height.toFloat()) <= itemRadiusSquared(size.width, size.height)
@@ -289,7 +308,7 @@ fun WorkspaceCanvas(
                             if (board.contains(position)) {
                                 // Let go on the board: it settles in from the edge, name and all, instead of hanging over the frame.
                                 val labelHalf = labelPaint.measureText(context.resources.elementName(item.elementId)) / 2
-                                val resting = restingPosition(onBoard(position), width, height, labelHalf)
+                                val resting = restingPosition(onBoard(position), width, height, labelHalf, labelPaint.fontSpacing)
                                 currentOnMove(item.instanceId, resting)
                                 currentOnResolve(item.instanceId, resting)
                             } else {
@@ -309,7 +328,7 @@ fun WorkspaceCanvas(
             val frames = transitions()
             val held = currentItems.find { it.instanceId == heldId }
             if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
-            labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
+            labelPaint.textSize = workspaceLabelSize(size.width, size.height, density)
             val target = held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }
             target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
@@ -336,8 +355,22 @@ fun WorkspaceCanvas(
             if (!reducedMotion) fx.drawSparks(this, held, radius)
             effect?.let { drawEffect(it, time, art, radius, fx.rayPath) }
         }
-        ItemAccessibilityNodes(items, constraints.maxWidth, constraints.maxHeight)
+        ItemAccessibilityNodes(items, constraints.maxWidth, constraints.maxHeight, onSelect = { selectedId = it }, onRemove = onRemove)
     }
+    WorkspaceCombinationDialog(
+        selected = items.find { it.instanceId == selectedId },
+        items = items,
+        onMix = { selected, position ->
+            selectedId = null
+            // Resolve at the partner's position without moving the source: an invalid pair keeps both as they were.
+            onResolve(selected.instanceId, Offset(position.xFraction, position.yFraction))
+        },
+        onRemove = { id ->
+            selectedId = null
+            onRemove(id)
+        },
+        onDismiss = { selectedId = null }
+    )
 }
 
 /**
@@ -395,7 +428,9 @@ private fun Modifier.shaking(shake: Animatable<Float, AnimationVector1D>, amplit
 
 /** One invisible node per item over the canvas, so a screen reader can reach each element and hear its name. */
 @Composable
-private fun ItemAccessibilityNodes(items: List<WorkspaceItem>, width: Int, height: Int) {
+private fun ItemAccessibilityNodes(items: List<WorkspaceItem>, width: Int, height: Int, onSelect: (Long) -> Unit, onRemove: (Long) -> Unit) {
+    val mixLabel = stringResource(R.string.workspace_mix)
+    val removeLabel = stringResource(R.string.workspace_remove)
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val side = with(LocalDensity.current) { (radius * 2).toDp() }
     items.forEach { item ->
@@ -406,9 +441,59 @@ private fun ItemAccessibilityNodes(items: List<WorkspaceItem>, width: Int, heigh
                     .offset { IntOffset((item.xFraction * width - radius).roundToInt(), (item.yFraction * height - radius).roundToInt()) }
                     .size(side)
                     .testTag("workspace_item")
-                    .semantics { contentDescription = name }
+                    // Semantics actions leave ordinary pointer gestures to the canvas underneath.
+                    .semantics {
+                        contentDescription = name
+                        role = Role.Button
+                        onClick(label = mixLabel) {
+                            onSelect(item.instanceId)
+                            true
+                        }
+                        customActions = listOf(
+                            CustomAccessibilityAction(mixLabel) {
+                                onSelect(item.instanceId)
+                                true
+                            },
+                            CustomAccessibilityAction(removeLabel) {
+                                onRemove(item.instanceId)
+                                true
+                            }
+                        )
+                    }
             )
         }
+    }
+}
+
+/** A partner picker reachable by screen readers without having to drag an element. */
+@Composable
+private fun WorkspaceCombinationDialog(
+    selected: WorkspaceItem?,
+    items: List<WorkspaceItem>,
+    onMix: (WorkspaceItem, WorkspaceItem) -> Unit,
+    onRemove: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (selected == null) return
+    // When items overlap, offer the actual target at each position, so a button never mixes a different ingredient.
+    val partners = items.filter { it.instanceId != selected.instanceId }
+        .mapNotNull { position -> overlapTarget(items, selected.instanceId, position.xFraction, position.yFraction)?.let { it to position } }
+        .distinctBy { it.first.instanceId }
+    AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
+        Text(stringResource(R.string.workspace_choose_partner, elementName(selected.elementId)), style = MaterialTheme.typography.titleLarge)
+        Column(modifier = Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(rememberScrollState()).testTag("workspace_combine_dialog")) {
+            if (partners.isEmpty()) Text(stringResource(R.string.workspace_no_partner))
+            partners.forEach { (partner, position) ->
+                AlchemyButton(
+                    text = elementName(partner.elementId),
+                    style = ButtonStyle.BLUE,
+                    onClick = { onMix(selected, position) },
+                    modifier = Modifier.fillMaxWidth().testTag("workspace_partner_${partner.instanceId}")
+                )
+            }
+        }
+        AlchemyButton(stringResource(R.string.workspace_remove), ButtonStyle.RED, onClick = { onRemove(selected.instanceId) })
+        AlchemyButton(stringResource(R.string.cancel), ButtonStyle.DARK, onDismiss)
     }
 }
 
@@ -497,9 +582,12 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
             alpha = alpha,
             filterQuality = FilterQuality.Medium
         )
-        val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
+        val halfWidth = labelPaint.measureText(name) / 2f
+        val labelBounds = Rect(-halfWidth, labelPaint.ascent(), halfWidth, labelPaint.descent())
+        val iconBounds = Rect(center.x - iconSize / 2f, center.y - radius * ICON_TOP_SHARE, center.x + iconSize / 2f, center.y - radius * ICON_TOP_SHARE + iconSize)
+        val labelPosition = workspaceLabelPosition(iconBounds, labelBounds, size, scale, radius * LABEL_EDGE_GAP)
         labelPaint.alpha = (alpha * 255).roundToInt()
-        drawContext.canvas.nativeCanvas.drawText(name, center.x, labelBaseline, labelPaint)
+        drawContext.canvas.nativeCanvas.drawText(name, labelPosition.x, labelPosition.y, labelPaint)
         labelPaint.alpha = 255
     }
 }
@@ -636,11 +724,11 @@ private fun normalize(position: Offset, width: Int, height: Int): Offset = Offse
  * Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and its name,
  * [labelHalfWidth] pixels either side of the centre, clear the edges.
  */
-internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f): Offset {
+internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f, labelHeight: Float = 0f): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val side = (maxOf(radius * REST_SIDE, labelHalfWidth + radius * LABEL_EDGE_GAP) / width).coerceAtMost(HALF)
     val top = (radius * REST_TOP / height).coerceAtMost(HALF)
-    val bottom = (radius * REST_BOTTOM / height).coerceAtMost(HALF)
+    val bottom = (maxOf(radius * REST_BOTTOM, radius * (2 * ICON_SHARE - ICON_TOP_SHARE) + labelHeight) / height).coerceAtMost(HALF)
     return Offset(position.x.coerceIn(side, 1f - side), position.y.coerceIn(top, 1f - bottom))
 }
 
@@ -648,10 +736,10 @@ internal fun restingPosition(position: Offset, width: Float, height: Float, labe
  * Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace, possibly
  * over the frame), in workspace fractions; [labelHalfWidth] is half its name's width.
  */
-internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float): Offset {
+internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float, labelHeight: Float = 0f): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val center = Offset(iconCenter.x, iconCenter.y + radius * ICON_TOP_SHARE - radius * ICON_SHARE)
-    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth)
+    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth, labelHeight)
 }
 
 /**
@@ -670,7 +758,28 @@ internal fun iconCenterAt(xFraction: Float, yFraction: Float, width: Float, heig
 internal fun workspaceIconSize(width: Float, height: Float): Float = minOf(width, height) * ITEM_RADIUS_FRACTION * 2 * ICON_SHARE
 
 /** The size of an element's name on a workspace of this size, in pixels. */
-internal fun workspaceLabelSize(width: Float, height: Float): Float = minOf(width, height) * LABEL_SIZE_FRACTION
+internal fun workspaceLabelSize(width: Float, height: Float, density: Density = Density(1f)): Float = with(density) {
+    maxOf(12f, minOf(width, height) * LABEL_SIZE_FRACTION / density.density).sp.toPx()
+}
+
+/** Coordinates of a label baseline before the item's visual scale is applied. */
+internal fun workspaceLabelPosition(icon: Rect, label: Rect, board: Size, scale: Float = 1f, gap: Float = 0f): Offset {
+    val pivot = icon.center
+    // Text is drawn inside the same scale transform as the icon; keep its transformed bounds on the board.
+    val bounds = Rect(
+        pivot.x - pivot.x / scale,
+        pivot.y - pivot.y / scale,
+        pivot.x + (board.width - pivot.x) / scale,
+        pivot.y + (board.height - pivot.y) / scale
+    )
+    val below = icon.bottom - label.top
+    val baseline = if (below + label.bottom <= bounds.bottom) below else icon.top - label.bottom - gap
+    val minX = (bounds.left - label.left).coerceAtMost(bounds.center.x)
+    val maxX = (bounds.right - label.right).coerceAtLeast(bounds.center.x)
+    val minY = (bounds.top - label.top).coerceAtMost(bounds.center.y)
+    val maxY = (bounds.bottom - label.bottom).coerceAtLeast(bounds.center.y)
+    return Offset(pivot.x.coerceIn(minX, maxX), baseline.coerceIn(minY, maxY))
+}
 
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x

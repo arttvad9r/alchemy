@@ -55,17 +55,17 @@ fun itemTransitions(before: WorkspaceState, result: WorkspaceResult, event: Work
 }
 
 /**
- * The two elements a combination merges: the one dropped stays at the result's position, the other
- * slides in from where it lay.
+ * The two elements a combination merges at their actual source positions. A palette drop has no
+ * source in the previous workspace, so its frame starts at the result's position.
  */
 fun effectSources(before: WorkspaceState, result: WorkspaceResult): List<EffectSource> {
     val combination = result.combination ?: return emptyList()
     val merged = result.workspace.items.last()
     val afterIds = result.workspace.items.mapTo(HashSet()) { it.instanceId }
     val dropped = EffectSource(combination.secondId, merged.xFraction, merged.yFraction)
-    val target = before.items
-        .filterNot { it.instanceId in afterIds }
-        .maxByOrNull { (it.xFraction - merged.xFraction).let { dx -> dx * dx } + (it.yFraction - merged.yFraction).let { dy -> dy * dy } }
-        ?: return listOf(dropped)
-    return listOf(EffectSource(combination.firstId, target.xFraction, target.yFraction), dropped)
+    val removed = before.items.filterNot { it.instanceId in afterIds }
+    val target = removed.firstOrNull { it.elementId == combination.firstId } ?: return listOf(dropped)
+    val source = removed.firstOrNull { it.instanceId != target.instanceId && it.elementId == combination.secondId }
+    val sourceFrame = source?.let { EffectSource(it.elementId, it.xFraction, it.yFraction) } ?: dropped
+    return listOf(EffectSource(target.elementId, target.xFraction, target.yFraction), sourceFrame)
 }
