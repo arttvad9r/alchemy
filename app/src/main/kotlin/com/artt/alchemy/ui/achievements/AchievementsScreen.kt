@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,7 +40,7 @@ import com.artt.alchemy.ui.theme.themedArt
 @Composable
 fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, modifier: Modifier = Modifier) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(ScreenPadding),
         modifier = modifier.fillMaxSize().testTag("screen_achievements")
     ) {
@@ -55,15 +56,15 @@ fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, m
                     .cascadeIn(index)
                     .fillMaxWidth()
                     .rowPanel()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 9.dp)
                     .testTag("achievement_${achievement.id}")
             ) {
-                AchievementBadge(completed)
+                AchievementBadge(achievement.iconRes, completed)
                 val title = stringResource(achievement.title)
                 val count = "$current / ${achievement.target}"
                 val status = if (completed) stringResource(R.string.achievement_completed) else count
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .clearAndSetSemantics { contentDescription = "$title: $status" }
@@ -96,11 +97,11 @@ private fun CompletionCard(onClick: () -> Unit) {
             // Before the panel, so the whole card sinks under the finger, art and all.
             .pressClickable(role = Role.Button, pressedScale = ROW_PRESSED_SCALE, onClick = onClick)
             .rowPanel()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 9.dp)
             .testTag("achievement_completion")
             .clearAndSetSemantics { contentDescription = description }
     ) {
-        AchievementBadge(completed = true)
+        AchievementBadge(R.drawable.nav_achievements, completed = true)
         Text(
             text = stringResource(R.string.completion_title),
             style = MaterialTheme.typography.titleMedium,
@@ -111,18 +112,22 @@ private fun CompletionCard(onClick: () -> Unit) {
     }
 }
 
-/** A trophy in the gold wreath once earned, a chained lock until then. */
+/** Each achievement keeps its own symbol; completion upgrades the neutral frame to the gold wreath. */
 @Composable
-fun AchievementBadge(completed: Boolean, modifier: Modifier = Modifier) {
-    if (completed) {
-        Box(contentAlignment = Alignment.Center, modifier = modifier.size(BADGE_SIZE)) {
-            Image(painter = painterResource(R.drawable.achievement_wreath), contentDescription = null, modifier = Modifier.fillMaxSize())
-            Image(painter = painterResource(R.drawable.nav_achievements), contentDescription = null, modifier = Modifier.size(BADGE_SIZE * 0.5f))
-        }
-    } else {
-        Image(painter = painterResource(themedArt(R.drawable.achievement_locked)), contentDescription = null, modifier = modifier.size(BADGE_SIZE))
+fun AchievementBadge(iconRes: Int, completed: Boolean, modifier: Modifier = Modifier) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier.size(BADGE_SIZE)) {
+        Image(
+            painter = painterResource(if (completed) R.drawable.achievement_wreath else themedArt(R.drawable.frame_base)),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize().alpha(if (completed) 1f else 0.78f)
+        )
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(BADGE_SIZE * if (completed) 0.5f else 0.56f).alpha(if (completed) 1f else 0.52f)
+        )
     }
 }
 
-private val BADGE_SIZE = 48.dp
+private val BADGE_SIZE = 44.dp
 private const val ROW_PRESSED_SCALE = 0.97f

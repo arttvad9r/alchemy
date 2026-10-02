@@ -123,7 +123,6 @@ import com.artt.alchemy.ui.components.WholeWordsAutoSize
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.panelBackground
-import com.artt.alchemy.ui.components.pillBadge
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.BodyFontFamily
 import com.artt.alchemy.ui.theme.Gold
@@ -244,7 +243,7 @@ fun HomeScreen(
                 )
                 AlchemyButton(
                     text = stringResource(R.string.clear_workspace),
-                    style = ButtonStyle.BLUE,
+                    style = ButtonStyle.DARK,
                     onClick = { onEvent(WorkspaceEvent.Clear) },
                     modifier = Modifier.testTag("clear_workspace")
                 )
@@ -511,7 +510,8 @@ private fun ProgressCounter(unlocked: Int) {
                 scaleX = bounce.value
                 scaleY = bounce.value
             }
-            .pillBadge()
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(50))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(50))
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
         Image(painter = painterResource(themedArt(R.drawable.nav_recipes)), contentDescription = null, modifier = Modifier.size(20.dp))
@@ -576,13 +576,13 @@ private fun TransitionClock(playing: MutableList<PlayingTransition>, onTick: (no
 private const val COUNTER_BOUNCE_SCALE = 1.25f
 private const val COUNTER_ROLL_MILLIS = 260
 private const val PREVIEW_LIFT_SCALE = 1.12f
-private const val PREVIEW_GLOW_ALPHA = 0.7f
+private const val PREVIEW_GLOW_ALPHA = 0.5f
 private const val PREVIEW_GLOW_SHARE = 0.85f
 private val PREVIEW_FALLBACK_ICON = 56.dp
 private val PreviewLabelShadow = Shadow(color = Color.Black, offset = Offset(0f, 2f), blurRadius = 6f)
 private const val TILE_GLOW_SHARE = 0.75f
-private const val FRESH_GLOW_LOW = 0.25f
-private const val FRESH_GLOW_HIGH = 0.75f
+private const val FRESH_GLOW_LOW = 0.15f
+private const val FRESH_GLOW_HIGH = 0.52f
 private const val FRESH_PULSE_MILLIS = 1100
 
 private data class PlayingTransition(val transition: ItemTransition, val startMillis: Long, val origin: Offset?)

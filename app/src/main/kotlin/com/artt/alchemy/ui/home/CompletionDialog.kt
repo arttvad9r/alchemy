@@ -74,7 +74,7 @@ fun CompletionDialog(progress: PlayerProgress, onDismiss: () -> Unit, onClick: (
                         .scale(BURST_START_SCALE + (1f - BURST_START_SCALE) * entrance.value)
                         .graphicsLayer { alpha = entrance.value.coerceIn(0f, 1f) }
                 )
-                AchievementBadge(completed = true, modifier = Modifier.size(TROPHY_SIZE.dp).scale(entrance.value))
+                AchievementBadge(R.drawable.nav_achievements, completed = true, modifier = Modifier.size(TROPHY_SIZE.dp).scale(entrance.value))
             }
             Text(stringResource(R.string.completion_message, AlchemyCatalog.elements.size), textAlign = TextAlign.Center)
             Text(

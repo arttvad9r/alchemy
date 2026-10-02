@@ -91,7 +91,7 @@ private const val ICON_SHARE = 0.66f
 private const val ICON_TOP_SHARE = 0.85f
 private const val LABEL_SHADOW_RADIUS = 6f
 private const val WATERMARK_SIZE_FRACTION = 0.85f
-private const val WATERMARK_ALPHA = 0.28f
+private const val WATERMARK_ALPHA = 0.2f
 private const val SMOKE_ALPHA = 0.9f
 private const val HELD_RING_SHARE = 1.45f
 
@@ -134,12 +134,12 @@ private const val RESULT_APPEAR_SPAN = 0.45f
 // The scene breathes: the circle turns slowly, items float on the spot, and a discovery wakes the circle up.
 private const val CIRCLE_TURN_DEGREES_PER_SECOND = 2.4f
 private const val CIRCLE_BREATH_SPEED = 0.7f
-private const val CIRCLE_BREATH_ALPHA = 0.05f
+private const val CIRCLE_BREATH_ALPHA = 0.025f
 private const val CIRCLE_FLARE_ALPHA = 0.45f
 private const val BOB_SPEED = 1.7f
 private const val BOB_SHARE = 0.045f
 private const val HALO_SHARE = 0.95f
-private const val HALO_ALPHA = 0.85f
+private const val HALO_ALPHA = 0.6f
 private const val HALO_PULSE = 0.25f
 
 // Sparks thrown when the two sources meet, a little after the effect starts.

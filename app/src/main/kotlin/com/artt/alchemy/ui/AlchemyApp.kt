@@ -98,7 +98,7 @@ import com.artt.alchemy.ui.theme.themedArt
 private const val LIST_DIM = 0.7f
 private const val TOP_SCRIM_HEIGHT = 0.22f
 private const val TOP_SCRIM_ALPHA = 0.75f
-private const val UNSELECTED_ICON_ALPHA = 0.6f
+private const val UNSELECTED_ICON_ALPHA = 0.55f
 private const val TAB_FADE_MILLIS = 180
 private const val THEME_FADE_MILLIS = 400
 
@@ -114,7 +114,7 @@ private const val ICON_HOP_SCALE = 0.78f
 private val NAV_BAR_HEIGHT = 58.dp
 private val NAV_ICON_SIZE = 26.dp
 private val NAV_TOP_LINE = 1.dp
-private val NavTopLine = Brush.horizontalGradient(listOf(Color.Transparent, Gold.copy(alpha = 0.55f), Color.Transparent))
+private val NavTopLine = Brush.horizontalGradient(listOf(Color.Transparent, Gold.copy(alpha = 0.4f), Color.Transparent))
 
 /** The whole game; [sceneReady] turns true once the launch splash has gone, and the music waits for it. */
 @Composable
@@ -322,7 +322,7 @@ private fun RowScope.NavigationItem(tab: AppTab, selected: Boolean, labelStyle: 
                     if (shown > 0f) {
                         val width = size.width * (INDICATOR_START_WIDTH + (1f - INDICATOR_START_WIDTH) * shown)
                         drawRoundRect(
-                            color = pillColor.copy(alpha = shown.coerceAtMost(1f)),
+                            color = pillColor.copy(alpha = 0.78f * shown.coerceAtMost(1f)),
                             topLeft = Offset((size.width - width) / 2, 0f),
                             size = Size(width, size.height),
                             cornerRadius = CornerRadius(size.height / 2)
