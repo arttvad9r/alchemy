@@ -6,13 +6,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.data.ProgressStore
@@ -40,10 +49,32 @@ class MainActivity : ComponentActivity() {
         window.decorView.postDelayed({ sceneReady.value = true }, SPLASH_FALLBACK_MILLIS)
         setContent {
             ScaledUpOnLargeScreens {
-                if (introComplete) {
-                    AlchemyApp(sceneReady = sceneReady.value)
-                } else {
-                    StudioIntro(ready = sceneReady.value, reducedMotion = reducedMotion, onFinished = { introComplete = true })
+                // The game is laid out behind the playing intro, so the intro's black lifts straight onto a finished scene.
+                var gameLaidOut by remember { mutableStateOf(introComplete) }
+                val introShown = remember { MutableTransitionState(!introComplete) }
+                introShown.targetState = !introComplete
+                val introGone = introShown.isIdle && !introShown.currentState
+                Box {
+                    if (gameLaidOut) {
+                        Box(if (introGone) Modifier else Modifier.clearAndSetSemantics { }) {
+                            AlchemyApp(sceneReady = sceneReady.value && introComplete)
+                        }
+                    }
+                    AnimatedVisibility(
+                        visibleState = introShown,
+                        enter = EnterTransition.None,
+                        exit = fadeOut(tween(if (reducedMotion) 0 else INTRO_LIFT_MILLIS))
+                    ) {
+                        StudioIntro(
+                            ready = sceneReady.value,
+                            reducedMotion = reducedMotion,
+                            onShowing = { gameLaidOut = true },
+                            onFinished = {
+                                gameLaidOut = true
+                                introComplete = true
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -65,6 +96,7 @@ class MainActivity : ComponentActivity() {
     private companion object {
         const val INTRO_COMPLETE_KEY = "studio_intro_complete"
         const val SPLASH_FALLBACK_MILLIS = 1500L
+        const val INTRO_LIFT_MILLIS = 450
     }
 }
 

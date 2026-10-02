@@ -97,6 +97,19 @@ UI_ASSETS = {
     "ui/buttons/pill_badge_green.png": ("pill_badge", 256),
     "ui/buttons/tooltip_bubble.png": ("tooltip_bubble", 512),
     "ui/panels_states/discovery_burst_gold.png": ("fx_discovery_burst_gold", 256),
+    # Achievement symbols come from the same art set, so a badge never repeats an element icon. Leaf, combine
+    # flash and success burst are shared with the drawables above.
+    "props/alchemy_table.png": ("achievement_experiments", 128),
+    "effects/glow_blue_orb.png": ("achievement_discovered_50", 128),
+    "effects/glow_gold_orb.png": ("achievement_discovered_100", 128),
+    "props/crystals_large.png": ("achievement_first_epic", 128),
+    "ui/icons/favorite_star.png": ("achievement_first_legendary", 128),
+    "props/scroll_roll.png": ("achievement_all_final", 128),
+    "effects/lightning_arc.png": ("achievement_nature", 128),
+    "props/wooden_crate.png": ("achievement_material", 128),
+    "props/plants_small.png": ("achievement_life", 128),
+    "props/lantern.png": ("achievement_civilization", 128),
+    "effects/portal_swirl.png": ("achievement_cosmos", 128),
 }
 
 CLOSE_ICON = "ui/icons/close.png"
