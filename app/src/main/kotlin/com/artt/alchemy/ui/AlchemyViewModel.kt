@@ -279,6 +279,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     fun exportProgress(uri: Uri) {
         val progress = state.progress
         transferJob?.cancel()
+        state = state.copy(pendingImport = null, transferResult = null)
         transferJob = viewModelScope.launch {
             val written = try {
                 withContext(Dispatchers.IO) {
@@ -292,13 +293,14 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             } catch (_: Exception) {
                 false
             }
-            state = state.copy(transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+            state = state.copy(pendingImport = null, transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
         }
     }
 
     /** Reads a save from the picked document; a file that is not a save changes nothing, a good one waits for confirmation. */
     fun readImport(uri: Uri) {
         transferJob?.cancel()
+        state = state.copy(pendingImport = null, transferResult = null)
         transferJob = viewModelScope.launch {
             val progress = try {
                 withContext(Dispatchers.IO) {
@@ -320,7 +322,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             } catch (_: Exception) {
                 null
             }
-            state = if (progress == null) state.copy(transferResult = TransferResult.IMPORT_INVALID) else state.copy(pendingImport = progress)
+            state = state.copy(pendingImport = progress, transferResult = TransferResult.IMPORT_INVALID.takeIf { progress == null })
         }
     }
 
