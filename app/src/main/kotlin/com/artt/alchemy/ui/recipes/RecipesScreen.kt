@@ -22,7 +22,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -64,7 +64,7 @@ fun RecipesScreen(
     var query by rememberSaveable { mutableStateOf("") }
     var selectedGroup by rememberSaveable { mutableStateOf<ElementGroup?>(null) }
     var sort by rememberSaveable { mutableStateOf(RecipeSort.RECENT) }
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val known = remember(progress.knownRecipeKeys) { AlchemyCatalog.recipes.filter { recipeKey(it.firstId, it.secondId) in progress.knownRecipeKeys } }
     val recipes = remember(known, progress.discoveryOrder, sort, selectedGroup, query, resources) {
         sortRecipes(known, progress.discoveryOrder, sort, Locale.getDefault(), resources::elementName)

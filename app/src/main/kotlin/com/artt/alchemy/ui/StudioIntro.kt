@@ -2,7 +2,6 @@ package com.artt.alchemy.ui
 
 import android.media.AudioManager
 import android.media.MediaPlayer
-import android.net.Uri
 import android.widget.VideoView
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -31,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -149,7 +149,7 @@ private fun IntroVideo(startAt: () -> Int, mayPlay: () -> Boolean, blackout: () 
                     onError()
                     true
                 }
-                setVideoURI(Uri.parse("android.resource://${context.packageName}/${R.raw.artt_intro}"))
+                setVideoURI("android.resource://${context.packageName}/${R.raw.artt_intro}".toUri())
                 onCreated(this)
             }
         },

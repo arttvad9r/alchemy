@@ -1,6 +1,7 @@
 package com.artt.alchemy.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Combination
 import com.artt.alchemy.game.ElementSort
@@ -156,31 +157,29 @@ class ProgressStore(context: Context) {
     ).sanitized()
 
     fun save(progress: PlayerProgress) {
-        preferences.edit()
-            .putStringSet(KEY_UNLOCKED_IDS, progress.unlockedIds)
-            .putString(KEY_DISCOVERY_ORDER, progress.discoveryOrder.joinToString(SEPARATOR))
-            .putStringSet(KEY_KNOWN_RECIPES, progress.knownRecipeKeys)
-            .putInt(KEY_SUCCESSFUL_MIX_COUNT, progress.successfulMixCount)
-            .putInt(KEY_MIX_ATTEMPT_COUNT, progress.mixAttemptCount)
-            .putBoolean(KEY_SOUND_ENABLED, progress.soundEnabled)
-            .putBoolean(KEY_VIBRATION_ENABLED, progress.vibrationEnabled)
-            .putBoolean(KEY_MUSIC_ENABLED, progress.musicEnabled)
-            .putFloat(KEY_MUSIC_VOLUME, progress.musicVolume)
-            .putFloat(KEY_EFFECTS_VOLUME, progress.effectsVolume)
-            .apply {
-                progress.reducedMotion?.let { putBoolean(KEY_REDUCED_MOTION, it) } ?: remove(KEY_REDUCED_MOTION)
-                progress.activeHint?.let { putString(KEY_ACTIVE_HINT, "${it.step}$SEPARATOR${it.recipeKey}") } ?: remove(KEY_ACTIVE_HINT)
-            }
-            .putString(KEY_THEME, progress.theme.name)
-            .putBoolean(KEY_ONBOARDING_SEEN, progress.onboardingSeen)
-            .putString(KEY_PALETTE_SORT, progress.paletteSort.name)
-            .apply()
+        preferences.edit {
+            putStringSet(KEY_UNLOCKED_IDS, progress.unlockedIds)
+            putString(KEY_DISCOVERY_ORDER, progress.discoveryOrder.joinToString(SEPARATOR))
+            putStringSet(KEY_KNOWN_RECIPES, progress.knownRecipeKeys)
+            putInt(KEY_SUCCESSFUL_MIX_COUNT, progress.successfulMixCount)
+            putInt(KEY_MIX_ATTEMPT_COUNT, progress.mixAttemptCount)
+            putBoolean(KEY_SOUND_ENABLED, progress.soundEnabled)
+            putBoolean(KEY_VIBRATION_ENABLED, progress.vibrationEnabled)
+            putBoolean(KEY_MUSIC_ENABLED, progress.musicEnabled)
+            putFloat(KEY_MUSIC_VOLUME, progress.musicVolume)
+            putFloat(KEY_EFFECTS_VOLUME, progress.effectsVolume)
+            progress.reducedMotion?.let { putBoolean(KEY_REDUCED_MOTION, it) } ?: remove(KEY_REDUCED_MOTION)
+            progress.activeHint?.let { putString(KEY_ACTIVE_HINT, "${it.step}$SEPARATOR${it.recipeKey}") } ?: remove(KEY_ACTIVE_HINT)
+            putString(KEY_THEME, progress.theme.name)
+            putBoolean(KEY_ONBOARDING_SEEN, progress.onboardingSeen)
+            putString(KEY_PALETTE_SORT, progress.paletteSort.name)
+        }
     }
 
     /** The elements lying on the workspace, kept apart from the progress so they survive the app being closed. */
     fun saveWorkspace(workspace: WorkspaceState) {
         val items = workspace.items.joinToString(ITEM_SEPARATOR) { "${it.elementId}$SEPARATOR${it.xFraction}$SEPARATOR${it.yFraction}" }
-        preferences.edit().putString(KEY_WORKSPACE, items).apply()
+        preferences.edit { putString(KEY_WORKSPACE, items) }
     }
 
     /** The saved workspace, without elements that are unknown or not open in [unlockedIds] and with positions on the board. */

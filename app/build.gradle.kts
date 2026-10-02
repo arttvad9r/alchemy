@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.artt.alchemy"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.artt.alchemy"
         minSdk = 31
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "1.1.1"
         testInstrumentationRunner = "com.artt.alchemy.RussianLocaleRunner"
@@ -83,6 +83,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    // Compose UI tests bring Espresso 3.5, which cannot inject input on Android 17 (API 37).
+    androidTestImplementation(libs.androidx.test.espresso.core)
 }
 
 // NormalPowers android-engineering-v1 bootstrap

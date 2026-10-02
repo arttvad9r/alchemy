@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 13+ themed icon: the spellbook as a flat shape, with the moon and star of its cover cut out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M39,30 H70 A3,3 0 0 1 73,33 V71 A3,3 0 0 1 70,74 H39 A3,3 0 0 1 36,71 V33 A3,3 0 0 1 39,30 Z M40.5,30 H42.5 V74 H40.5 Z M42.5,68.5 H73 V70.5 H42.5 Z M51.17,39.54 A9.5,9.5 0 1,0 60.97,52.14 A8,8 0 0,1 51.17,39.54 Z M62,54 L63.4,58.6 L68,60 L63.4,61.4 L62,66 L60.6,61.4 L56,60 L60.6,58.6 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M63,74 H68 V83 L65.5,80.5 L63,83 Z" />
+</vector>

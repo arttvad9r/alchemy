@@ -50,15 +50,17 @@ class LargeTextHomeTest {
                 }
             }
         }
-        listOf("Открытые элементы", "Воздух", "Земля", "Огонь", "Вода").forEach { text ->
-            if (text != "Открытые элементы") {
+        // The heading and the motto under the game's name sit above the palette; the names are in it.
+        val headings = setOf("Открыто", "Соединяй · Открывай · Создавай")
+        (headings + listOf("Воздух", "Земля", "Огонь", "Вода")).forEach { text ->
+            if (text !in headings) {
                 composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text))
             }
             val layouts = mutableListOf<TextLayoutResult>()
             composeRule.onNodeWithText(text, useUnmergedTree = true)
                 .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
             assertFalse("$text must fit at twice the system text size", layouts.single().hasVisualOverflow)
-            if (text != "Открытые элементы") assertEquals("A basic name must not break inside a word", 1, layouts.single().lineCount)
+            if (text !in headings) assertEquals("A basic name must not break inside a word", 1, layouts.single().lineCount)
         }
     }
 }

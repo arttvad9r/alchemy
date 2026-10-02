@@ -59,6 +59,7 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
@@ -257,6 +258,7 @@ fun WorkspaceCanvas(
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val density = LocalDensity.current
     val labelPaint = remember(labelColor) {
         android.graphics.Paint().apply {
@@ -318,7 +320,7 @@ fun WorkspaceCanvas(
                             val position = normalize(lastPosition, size.width, size.height)
                             if (board.contains(position)) {
                                 // Let go on the board: it settles in from the edge, name and all, instead of hanging over the frame.
-                                val labelHalf = labelPaint.measureText(context.resources.elementName(item.elementId)) / 2
+                                val labelHalf = labelPaint.measureText(resources.elementName(item.elementId)) / 2
                                 val resting = restingPosition(onBoard(position), width, height, labelHalf, labelPaint.fontSpacing)
                                 currentOnMove(item.instanceId, resting)
                                 currentOnResolve(item.instanceId, resting)
@@ -345,7 +347,7 @@ fun WorkspaceCanvas(
             val held = shown.find { it.instanceId == heldId }
             if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
             labelPaint.textSize = workspaceLabelSize(size.width, size.height, density)
-            val target = held?.takeUnless { heldOff }?.let { mixTarget(shown, it, labelPaint, context.resources.elementName(it.elementId)) }
+            val target = held?.takeUnless { heldOff }?.let { mixTarget(shown, it, labelPaint, resources.elementName(it.elementId)) }
             target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
                 val center = Offset(target.xFraction * size.width, target.yFraction * size.height)
@@ -367,7 +369,7 @@ fun WorkspaceCanvas(
                 leavingId = heldId.takeIf { heldOff }
             )
             // The item in hand is drawn last, so it never slides under the others.
-            shown.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, context.resources.elementName(it.elementId)) }
+            shown.sortedBy { it.instanceId == heldId }.forEach { drawItem(it, art, labelPaint, radius, motion, resources.elementName(it.elementId)) }
             drawTransitions(frames, art, radius)
             if (!reducedMotion) fx.drawSparks(this, held, radius)
             effect?.let { drawEffect(it, time, art, radius, fx.rayPath) }

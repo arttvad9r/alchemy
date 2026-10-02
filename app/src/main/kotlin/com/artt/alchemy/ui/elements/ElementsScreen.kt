@@ -33,8 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -84,7 +84,7 @@ fun ElementsScreen(
     // Cards opened one from another, so back returns to the previous one.
     var openedCards by remember { mutableStateOf(emptyList<ElementDefinition>()) }
     var selectedGroup by rememberSaveable { mutableStateOf<ElementGroup?>(null) }
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
     val entries = remember(progress.unlockedIds, selectedGroup, query, resources) {
         AlchemyCatalog.elements.filter { element ->
@@ -244,7 +244,7 @@ private fun catalogNameStyle(contentWidth: Dp): TextStyle {
     // Tight leading, so a two-word name reads as one label.
     val base = MaterialTheme.typography.labelMedium.let { it.copy(lineHeight = it.fontSize * NAME_LINE_HEIGHT) }
     val locked = stringResource(R.string.locked_element)
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val measurer = rememberTextMeasurer()
     val widthPx = with(LocalDensity.current) { contentWidth.roundToPx() }
     return remember(base, locked, widthPx, resources) {
