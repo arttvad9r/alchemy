@@ -76,6 +76,8 @@ import com.artt.alchemy.ui.components.LocalReducedMotion
 import com.artt.alchemy.ui.components.elementIconRes
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.motion
+import com.artt.alchemy.ui.theme.LocalAppTheme
+import com.artt.alchemy.ui.theme.moteTint
 import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.PI
 import kotlin.math.cos
@@ -188,14 +190,14 @@ fun WorkspaceCanvas(
     val art = WorkspaceArt(
         icons = icons,
         magicCircle = ImageBitmap.imageResource(themedArt(R.drawable.scene_magic_circle)),
-        flash = ImageBitmap.imageResource(R.drawable.fx_combine_flash),
+        flash = ImageBitmap.imageResource(themedArt(R.drawable.fx_combine_flash)),
         burst = ImageBitmap.imageResource(R.drawable.fx_success_burst),
         sparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_gold),
-        appearSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_blue),
+        appearSparkles = ImageBitmap.imageResource(themedArt(R.drawable.fx_sparkles_blue)),
         smoke = ImageBitmap.imageResource(R.drawable.fx_smoke_puff),
-        heldRing = ImageBitmap.imageResource(R.drawable.fx_selected_ring),
-        energyRing = ImageBitmap.imageResource(R.drawable.fx_energy_ring),
-        shockwave = ImageBitmap.imageResource(R.drawable.fx_shockwave_ring),
+        heldRing = ImageBitmap.imageResource(themedArt(R.drawable.fx_selected_ring)),
+        energyRing = ImageBitmap.imageResource(themedArt(R.drawable.fx_energy_ring)),
+        shockwave = ImageBitmap.imageResource(themedArt(R.drawable.fx_shockwave_ring)),
         purpleSparkles = ImageBitmap.imageResource(R.drawable.fx_sparkles_purple),
         purpleOrb = ImageBitmap.imageResource(R.drawable.fx_glow_purple_orb),
         goldOrb = ImageBitmap.imageResource(R.drawable.fx_glow_gold_orb),
@@ -224,7 +226,8 @@ fun WorkspaceCanvas(
     val reducedMotion = LocalReducedMotion.current
     val targetPulse = if (reducedMotion) 1f else animatedPulse
 
-    val fx = remember { WorkspaceFx() }
+    val moteTint = LocalAppTheme.current.moteTint
+    val fx = remember(moteTint) { WorkspaceFx(moteTint) }
     val clock = rememberWorkspaceClock(fx, reducedMotion)
     val shake = remember { Animatable(0f) }
 
@@ -689,9 +692,9 @@ private const val BEAT_SPREAD = 7L
 private const val BEAT_STEP = 0.9f
 
 /** What lives on the workspace between the game's events: its sparks, motes and the reusable ray geometry. */
-private class WorkspaceFx {
+private class WorkspaceFx(moteTint: Color) {
     val sparks = Sparks()
-    val motes = Motes()
+    val motes = Motes(moteTint)
     val rayPath = Path()
 
     // Refusals and removals already given their sparks, so a transition throws them once.

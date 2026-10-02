@@ -117,18 +117,30 @@ SLIDER_KNOB_FEATHER = 6
 SLIDER_KNOB_SIZE = 96
 
 # Blue art that each theme recolours: written next to the original as <name>_<theme>.webp.
-# Only the saturated blues move; gold trim, silver and the green/red accents keep their colour.
+# Only the blues move, greyish navy fills included; gold trim, silver and the green/red accents keep their colour.
 # The rarity cards are recoloured in convert_card_rarities, from the themed card_base.
 THEMED_ART = (
     "btn_blue", "dialog_blue", "tab_active", "tab_inactive", "toggle_on", "field_search", "field_dropdown",
     "field_row", "progress_track", "progress_fill", "slider_knob", "banner_wide", "scene_magic_circle",
-    "radio_on", "card_base", "ic_plus", "ic_forward", "ic_close",
+    "radio_on", "card_base", "ic_plus", "ic_forward", "ic_close", "radio_off", "toggle_off", "btn_dark", "dialog_gold",
+    "tooltip_bubble", "achievement_locked",
+    "ic_info", "ic_help", "ic_back", "ic_recent", "ic_audio", "ic_haptics", "nav_recipes", "nav_settings",
+    "fx_selected_ring", "fx_sparkles_blue", "fx_energy_ring", "fx_shockwave_ring", "fx_combine_flash",
 )
+# Element tile frames: the rim is the rarity colour and stays; the dark, nearly grey face takes the theme's hue
+# with one chroma for every rarity, so a row of tiles shares one face. Pixels fade from face to rim between
+# these OKLCH (start, end) lightnesses and chromas, so the rim's glow spilling onto the face leaves no hard edge.
+FRAMES = ("frame_base", "frame_common", "frame_rare", "frame_epic", "frame_legendary")
+FACE_LIGHTNESS_FADE = (0.3, 0.38)
+FACE_CHROMA_FADE = (0.09, 0.16)
+FACE_CHROMA = 0.03
 # Theme -> (OKLCH hue every blue becomes, chroma factor, lightness factor). The shift keeps perceived
 # lightness, so the new hue is no brighter than the blue it replaces; one hue keeps toggles and panels alike.
 THEME_TINTS = {"ember": (48, 0.75, 1.1), "verdant": (180, 0.7, 1.0)}
+# The workspace glow is a wide translucent wash: in Ember's copper it reads as rust, so it takes amber instead.
+TINT_OVERRIDES = {("scene_magic_circle", "ember"): (65, 0.5, 1.2)}
 BLUE_HUE_RANGE = (190, 262)
-BLUE_MIN_SATURATION = 0.35
+BLUE_MIN_SATURATION = 0.1
 # Dark navy fills turn muddy in a warm or green hue, so the darkest pixels keep only this share of
 # their chroma and read as tinted charcoal; full chroma returns between these OKLCH lightnesses.
 DARK_CHROMA = 0.4
@@ -171,9 +183,9 @@ def from_oklch(lightness: float, chroma: float, hue: float) -> tuple[float, floa
     )
 
 
-def tinted(source: Image.Image, theme: str) -> Image.Image:
-    """The image with its saturated blues moved to the theme's hue."""
-    target, chroma_factor, lightness_factor = THEME_TINTS[theme]
+def tinted(source: Image.Image, theme: str, tint: tuple[float, float, float] | None = None) -> Image.Image:
+    """The image with its blues moved to the theme's hue, or to [tint] when given."""
+    target, chroma_factor, lightness_factor = tint or THEME_TINTS[theme]
     low, high = DARK_CHROMA_RAMP
     image = source.copy()
     pixels = image.load()
@@ -196,7 +208,35 @@ def convert_themed_art() -> None:
     for name in THEMED_ART:
         source = Image.open(RES_DIR / f"{name}.webp").convert("RGBA")
         for theme in THEME_TINTS:
-            tinted(source, theme).save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+            tinted(source, theme, TINT_OVERRIDES.get((name, theme))).save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    for name in FRAMES:
+        source = Image.open(RES_DIR / f"{name}.webp").convert("RGBA")
+        for theme in THEME_TINTS:
+            face_tinted(source, theme).save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
+def fade_out(value: float, fade: tuple[float, float]) -> float:
+    """1 below fade's start, 0 above its end, linear between."""
+    return min(1.0, max(0.0, (fade[1] - value) / (fade[1] - fade[0])))
+
+
+def face_tinted(source: Image.Image, theme: str) -> Image.Image:
+    """The tile frame with its dark face, whatever its hue, in the theme's hue."""
+    target, _, lightness_factor = THEME_TINTS[theme]
+    image = source.copy()
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            red, green, blue, alpha = pixels[x, y]
+            if alpha == 0:
+                continue
+            lightness, chroma, _ = to_oklch(red / 255, green / 255, blue / 255)
+            face = fade_out(lightness, FACE_LIGHTNESS_FADE) * fade_out(chroma, FACE_CHROMA_FADE)
+            if face > 0:
+                rgb = from_oklch(lightness * lightness_factor, FACE_CHROMA, target)
+                old = (red, green, blue)
+                pixels[x, y] = (*(round(o + (c * 255 - o) * face) for o, c in zip(old, rgb)), alpha)
+    return image
 
 
 def trimmed(source: Path) -> Image.Image:

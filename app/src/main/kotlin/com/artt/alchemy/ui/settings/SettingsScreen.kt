@@ -195,7 +195,7 @@ fun SettingsScreen(
         }
         SettingsPanel {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Image(painterResource(R.drawable.ic_help), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
+                Image(painterResource(themedArt(R.drawable.ic_help)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
                 Text(stringResource(R.string.help), style = MaterialTheme.typography.titleMedium)
             }
             Text(stringResource(R.string.help_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -310,7 +310,7 @@ private fun SettingToggle(label: String, iconRes: Int?, enabled: Boolean, tag: S
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (iconRes != null) Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
+        if (iconRes != null) Image(painterResource(themedArt(iconRes)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
         Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         AlchemyToggle(
             checked = enabled,
@@ -336,7 +336,7 @@ private fun VolumeSlider(
     val alpha by animateFloatAsState(if (muted) MUTED_ALPHA else 1f, motion(tween(MUTE_FADE_MILLIS)), label = "muted")
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.alpha(alpha)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
+            Image(painterResource(themedArt(iconRes)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
             Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             Text("${(value * 100).roundToInt()}%", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

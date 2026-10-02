@@ -34,6 +34,7 @@ import com.artt.alchemy.ui.components.cascadeIn
 import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.theme.themedArt
 
 @Composable
 fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, modifier: Modifier = Modifier) {
@@ -119,7 +120,7 @@ fun AchievementBadge(completed: Boolean, modifier: Modifier = Modifier) {
             Image(painter = painterResource(R.drawable.nav_achievements), contentDescription = null, modifier = Modifier.size(BADGE_SIZE * 0.5f))
         }
     } else {
-        Image(painter = painterResource(R.drawable.achievement_locked), contentDescription = null, modifier = modifier.size(BADGE_SIZE))
+        Image(painter = painterResource(themedArt(R.drawable.achievement_locked)), contentDescription = null, modifier = modifier.size(BADGE_SIZE))
     }
 }
 

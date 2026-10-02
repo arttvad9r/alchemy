@@ -42,8 +42,8 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.color
+import com.artt.alchemy.ui.theme.themedArt
 
-private val FinalBadgeColor = Color(0xFF2A3160)
 private val FinalMarkEdge = Color(0xFF3B2A06)
 
 // Share of the frame taken by its ornamental border on each side.
@@ -68,7 +68,7 @@ fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silho
 fun ElementFrame(rarity: ElementRarity?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Box(contentAlignment = Alignment.Center, modifier = modifier.aspectRatio(1f)) {
         Image(
-            painter = painterResource(rarity.frameRes),
+            painter = painterResource(themedArt(rarity.frameRes)),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize().then(if (rarity == null) Modifier.alpha(0.7f) else Modifier)
@@ -104,7 +104,7 @@ fun FinalBadge(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         modifier = modifier
-            .background(FinalBadgeColor, RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(50))
             .padding(horizontal = 8.dp, vertical = 1.dp)
     ) {
         FinalMark(Modifier.size(8.dp))

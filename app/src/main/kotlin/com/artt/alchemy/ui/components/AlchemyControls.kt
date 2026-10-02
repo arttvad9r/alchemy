@@ -247,7 +247,7 @@ fun <T : Enum<T>> AlchemyDropdown(
                 .testTag(tag)
         ) {
             iconRes?.let {
-                Image(painterResource(it), contentDescription = null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
+                Image(painterResource(themedArt(it)), contentDescription = null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
             }
             Text(label(selected), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
         }
@@ -484,7 +484,7 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
 /** A speech bubble with its tail at the bottom centre; leave room for the tail below the content. */
 @Composable
 fun Modifier.tooltipBackground(): Modifier {
-    val art = ImageBitmap.imageResource(R.drawable.tooltip_bubble)
+    val art = ImageBitmap.imageResource(themedArt(R.drawable.tooltip_bubble))
     return drawBehind { drawSliced(art, BubbleColumns, BubbleRows, density / BUBBLE_ART_DENSITY) }
 }
 

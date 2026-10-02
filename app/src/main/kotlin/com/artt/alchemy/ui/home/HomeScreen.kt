@@ -130,6 +130,7 @@ import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.TitleFontFamily
 import com.artt.alchemy.ui.theme.panel
 import com.artt.alchemy.ui.theme.panelBorder
+import com.artt.alchemy.ui.theme.themedArt
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.currentCoroutineContext
@@ -513,7 +514,7 @@ private fun ProgressCounter(unlocked: Int) {
             .pillBadge()
             .padding(horizontal = 14.dp, vertical = 6.dp)
     ) {
-        Image(painter = painterResource(R.drawable.nav_recipes), contentDescription = null, modifier = Modifier.size(20.dp))
+        Image(painter = painterResource(themedArt(R.drawable.nav_recipes)), contentDescription = null, modifier = Modifier.size(20.dp))
         // The count rolls over like a mechanical counter: up for a find, down after a reset.
         AnimatedContent(targetState = unlocked, transitionSpec = counterRoll(LocalReducedMotion.current), label = "counter") { count ->
             Text(

@@ -48,7 +48,8 @@ private const val MOTE_CORE_SHARE = 0.55f
 private const val RAY_WIDTH_SHARE = 0.34f
 
 private val SparkWhite = Color(0xFFFFFFFF)
-private val MoteColors = listOf(Color(0xFFFFD98A), Color(0xFFFFD98A), Color(0xFF9CC3FF), Color(0xFF9CC3FF), Color(0xFFC9A4FF))
+private val MoteGold = Color(0xFFFFD98A)
+private val MoteViolet = Color(0xFFC9A4FF)
 
 /** The glowing colour of a rarity in effects: brighter than its badge, so it reads as light on the dark workspace. */
 internal val ElementRarity.glowColor: Color
@@ -182,8 +183,9 @@ class Sparks {
 
 private class Mote(val x: Float, val start: Float, val speed: Float, val sway: Float, val phase: Float, val size: Float, val color: Color)
 
-/** Specks of light drifting slowly up through the workspace and twinkling, always the same for the same time. */
-class Motes {
+/** Specks of light drifting slowly up through the workspace and twinkling, always the same for the same time; [tint] is the theme's own speck. */
+class Motes(tint: Color) {
+    private val colors = listOf(MoteGold, MoteGold, tint, tint, MoteViolet)
     private val motes = Random(SEED).let { random ->
         List(MOTE_COUNT) {
             Mote(
@@ -193,7 +195,7 @@ class Motes {
                 sway = 0.01f + 0.03f * random.nextFloat(),
                 phase = random.nextFloat() * TAU,
                 size = 0.02f + 0.03f * random.nextFloat(),
-                color = MoteColors[random.nextInt(MoteColors.size)]
+                color = colors[random.nextInt(colors.size)]
             )
         }
     }

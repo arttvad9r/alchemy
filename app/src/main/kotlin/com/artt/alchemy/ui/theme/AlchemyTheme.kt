@@ -158,6 +158,30 @@ private val ThemedArt = mapOf(
     themed(R.drawable.ic_plus, R.drawable.ic_plus_ember, R.drawable.ic_plus_verdant),
     themed(R.drawable.ic_forward, R.drawable.ic_forward_ember, R.drawable.ic_forward_verdant),
     themed(R.drawable.ic_close, R.drawable.ic_close_ember, R.drawable.ic_close_verdant),
+    themed(R.drawable.radio_off, R.drawable.radio_off_ember, R.drawable.radio_off_verdant),
+    themed(R.drawable.toggle_off, R.drawable.toggle_off_ember, R.drawable.toggle_off_verdant),
+    themed(R.drawable.btn_dark, R.drawable.btn_dark_ember, R.drawable.btn_dark_verdant),
+    themed(R.drawable.dialog_gold, R.drawable.dialog_gold_ember, R.drawable.dialog_gold_verdant),
+    themed(R.drawable.tooltip_bubble, R.drawable.tooltip_bubble_ember, R.drawable.tooltip_bubble_verdant),
+    themed(R.drawable.achievement_locked, R.drawable.achievement_locked_ember, R.drawable.achievement_locked_verdant),
+    themed(R.drawable.frame_base, R.drawable.frame_base_ember, R.drawable.frame_base_verdant),
+    themed(R.drawable.frame_common, R.drawable.frame_common_ember, R.drawable.frame_common_verdant),
+    themed(R.drawable.frame_rare, R.drawable.frame_rare_ember, R.drawable.frame_rare_verdant),
+    themed(R.drawable.frame_epic, R.drawable.frame_epic_ember, R.drawable.frame_epic_verdant),
+    themed(R.drawable.frame_legendary, R.drawable.frame_legendary_ember, R.drawable.frame_legendary_verdant),
+    themed(R.drawable.ic_info, R.drawable.ic_info_ember, R.drawable.ic_info_verdant),
+    themed(R.drawable.ic_help, R.drawable.ic_help_ember, R.drawable.ic_help_verdant),
+    themed(R.drawable.ic_back, R.drawable.ic_back_ember, R.drawable.ic_back_verdant),
+    themed(R.drawable.ic_recent, R.drawable.ic_recent_ember, R.drawable.ic_recent_verdant),
+    themed(R.drawable.ic_audio, R.drawable.ic_audio_ember, R.drawable.ic_audio_verdant),
+    themed(R.drawable.ic_haptics, R.drawable.ic_haptics_ember, R.drawable.ic_haptics_verdant),
+    themed(R.drawable.nav_recipes, R.drawable.nav_recipes_ember, R.drawable.nav_recipes_verdant),
+    themed(R.drawable.nav_settings, R.drawable.nav_settings_ember, R.drawable.nav_settings_verdant),
+    themed(R.drawable.fx_selected_ring, R.drawable.fx_selected_ring_ember, R.drawable.fx_selected_ring_verdant),
+    themed(R.drawable.fx_sparkles_blue, R.drawable.fx_sparkles_blue_ember, R.drawable.fx_sparkles_blue_verdant),
+    themed(R.drawable.fx_energy_ring, R.drawable.fx_energy_ring_ember, R.drawable.fx_energy_ring_verdant),
+    themed(R.drawable.fx_shockwave_ring, R.drawable.fx_shockwave_ring_ember, R.drawable.fx_shockwave_ring_verdant),
+    themed(R.drawable.fx_combine_flash, R.drawable.fx_combine_flash_ember, R.drawable.fx_combine_flash_verdant),
     themed(R.drawable.card_common, R.drawable.card_common_ember, R.drawable.card_common_verdant),
     themed(R.drawable.card_rare, R.drawable.card_rare_ember, R.drawable.card_rare_verdant),
     themed(R.drawable.card_epic, R.drawable.card_epic_ember, R.drawable.card_epic_verdant),
@@ -239,6 +263,14 @@ val AppTheme.backgroundRes: Int
         AppTheme.AETHER -> R.drawable.bg_aether
         AppTheme.EMBER -> R.drawable.bg_ember
         AppTheme.VERDANT -> R.drawable.bg_verdant
+    }
+
+/** The light specks drifting over the workspace alongside the gold ones. */
+val AppTheme.moteTint: Color
+    get() = when (this) {
+        AppTheme.AETHER -> Color(0xFF9CC3FF)
+        AppTheme.EMBER -> Color(0xFFFFB98A)
+        AppTheme.VERDANT -> Color(0xFF9CE3D2)
     }
 
 /** How much the home screen darkens the picture: the brighter the background, the more. */
