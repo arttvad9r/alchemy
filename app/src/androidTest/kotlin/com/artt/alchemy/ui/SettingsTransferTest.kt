@@ -192,4 +192,86 @@ class SettingsTransferTest {
         .appendQueryParameter("delayMillis", "3000")
         .apply { text?.let { appendQueryParameter("text", it) } }
         .build()
+
+    @Test
+    fun aNewImportDiscardsThePreviousPendingSaveBeforeReadingItsDocument() {
+        importFile(initialPlayerProgress().copy(unlockedIds = initialPlayerProgress().unlockedIds + "steam").toJson())
+        val next = initialPlayerProgress().copy(unlockedIds = initialPlayerProgress().unlockedIds + "mud")
+
+        scenario.onActivity { activity ->
+            val model = ViewModelProvider(activity)[AlchemyViewModel::class.java]
+            model.readImport(delayedDocument("replacement-import.json", next.toJson()))
+            assertNull(model.state.pendingImport)
+            assertNull(model.state.transferResult)
+            model.confirmImport()
+            assertTrue("The previous file must not be imported", "steam" !in model.state.progress.unlockedIds)
+        }
+        composeRule.waitUntil(5_000) { composeRule.onAllNodesWithTag("import_dialog").fetchSemanticsNodes().isNotEmpty() }
+        scenario.onActivity { activity ->
+            val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
+            assertTrue("mud" in state.pendingImport!!.unlockedIds)
+            assertNull(state.transferResult)
+        }
+    }
+
+    @Test
+    fun anInvalidReplacementImportLeavesOnlyTheErrorResult() {
+        importFile(initialPlayerProgress().copy(unlockedIds = initialPlayerProgress().unlockedIds + "steam").toJson())
+
+        importFile("not a save")
+
+        scenario.onActivity { activity ->
+            val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
+            assertNull(state.pendingImport)
+            assertEquals(TransferResult.IMPORT_INVALID, state.transferResult)
+        }
+        composeRule.onNodeWithTag("import_dialog").assertDoesNotExist()
+        composeRule.onNodeWithTag("transfer_dialog").assertIsDisplayed()
+    }
+
+    @Test
+    fun aNewExportDiscardsThePreviousTransferDialog() {
+        importFile(initialPlayerProgress().toJson())
+
+        scenario.onActivity { activity ->
+            val model = ViewModelProvider(activity)[AlchemyViewModel::class.java]
+            model.exportProgress(delayedDocument("replacement-export.json"))
+            assertNull(model.state.pendingImport)
+            assertNull(model.state.transferResult)
+        }
+        composeRule.waitUntil(5_000) { composeRule.onAllNodesWithTag("transfer_dialog").fetchSemanticsNodes().isNotEmpty() }
+        scenario.onActivity { activity ->
+            val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
+            assertNull(state.pendingImport)
+            assertEquals(TransferResult.EXPORTED, state.transferResult)
+        }
+        composeRule.onNodeWithTag("import_dialog").assertDoesNotExist()
+    }
+
+    @Test
+    fun resettingWhileExportOpensTheDocumentStillWritesTheRequestedSnapshot() {
+        val uri = delayedDocument("export-before-reset-${SystemClock.elapsedRealtime()}.json")
+        val expected = initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true)
+        scenario.onActivity { activity ->
+            val model = ViewModelProvider(activity)[AlchemyViewModel::class.java]
+            model.exportProgress(uri)
+            model.confirmReset()
+        }
+
+        val immediateUri = uri.buildUpon().clearQuery().build()
+        var exported: PlayerProgress? = null
+        composeRule.waitUntil(5_000) {
+            exported = runCatching {
+                context.contentResolver.openInputStream(immediateUri)?.use { parsePlayerProgress(it.readBytes().decodeToString()) }
+            }.getOrNull()
+            exported != null
+        }
+        assertEquals(expected, exported)
+        scenario.onActivity { activity ->
+            val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
+            assertEquals(initialPlayerProgress(), state.progress)
+            assertNull(state.pendingImport)
+            assertNull(state.transferResult)
+        }
+    }
 }
