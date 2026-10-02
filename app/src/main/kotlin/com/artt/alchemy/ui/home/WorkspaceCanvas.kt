@@ -360,10 +360,10 @@ fun WorkspaceCanvas(
     WorkspaceCombinationDialog(
         selected = items.find { it.instanceId == selectedId },
         items = items,
-        onMix = { selected, partner ->
+        onMix = { selected, position ->
             selectedId = null
             // Resolve at the partner's position without moving the source: an invalid pair keeps both as they were.
-            onResolve(selected.instanceId, Offset(partner.xFraction, partner.yFraction))
+            onResolve(selected.instanceId, Offset(position.xFraction, position.yFraction))
         },
         onRemove = { id ->
             selectedId = null
@@ -477,17 +477,17 @@ private fun WorkspaceCombinationDialog(
     if (selected == null) return
     // When items overlap, offer the actual target at each position, so a button never mixes a different ingredient.
     val partners = items.filter { it.instanceId != selected.instanceId }
-        .mapNotNull { overlapTarget(items, selected.instanceId, it.xFraction, it.yFraction) }
-        .distinctBy { it.instanceId }
+        .mapNotNull { position -> overlapTarget(items, selected.instanceId, position.xFraction, position.yFraction)?.let { it to position } }
+        .distinctBy { it.first.instanceId }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_blue) {
         Text(stringResource(R.string.workspace_choose_partner, elementName(selected.elementId)), style = MaterialTheme.typography.titleLarge)
         Column(modifier = Modifier.weight(1f, fill = false).fillMaxWidth().verticalScroll(rememberScrollState()).testTag("workspace_combine_dialog")) {
             if (partners.isEmpty()) Text(stringResource(R.string.workspace_no_partner))
-            partners.forEach { partner ->
+            partners.forEach { (partner, position) ->
                 AlchemyButton(
                     text = elementName(partner.elementId),
                     style = ButtonStyle.BLUE,
-                    onClick = { onMix(selected, partner) },
+                    onClick = { onMix(selected, position) },
                     modifier = Modifier.fillMaxWidth().testTag("workspace_partner_${partner.instanceId}")
                 )
             }
