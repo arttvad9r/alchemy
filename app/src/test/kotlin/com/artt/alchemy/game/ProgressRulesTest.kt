@@ -1,5 +1,6 @@
 package com.artt.alchemy.game
 
+import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.reset
@@ -34,10 +35,29 @@ class ProgressRulesTest {
     }
 
     @Test
-    fun reset_restores_initial_progress() {
+    fun reset_restores_initial_progress_and_keeps_settings() {
         val changed = initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam"))
+            .copy(theme = AppTheme.EMBER, musicVolume = 0.3f, soundEnabled = false, reducedMotion = true, onboardingSeen = true)
 
-        assertEquals(initialPlayerProgress(), changed.reset())
+        assertEquals(
+            initialPlayerProgress().copy(theme = AppTheme.EMBER, musicVolume = 0.3f, soundEnabled = false, reducedMotion = true),
+            changed.reset()
+        )
+    }
+
+    @Test
+    fun known_recipes_need_open_ingredients_and_result_and_mixes_count_as_attempts() {
+        val dirty = initialPlayerProgress().copy(
+            knownRecipeKeys = setOf(recipeKey("fire", "water"), recipeKey("steam", "air")),
+            unlockedIds = AlchemyCatalog.baseElementIds + "cloud",
+            successfulMixCount = 5,
+            mixAttemptCount = 2
+        )
+
+        val clean = dirty.sanitized()
+
+        assertEquals(emptySet<String>(), clean.knownRecipeKeys)
+        assertEquals(5, clean.mixAttemptCount)
     }
 
     @Test
@@ -73,7 +93,7 @@ class ProgressRulesTest {
 
         val clean = dirty.sanitized()
 
-        assertEquals(listOf("mud", "fire", "water", "earth", "air", "steam"), clean.discoveryOrder)
+        assertEquals(listOf("fire", "water", "earth", "air", "steam", "mud"), clean.discoveryOrder)
         assertEquals(AlchemyCatalog.baseElementIds + setOf("mud", "steam"), clean.unlockedIds)
         assertEquals(setOf(recipeKey("fire", "water")), clean.knownRecipeKeys)
         assertEquals(1f, clean.musicVolume, 0f)

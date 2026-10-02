@@ -20,6 +20,7 @@ import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.Combination
+import com.artt.alchemy.game.WorkspaceState
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -39,6 +40,9 @@ class FirstRunTest {
     @Before
     fun rememberProgress() {
         store = ProgressStore(context)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         original = store.load()
     }
 
@@ -130,6 +134,20 @@ class FirstRunTest {
             moveTo(Offset(center.x, workspace.top - OUTSIDE_MARGIN - item.top))
             up()
         }
+    }
+
+    @Test
+    fun theTipsGoOnWhereTheyWereLeftAfterTheGameIsClosed() {
+        launchWith(initialPlayerProgress())
+        composeRule.onNodeWithTag("palette_fire").performClick()
+        composeRule.onNodeWithTag("palette_water").dragToWorkspaceCentre()
+        composeRule.onNodeWithText(context.getString(R.string.tip_remove)).assertIsDisplayed()
+
+        scenario?.close()
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
+
+        composeRule.onNodeWithText(context.getString(R.string.tip_remove)).assertIsDisplayed()
     }
 
     private fun launchWith(progress: PlayerProgress) {

@@ -127,4 +127,40 @@ class WorkspaceReducerTest {
         assertEquals(null, overlapTarget(items, draggedInstanceId = 2, xFraction = 0.9f, yFraction = 0.9f))
         assertEquals(null, overlapTarget(items, draggedInstanceId = 1, xFraction = 0.5f, yFraction = 0.5f))
     }
+
+    @Test
+    fun a_drop_mixes_with_the_nearest_item_in_reach_not_the_oldest() {
+        val state = WorkspaceState(
+            items = listOf(
+                WorkspaceItem(1, "fire", 0.4f, 0.4f),
+                WorkspaceItem(2, "water", 0.5f, 0.5f),
+                WorkspaceItem(3, "water", 0.52f, 0.5f)
+            ),
+            nextInstanceId = 4
+        )
+
+        val result = reduce(state, WorkspaceEvent.ResolveOverlap(3, 0.52f, 0.5f), engine)
+
+        assertEquals(Combination("water", "water", "ocean"), result.combination)
+        assertEquals(listOf(1L, 4L), result.workspace.items.map { it.instanceId })
+    }
+
+    @Test
+    fun of_equally_near_items_the_one_drawn_on_top_is_the_target() {
+        val items = listOf(WorkspaceItem(1, "fire", 0.5f, 0.5f), WorkspaceItem(2, "water", 0.5f, 0.5f), WorkspaceItem(3, "air", 0.5f, 0.6f))
+
+        assertEquals(2L, overlapTarget(items, 3, 0.5f, 0.5f)?.instanceId)
+    }
+
+    @Test
+    fun an_automatic_spawn_on_a_crowded_workspace_never_mixes() {
+        var state = WorkspaceState()
+        repeat(60) { state = reduce(state, WorkspaceEvent.SpawnAutomatically("water"), engine).workspace }
+
+        val result = reduce(state, WorkspaceEvent.SpawnAutomatically("water"), engine)
+
+        assertNull(result.combination)
+        assertEquals(false, result.attemptedMix)
+        assertEquals(61, result.workspace.items.size)
+    }
 }

@@ -284,10 +284,12 @@ fun AlchemyDialog(
     onClose: (() -> Unit)? = null,
     // Shows a back arrow in the top left corner.
     onBack: (() -> Unit)? = null,
+    // False for a card that must not be lost to a stray touch beside it; Back still closes it.
+    dismissOnClickOutside: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
-    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = dismissOnClickOutside)) {
         val art = ImageBitmap.imageResource(themedArt(panelRes))
         val entrance = remember { Animatable(0f) }
         // A quick pop with a touch of overshoot, like a card laid down with a flourish.

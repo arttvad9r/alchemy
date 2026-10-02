@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -154,10 +155,14 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel(), sceneReady: Boolean = 
                     containerColor = Color.Transparent,
                     bottomBar = { AlchemyNavigationBar(selectedTab = state.selectedTab, onSelect = viewModel::selectTab) }
                 ) { padding ->
+                    // Each screen keeps its scroll position, search and filters while another tab is open.
+                    val tabStates = rememberSaveableStateHolder()
                     AnimatedContent(targetState = state.selectedTab, transitionSpec = tabTransition(reducedMotion), label = "tab") { tab ->
-                        // Lists on the screen that has just appeared arrive in a cascade.
-                        CompositionLocalProvider(LocalScreenOpening provides rememberScreenOpening()) {
-                            TabScreen(tab, state, viewModel, Modifier.padding(padding))
+                        tabStates.SaveableStateProvider(tab.name) {
+                            // Lists on the screen that has just appeared arrive in a cascade.
+                            CompositionLocalProvider(LocalScreenOpening provides rememberScreenOpening()) {
+                                TabScreen(tab, state, viewModel, Modifier.padding(padding))
+                            }
                         }
                     }
                 }
@@ -215,6 +220,7 @@ private fun TabScreen(tab: AppTab, state: AlchemyUiState, viewModel: AlchemyView
             onConfirmReset = viewModel::confirmReset,
             onDismissReset = viewModel::dismissReset,
             onMusicVolumeChanged = viewModel::setMusicVolume,
+            onMusicVolumeFinished = viewModel::saveMusicVolume,
             onEffectsVolumeChanged = viewModel::setEffectsVolume,
             onEffectsVolumeFinished = viewModel::previewEffectsVolume,
             onThemeChanged = viewModel::setTheme,

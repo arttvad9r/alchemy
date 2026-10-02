@@ -84,8 +84,8 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -94,6 +94,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -174,7 +175,7 @@ fun HomeScreen(
     val unlockedIds = state.progress.unlockedIds
     val paletteSort = state.progress.paletteSort
     val discoveryOrder = state.progress.discoveryOrder
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val exhaustedIds = remember(unlockedIds) { ElementLinks.exhaustedIds(unlockedIds) }
     val unlocked = remember(unlockedIds, discoveryOrder, paletteSort, resources) {
         sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort, Locale.getDefault(), resources::elementName)
@@ -241,8 +242,7 @@ fun HomeScreen(
 
     Box(modifier = modifier.fillMaxSize().onGloballyPositioned { homeBounds = it.boundsInRoot() }) {
         Column(modifier = Modifier.fillMaxSize().padding(ScreenPadding)) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                GameTitle(modifier = Modifier.weight(1f))
+            GameTitle(modifier = Modifier.fillMaxWidth()) {
                 AlchemyIconButton(
                     icon = R.drawable.ic_info,
                     contentDescription = stringResource(R.string.tips_show),
@@ -617,13 +617,21 @@ private const val FRESH_PULSE_MILLIS = 1100
 
 private data class PlayingTransition(val transition: ItemTransition, val startMillis: Long, val origin: Offset?)
 
+/**
+ * A thumb showing where the palette is scrolled, which can also be dragged. The scroll position is read only while the
+ * thumb is placed, so scrolling moves it without recomposing the screen around it.
+ */
 @Composable
 private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier) {
-    val totalItems = state.layoutInfo.totalItemsCount
-    val visibleItems = state.layoutInfo.visibleItemsInfo.map { it.index }.distinct().size.coerceAtLeast(1)
+    // How many items the grid holds and how many it shows; it changes as elements are found, not as it scrolls.
+    val extent by remember(state) {
+        derivedStateOf {
+            val visible = state.layoutInfo.visibleItemsInfo.map { it.index }.distinct().size.coerceAtLeast(1)
+            state.layoutInfo.totalItemsCount to visible
+        }
+    }
+    val (totalItems, visibleItems) = extent
     val thumbFraction = (visibleItems.toFloat() / totalItems.coerceAtLeast(visibleItems)).coerceIn(0.18f, 1f)
-    val maxFirstVisibleIndex = (totalItems - visibleItems).coerceAtLeast(1)
-    val scrollFraction = (state.firstVisibleItemIndex.toFloat() / maxFirstVisibleIndex).coerceIn(0f, 1f)
     val dragState = rememberDraggableState { delta ->
         state.dispatchRawDelta(delta * (totalItems.toFloat() / visibleItems).coerceAtLeast(1f))
     }
@@ -636,11 +644,15 @@ private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier
             .testTag("palette_scrollbar")
     ) {
         val thumbHeight = maxHeight * thumbFraction
-        val thumbOffset = (maxHeight - thumbHeight) * scrollFraction
+        val travel = constraints.maxHeight - with(LocalDensity.current) { thumbHeight.roundToPx() }
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = thumbOffset)
+                .offset {
+                    val maxFirstVisibleIndex = (totalItems - visibleItems).coerceAtLeast(1)
+                    val scrollFraction = (state.firstVisibleItemIndex.toFloat() / maxFirstVisibleIndex).coerceIn(0f, 1f)
+                    IntOffset(0, (travel * scrollFraction).roundToInt())
+                }
                 .width(8.dp)
                 .height(thumbHeight)
                 .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))

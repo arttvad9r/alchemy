@@ -21,6 +21,7 @@ import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Combination
 import com.artt.alchemy.game.ElementLinks
+import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.ui.components.elementFact
 import com.artt.alchemy.ui.components.withTypographicBinding
 import org.junit.After
@@ -39,6 +40,9 @@ class ElementLinksScreenTest {
     @Before
     fun rememberProgress() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         original = store.load()
     }
 

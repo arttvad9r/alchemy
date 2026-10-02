@@ -4,7 +4,7 @@
     <string name="progress">%1$d / %2$d</string>
     <string name="clear_workspace">Очистить</string>
     <string name="workspace_hint">Перетащите элементы сюда</string>
-    <string name="palette_title">Открытые элементы</string>
+    <string name="palette_title">Открыто</string>
     <string name="tab_home">Дом</string>
     <string name="tab_elements">Элементы</string>
     <string name="tab_recipes">Рецепты</string>
@@ -29,7 +29,8 @@
     <string name="sort_group">По группам</string>
     <string name="hint_request">Подсказка</string>
     <string name="hint_more">Показать второй элемент</string>
-    <string name="hint_place">Подсказка: %1$s и %2$s. Положить на плиту</string>
+    <string name="hint_place">Подсказка: %1$s и %2$s. Положить на рабочую область</string>
+    <string name="nothing_found">Ничего не найдено</string>
     <string name="no_known_recipes">Нет открытых рецептов</string>
     <string name="achievement_first_unlocks">Первые открытия</string>
     <string name="achievement_mixes">Удачные сочетания</string>

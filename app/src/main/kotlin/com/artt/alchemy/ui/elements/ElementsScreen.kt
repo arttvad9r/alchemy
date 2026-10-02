@@ -28,12 +28,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -79,16 +80,18 @@ fun ElementsScreen(
     // What was new when the catalog opened stays marked until it is left.
     val fresh = remember { freshIds }
     DisposableEffect(Unit) { onDispose(onSeen) }
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
     // Cards opened one from another, so back returns to the previous one.
     var openedCards by remember { mutableStateOf(emptyList<ElementDefinition>()) }
-    var selectedGroup by remember { mutableStateOf<ElementGroup?>(null) }
-    val resources = LocalContext.current.resources
+    var selectedGroup by rememberSaveable { mutableStateOf<ElementGroup?>(null) }
+    val resources = LocalResources.current
     // Open elements come first; each part keeps the catalog order, as sortedBy is stable.
-    val entries = AlchemyCatalog.elements.filter { element ->
-        (selectedGroup == null || element.group == selectedGroup) &&
-            (query.isBlank() || (element.id in progress.unlockedIds && resources.elementName(element.id).contains(query, ignoreCase = true)))
-    }.sortedBy { it.id !in progress.unlockedIds }
+    val entries = remember(progress.unlockedIds, selectedGroup, query, resources) {
+        AlchemyCatalog.elements.filter { element ->
+            (selectedGroup == null || element.group == selectedGroup) &&
+                (query.isBlank() || (element.id in progress.unlockedIds && resources.elementName(element.id).contains(query, ignoreCase = true)))
+        }.sortedBy { it.id !in progress.unlockedIds }
+    }
 
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         // Four columns on a compact phone; long names shrink to whole words, wider screens get more.
@@ -116,6 +119,15 @@ fun ElementsScreen(
                     tagPrefix = "elements_group",
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
+            }
+            if (entries.isEmpty()) {
+                item {
+                    Text(
+                        stringResource(R.string.nothing_found),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(24.dp).testTag("elements_nothing_found")
+                    )
+                }
             }
             // Each row is as tall as its tallest card and every card in it stretches to match, so rows
             // line up without reserving room for names that fit on one line.
@@ -232,7 +244,7 @@ private fun catalogNameStyle(contentWidth: Dp): TextStyle {
     // Tight leading, so a two-word name reads as one label.
     val base = MaterialTheme.typography.labelMedium.let { it.copy(lineHeight = it.fontSize * NAME_LINE_HEIGHT) }
     val locked = stringResource(R.string.locked_element)
-    val resources = LocalContext.current.resources
+    val resources = LocalResources.current
     val measurer = rememberTextMeasurer()
     val widthPx = with(LocalDensity.current) { contentWidth.roundToPx() }
     return remember(base, locked, widthPx, resources) {

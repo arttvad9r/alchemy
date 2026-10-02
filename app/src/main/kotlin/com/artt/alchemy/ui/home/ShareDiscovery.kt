@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.createBitmap
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
 import java.io.File
@@ -61,7 +62,7 @@ private fun discoveryPicture(context: Context, card: ImageBitmap, @DrawableRes b
         textAlign = Paint.Align.CENTER
     }
     val signatureHeight = (signature.fontSpacing + padding).toInt()
-    val picture = Bitmap.createBitmap(content.width + padding * 2, content.height + padding * 2 + signatureHeight, Bitmap.Config.ARGB_8888)
+    val picture = createBitmap(content.width + padding * 2, content.height + padding * 2 + signatureHeight)
     val canvas = Canvas(picture)
     BitmapFactory.decodeResource(context.resources, backgroundRes)?.let { background ->
         // Centre-crop, like the scene behind the game.

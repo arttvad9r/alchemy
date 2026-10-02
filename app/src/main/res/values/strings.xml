@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Alchemy</string>
     <string name="app_tagline">Combine · Discover · Create</string>
     <string name="progress">%1$d / %2$d</string>
@@ -30,6 +30,7 @@
     <string name="hint_request">Hint</string>
     <string name="hint_more">Show the second element</string>
     <string name="hint_place">Hint: %1$s and %2$s. Place on the board</string>
+    <string name="nothing_found">Nothing found</string>
     <string name="no_known_recipes">No recipes discovered yet</string>
     <string name="achievement_first_unlocks">First discoveries</string>
     <string name="achievement_mixes">Successful combinations</string>
@@ -92,7 +93,7 @@
     <string name="tips_show">Show tips</string>
     <string name="element_new_badge">New</string>
     <string name="completion_title">Alchemy complete</string>
-    <string name="completion_message">All %1$d elements discovered</string>
+    <string name="completion_message" tools:ignore="PluralsCandidate">All %1$d elements discovered</string>
     <string name="completion_attempts">Combination attempts: %1$d</string>
     <string name="completion_mixes">Successful combinations: %1$d</string>
     <string name="completion_card">Alchemy complete: every element is discovered. Open the summary</string>

@@ -21,6 +21,7 @@ import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.Recipe
+import com.artt.alchemy.game.WorkspaceState
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -37,6 +38,9 @@ class CompletionScreenTest {
     @Before
     fun saveOriginal() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         original = store.load()
     }
 

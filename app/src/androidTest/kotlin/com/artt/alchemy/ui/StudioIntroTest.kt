@@ -14,6 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
 import com.artt.alchemy.data.ProgressStore
+import com.artt.alchemy.game.WorkspaceState
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +29,9 @@ class StudioIntroTest {
     val chain: RuleChain = RuleChain.outerRule(object : TestWatcher() {
         override fun starting(description: Description) {
             val store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+            // A workspace left by another test would lie on this one's board.
+            store.saveWorkspace(WorkspaceState())
+            store.saveTipStep(0)
             store.save(store.load().copy(onboardingSeen = true, reducedMotion = description.methodName == "reducedMotionShowsStillThenEntersGame"))
         }
     }).around(composeRule)

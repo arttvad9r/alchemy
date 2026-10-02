@@ -1,11 +1,14 @@
 package com.artt.alchemy.ui.settings
 
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -74,6 +77,7 @@ fun SettingsScreen(
     onConfirmReset: () -> Unit,
     onDismissReset: () -> Unit,
     onMusicVolumeChanged: (Float) -> Unit,
+    onMusicVolumeFinished: () -> Unit,
     onEffectsVolumeChanged: (Float) -> Unit,
     onEffectsVolumeFinished: () -> Unit,
     onThemeChanged: (AppTheme) -> Unit,
@@ -139,7 +143,8 @@ fun SettingsScreen(
                 value = state.progress.musicVolume,
                 muted = !state.progress.musicEnabled,
                 tag = "settings_music_volume",
-                onChange = onMusicVolumeChanged
+                onChange = onMusicVolumeChanged,
+                onFinished = onMusicVolumeFinished
             )
         }
         SettingsPanel {
@@ -170,7 +175,7 @@ fun SettingsScreen(
                 AlchemyButton(
                     text = stringResource(R.string.language_open),
                     style = ButtonStyle.BLUE,
-                    onClick = { context.startActivity(appLanguageSettingsIntent(context.packageName)) },
+                    onClick = { openAppLanguageSettings(context) },
                     modifier = Modifier.fillMaxWidth().testTag("settings_language")
                 )
             }
@@ -358,7 +363,16 @@ private val TransferResult.messageRes: Int
         TransferResult.IMPORT_INVALID -> R.string.transfer_import_invalid
     }
 
-private fun appLanguageSettingsIntent(packageName: String): Intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", packageName, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+/** The system's language page for the game; a device without one gets the game's own settings page instead. */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun openAppLanguageSettings(context: Context) {
+    val app = Uri.fromParts("package", context.packageName, null)
+    try {
+        context.startActivity(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, app))
+    } catch (_: ActivityNotFoundException) {
+        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app))
+    }
+}
 
 private const val THEME_PREVIEW_RATIO = 0.8f
 private val RADIO_SIZE = 20.dp

@@ -18,12 +18,13 @@ import com.artt.alchemy.audio.panAt
 import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
-import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.isComplete
 import com.artt.alchemy.data.parsePlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.requestHint
+import com.artt.alchemy.data.reset
 import com.artt.alchemy.data.toJson
+import com.artt.alchemy.data.withSettingsOf
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.AlchemyEngine
 import com.artt.alchemy.game.ElementRarity
@@ -34,6 +35,7 @@ import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
+import com.artt.alchemy.ui.components.systemAnimationsOff
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -101,7 +103,14 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     private val engine = AlchemyEngine(AlchemyCatalog)
     private val store = ProgressStore(application)
 
-    var state by mutableStateOf(AlchemyUiState(progress = store.load()))
+    var state by mutableStateOf(
+        store.load().let { progress ->
+            val workspace = store.loadWorkspace(progress.unlockedIds)
+            // Without a kept tip, elements on the workspace show the first one, to put one down, is already done.
+            val tipStep = store.loadTipStep() ?: if (workspace.items.isEmpty()) 0 else 1
+            AlchemyUiState(progress = progress, workspace = workspace, tipStep = tipStep.coerceAtMost(TIP_COUNT - 1))
+        }
+    )
         private set
 
     private var combinationEffectCount = 0L
@@ -155,6 +164,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             newlyCompletedAchievements(state.progress, progress).map(Reveal::Achievement)
 
         if (onboarded != state.progress) store.save(onboarded)
+        if (result.workspace != state.workspace) store.saveWorkspace(result.workspace)
+        if (tipStep != state.tipStep) store.saveTipStep(tipStep.coerceAtMost(TIP_COUNT - 1))
         state = state.copy(
             combinationEffect = effect ?: state.combinationEffect,
             // Transitions pile up until Home takes them, so none is lost between frames.
@@ -247,6 +258,7 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         playSound(Sound.CLICK)
         updateProgress { copy(onboardingSeen = false) }
         state = state.copy(tipStep = 0)
+        store.saveTipStep(0)
     }
 
     fun markElementsSeen() {
@@ -272,8 +284,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun confirmReset() {
-        store.clear()
-        replaceProgress(initialPlayerProgress())
+        val progress = state.progress.reset()
+        store.save(progress)
+        replaceProgress(progress)
     }
 
     /** Writes the progress as JSON to the document the player picked. */
@@ -339,7 +352,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun confirmImport() {
-        val progress = state.pendingImport ?: return
+        // The file brings what was found; how the game looks and sounds stays as set on this device.
+        val progress = withSettingsOf(state.progress, state.pendingImport ?: return)
         store.save(progress)
         replaceProgress(progress)
         state = state.copy(transferResult = TransferResult.IMPORTED)
@@ -353,6 +367,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         importJob?.cancel()
         transferGeneration++
         state = AlchemyUiState(progress = progress, selectedTab = AppTab.SETTINGS)
+        store.saveWorkspace(state.workspace)
+        store.saveTipStep(state.tipStep)
         applyVolumes()
         if (progress.musicEnabled) resumeMusic() else music.pause()
     }
@@ -371,18 +387,25 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         vibrate(Haptic.CLICK)
     }
 
+    // A slider moves the volume at once and is saved when let go, not on every step of the drag.
     fun setMusicVolume(volume: Float) {
-        updateProgress { copy(musicVolume = volume.coerceIn(0f, 1f)) }
+        state = state.copy(progress = state.progress.copy(musicVolume = volume.coerceIn(0f, 1f)))
         music.level = state.progress.musicVolume
     }
 
     fun setEffectsVolume(volume: Float) {
-        updateProgress { copy(effectsVolume = volume.coerceIn(0f, 1f)) }
+        state = state.copy(progress = state.progress.copy(effectsVolume = volume.coerceIn(0f, 1f)))
         sounds.level = state.progress.effectsVolume
+    }
+
+    /** The player has let go of the music slider. */
+    fun saveMusicVolume() {
+        store.save(state.progress)
     }
 
     /** The player has let go of the effects slider: a click at the new volume shows what it sounds like. */
     fun previewEffectsVolume() {
+        store.save(state.progress)
         playSound(Sound.CLICK)
     }
 
@@ -390,8 +413,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         updateProgress { copy(theme = theme) }
     }
 
+    /** A choice that matches the system's own animation setting goes back to following it. */
     fun setReducedMotion(reduced: Boolean) {
-        updateProgress { copy(reducedMotion = reduced) }
+        updateProgress { copy(reducedMotion = reduced.takeUnless { it == systemAnimationsOff(getApplication()) }) }
     }
 
     fun setMusicEnabled(enabled: Boolean) {

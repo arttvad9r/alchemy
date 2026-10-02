@@ -16,6 +16,7 @@ import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.game.Recipe
+import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.nextHintRecipe
 import com.artt.alchemy.ui.components.elementName
 import org.junit.After
@@ -35,6 +36,9 @@ class HintsScreenTest {
     @Before
     fun startFresh() {
         store = ProgressStore(InstrumentationRegistry.getInstrumentation().targetContext)
+        // A workspace left by another test would lie on this one's board.
+        store.saveWorkspace(WorkspaceState())
+        store.saveTipStep(0)
         original = store.load()
         store.save(initialPlayerProgress().copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
