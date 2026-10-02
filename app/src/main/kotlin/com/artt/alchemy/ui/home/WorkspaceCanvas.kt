@@ -58,10 +58,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.core.content.res.ResourcesCompat
 import com.artt.alchemy.R
@@ -233,6 +235,7 @@ fun WorkspaceCanvas(
 
     val labelColor = MaterialTheme.colorScheme.onSurface.toArgb()
     val context = LocalContext.current
+    val density = LocalDensity.current
     val labelPaint = remember(labelColor) {
         android.graphics.Paint().apply {
             color = labelColor
@@ -289,7 +292,7 @@ fun WorkspaceCanvas(
                             if (board.contains(position)) {
                                 // Let go on the board: it settles in from the edge, name and all, instead of hanging over the frame.
                                 val labelHalf = labelPaint.measureText(context.resources.elementName(item.elementId)) / 2
-                                val resting = restingPosition(onBoard(position), width, height, labelHalf)
+                                val resting = restingPosition(onBoard(position), width, height, labelHalf, labelPaint.fontSpacing)
                                 currentOnMove(item.instanceId, resting)
                                 currentOnResolve(item.instanceId, resting)
                             } else {
@@ -309,7 +312,7 @@ fun WorkspaceCanvas(
             val frames = transitions()
             val held = currentItems.find { it.instanceId == heldId }
             if (!reducedMotion) fx.drawAmbience(this, frames, seconds, radius)
-            labelPaint.textSize = minOf(size.width, size.height) * LABEL_SIZE_FRACTION
+            labelPaint.textSize = workspaceLabelSize(size.width, size.height, density)
             val target = held?.let { current -> overlapTarget(currentItems, current.instanceId, current.xFraction, current.yFraction) }
             target?.let { target ->
                 val iconSize = radius * 2 * ICON_SHARE
@@ -636,11 +639,11 @@ private fun normalize(position: Offset, width: Int, height: Int): Offset = Offse
  * Where an element let go at [position] (workspace fractions) comes to rest, far enough in that its icon and its name,
  * [labelHalfWidth] pixels either side of the centre, clear the edges.
  */
-internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f): Offset {
+internal fun restingPosition(position: Offset, width: Float, height: Float, labelHalfWidth: Float = 0f, labelHeight: Float = 0f): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val side = (maxOf(radius * REST_SIDE, labelHalfWidth + radius * LABEL_EDGE_GAP) / width).coerceAtMost(HALF)
     val top = (radius * REST_TOP / height).coerceAtMost(HALF)
-    val bottom = (radius * REST_BOTTOM / height).coerceAtMost(HALF)
+    val bottom = (maxOf(radius * REST_BOTTOM, radius * (2 * ICON_SHARE - ICON_TOP_SHARE) + labelHeight) / height).coerceAtMost(HALF)
     return Offset(position.x.coerceIn(side, 1f - side), position.y.coerceIn(top, 1f - bottom))
 }
 
@@ -648,10 +651,10 @@ internal fun restingPosition(position: Offset, width: Float, height: Float, labe
  * Where an element comes to rest when dropped with its icon centred on [iconCenter] (pixels in the workspace, possibly
  * over the frame), in workspace fractions; [labelHalfWidth] is half its name's width.
  */
-internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float): Offset {
+internal fun dropPosition(iconCenter: Offset, width: Float, height: Float, labelHalfWidth: Float, labelHeight: Float = 0f): Offset {
     val radius = minOf(width, height) * ITEM_RADIUS_FRACTION
     val center = Offset(iconCenter.x, iconCenter.y + radius * ICON_TOP_SHARE - radius * ICON_SHARE)
-    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth)
+    return restingPosition(Offset((center.x / width).coerceIn(0f, 1f), (center.y / height).coerceIn(0f, 1f)), width, height, labelHalfWidth, labelHeight)
 }
 
 /**
@@ -670,7 +673,9 @@ internal fun iconCenterAt(xFraction: Float, yFraction: Float, width: Float, heig
 internal fun workspaceIconSize(width: Float, height: Float): Float = minOf(width, height) * ITEM_RADIUS_FRACTION * 2 * ICON_SHARE
 
 /** The size of an element's name on a workspace of this size, in pixels. */
-internal fun workspaceLabelSize(width: Float, height: Float): Float = minOf(width, height) * LABEL_SIZE_FRACTION
+internal fun workspaceLabelSize(width: Float, height: Float, density: Density = Density(1f)): Float = with(density) {
+    maxOf(12f, minOf(width, height) * LABEL_SIZE_FRACTION / density.density).sp.toPx()
+}
 
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x

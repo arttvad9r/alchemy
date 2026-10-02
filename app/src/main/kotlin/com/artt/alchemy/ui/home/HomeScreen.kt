@@ -92,6 +92,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -178,7 +179,7 @@ fun HomeScreen(
     val labelMeasurer = rememberTextMeasurer()
     // The bold reading face the workspace draws names in, at its size for these bounds.
     val workspaceLabelStyle = { bounds: Rect ->
-        TextStyle(fontFamily = BodyFontFamily, fontWeight = FontWeight.Bold, fontSize = with(density) { workspaceLabelSize(bounds.width, bounds.height).toSp() })
+        TextStyle(fontFamily = BodyFontFamily, fontWeight = FontWeight.Bold, fontSize = with(density) { workspaceLabelSize(bounds.width, bounds.height, density).toSp() })
     }
     var homeBounds by remember { mutableStateOf<Rect?>(null) }
     var draggedElement by remember { mutableStateOf<ElementDefinition?>(null) }
@@ -336,7 +337,7 @@ fun HomeScreen(
                                     onDrop = { drop ->
                                         tapOrigin = null
                                         paletteDrop(element.id, drop, workspaceBounds, frameInsetPx) { bounds ->
-                                            labelMeasurer.measure(resources.elementName(element.id), workspaceLabelStyle(bounds)).size.width / 2f
+                                            labelMeasurer.measure(resources.elementName(element.id), workspaceLabelStyle(bounds)).size
                                         }?.let(onEvent)
                                     },
                                     onTap = { center ->
@@ -434,7 +435,7 @@ private fun BoxScope.FlyingElements(
 private fun BoxScope.ElementGhost(element: ElementDefinition, at: Offset, workspace: Rect?, scale: () -> Float, glowAlpha: Float, modifier: Modifier = Modifier) {
     val density = LocalDensity.current
     val iconPx = workspace?.let { workspaceIconSize(it.width, it.height) } ?: with(density) { PREVIEW_FALLBACK_ICON.toPx() }
-    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
+    val labelSize = workspace?.let { with(density) { workspaceLabelSize(it.width, it.height, density).toSp() } } ?: MaterialTheme.typography.labelLarge.fontSize
     val glow = element.rarity.glowColor
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -484,9 +485,10 @@ private fun transitionFramesAt(
  * An element dropped from the palette lands where its icon was under the finger, name and all clear of the edges. The
  * frame round the board counts as the board; a drop anywhere else puts nothing down.
  */
-private fun paletteDrop(elementId: String, drop: Offset, workspace: Rect?, frameWidth: Float, labelHalfWidth: (Rect) -> Float): WorkspaceEvent? {
+private fun paletteDrop(elementId: String, drop: Offset, workspace: Rect?, frameWidth: Float, labelSize: (Rect) -> IntSize): WorkspaceEvent? {
     if (workspace == null || !workspace.inflate(frameWidth).contains(drop)) return null
-    val at = dropPosition(drop - workspace.topLeft, workspace.width, workspace.height, labelHalfWidth(workspace))
+    val label = labelSize(workspace)
+    val at = dropPosition(drop - workspace.topLeft, workspace.width, workspace.height, label.width / 2f, label.height.toFloat())
     return WorkspaceEvent.Spawn(elementId, at.x, at.y)
 }
 
