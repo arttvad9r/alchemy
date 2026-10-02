@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.data.initialPlayerProgress
@@ -36,7 +37,7 @@ class WorkspaceAccessibilityTest {
     @Test
     fun accessibility_click_can_mix_two_ingredients() {
         show(listOf(WorkspaceItem(1, "fire", 0.3f, 0.5f), WorkspaceItem(2, "water", 0.7f, 0.5f)))
-        item("fire").performClick()
+        item("fire").performSemanticsAction(SemanticsActions.OnClick) { it() }
         composeRule.onNodeWithTag("workspace_partner_2").performClick()
         composeRule.runOnIdle { assertEquals(listOf("steam"), state.value.workspace.items.map { it.elementId }) }
     }
@@ -45,20 +46,22 @@ class WorkspaceAccessibilityTest {
     fun inaccessible_pair_does_not_move_or_remove_ingredients() {
         val items = listOf(WorkspaceItem(1, "steam", 0.3f, 0.5f), WorkspaceItem(2, "earth", 0.7f, 0.5f))
         show(items)
-        item("steam").performClick()
+        item("steam").performSemanticsAction(SemanticsActions.OnClick) { it() }
         composeRule.onNodeWithTag("workspace_partner_2").performClick()
         composeRule.runOnIdle { assertEquals(items, state.value.workspace.items) }
     }
 
     @Test
     fun partner_picker_mixes_the_named_target_in_a_chain_of_overlapping_items() {
-        show(listOf(
-            WorkspaceItem(1, "fire", 0.2f, 0.5f),
-            WorkspaceItem(2, "earth", 0.5f, 0.5f),
-            WorkspaceItem(3, "water", 0.6f, 0.5f),
-            WorkspaceItem(4, "steam", 0.7f, 0.5f)
-        ))
-        item("fire").performClick()
+        show(
+            listOf(
+                WorkspaceItem(1, "fire", 0.2f, 0.5f),
+                WorkspaceItem(2, "earth", 0.5f, 0.5f),
+                WorkspaceItem(3, "water", 0.6f, 0.5f),
+                WorkspaceItem(4, "steam", 0.7f, 0.5f)
+            )
+        )
+        item("fire").performSemanticsAction(SemanticsActions.OnClick) { it() }
         composeRule.onNodeWithTag("workspace_partner_3").performClick()
         composeRule.runOnIdle { assertEquals(listOf("earth", "steam", "steam"), state.value.workspace.items.map { it.elementId }) }
     }
