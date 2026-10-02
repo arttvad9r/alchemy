@@ -13,7 +13,7 @@ Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 
 
 ## Status
 - Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–9 merged into `master` (themes last, 2026-10-01). No public release yet.
-- Themes: blue art has pre-tinted `*_ember`/`*_verdant` copies built by `tools/build_ui_assets.py` (`THEMED_ART`), picked via `themedArt()`.
+- Themes: blue art has pre-tinted `*_ember`/`*_verdant` copies built by `tools/build_ui_assets.py` (`THEMED_ART`, OKLCH hue shift; `BACKGROUND_GRADES` tones down their backgrounds), picked via `themedArt()`. Keep `EmberColors`/`VerdantColors` in step with `THEME_TINTS`.
 - Studio intro: 2.8s flat portrait ARTT animation follows a plain black system starting window (no game branding); no manual skip, background pauses playback, reduced motion shows a still.
 - Branding sources and rebuild instructions: `ART_ASSETS.md`, `tools/build_studio_intro.py`.
 - Release target: RuStore (signed APK). Listing, 512 px icon, 9:16 screenshots in `docs/rustore/`, privacy policy `docs/privacy.md`. Release key: ~/keys/alchemy-release.jks (props in ~/.gradle/gradle.properties). Next: publish in RuStore. Element texts are looked up by name — keep `res/raw/keep.xml` in sync or the shrunk release crashes.

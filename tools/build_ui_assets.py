@@ -8,9 +8,10 @@ Usage: python3 tools/build_ui_assets.py  (requires pillow)
 """
 
 import colorsys
+import math
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
@@ -116,34 +117,126 @@ SLIDER_KNOB_FEATHER = 6
 SLIDER_KNOB_SIZE = 96
 
 # Blue art that each theme recolours: written next to the original as <name>_<theme>.webp.
-# Only the saturated blues move; gold trim, silver and the green/red accents keep their colour.
+# Only the blues move, greyish navy fills included; gold trim, silver and the green/red accents keep their colour.
+# The rarity cards are recoloured in convert_card_rarities, from the themed card_base.
 THEMED_ART = (
     "btn_blue", "dialog_blue", "tab_active", "tab_inactive", "toggle_on", "field_search", "field_dropdown",
     "field_row", "progress_track", "progress_fill", "slider_knob", "banner_wide", "scene_magic_circle",
-    "radio_on", "card_base", "card_common", "card_rare", "card_epic", "card_legendary",
+    "radio_on", "card_base", "ic_plus", "ic_forward", "ic_close", "radio_off", "toggle_off", "btn_dark", "dialog_gold",
+    "tooltip_bubble", "achievement_locked",
+    "ic_info", "ic_help", "ic_back", "ic_recent", "ic_audio", "ic_haptics", "nav_recipes", "nav_settings",
+    "fx_selected_ring", "fx_sparkles_blue", "fx_energy_ring", "fx_shockwave_ring", "fx_combine_flash",
 )
-# Theme -> (hue in degrees every blue becomes, saturation factor). One hue keeps toggles, sliders and panels alike.
-THEME_TINTS = {"ember": (14, 0.95), "verdant": (152, 0.75)}
+# Element tile frames: the rim is the rarity colour and stays; the dark, nearly grey face takes the theme's hue
+# with one chroma for every rarity, so a row of tiles shares one face. Pixels fade from face to rim between
+# these OKLCH (start, end) lightnesses and chromas, so the rim's glow spilling onto the face leaves no hard edge.
+FRAMES = ("frame_base", "frame_common", "frame_rare", "frame_epic", "frame_legendary")
+FACE_LIGHTNESS_FADE = (0.3, 0.38)
+FACE_CHROMA_FADE = (0.09, 0.16)
+FACE_CHROMA = 0.03
+# Theme -> (OKLCH hue every blue becomes, chroma factor, lightness factor). The shift keeps perceived
+# lightness, so the new hue is no brighter than the blue it replaces; one hue keeps toggles and panels alike.
+THEME_TINTS = {"ember": (48, 0.75, 1.1), "verdant": (180, 0.7, 1.0)}
+# The workspace glow is a wide translucent wash: in Ember's copper it reads as rust, so it takes amber instead.
+TINT_OVERRIDES = {("scene_magic_circle", "ember"): (65, 0.5, 1.2)}
 BLUE_HUE_RANGE = (190, 262)
-BLUE_MIN_SATURATION = 0.35
+BLUE_MIN_SATURATION = 0.1
+# Dark navy fills turn muddy in a warm or green hue, so the darkest pixels keep only this share of
+# their chroma and read as tinted charcoal; full chroma returns between these OKLCH lightnesses.
+DARK_CHROMA = 0.4
+DARK_CHROMA_RAMP = (0.25, 0.55)
+
+# Backgrounds graded towards the dusk of bg_aether: drawable -> (colour factor, brightness factor).
+BACKGROUND_GRADES = {"bg_ember": (0.75, 0.85), "bg_verdant": (0.7, 0.6)}
+
+
+def srgb_to_linear(c: float) -> float:
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def linear_to_srgb(c: float) -> float:
+    c = min(1.0, max(0.0, c))
+    return 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
+
+
+def to_oklch(red: float, green: float, blue: float) -> tuple[float, float, float]:
+    """sRGB in 0..1 to OKLCH (https://bottosson.github.io/posts/oklab/)."""
+    r, g, b = srgb_to_linear(red), srgb_to_linear(green), srgb_to_linear(blue)
+    l = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b) ** (1 / 3)
+    m = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b) ** (1 / 3)
+    s = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b) ** (1 / 3)
+    lightness = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s
+    a = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s
+    b_ = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s
+    return lightness, math.hypot(a, b_), math.degrees(math.atan2(b_, a)) % 360
+
+
+def from_oklch(lightness: float, chroma: float, hue: float) -> tuple[float, float, float]:
+    a, b = chroma * math.cos(math.radians(hue)), chroma * math.sin(math.radians(hue))
+    l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3
+    m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3
+    s = (lightness - 0.0894841775 * a - 1.2914855480 * b) ** 3
+    return (
+        linear_to_srgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+        linear_to_srgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+        linear_to_srgb(-0.0041960771 * l - 0.7034186147 * m + 1.7076127572 * s),
+    )
+
+
+def tinted(source: Image.Image, theme: str, tint: tuple[float, float, float] | None = None) -> Image.Image:
+    """The image with its blues moved to the theme's hue, or to [tint] when given."""
+    target, chroma_factor, lightness_factor = tint or THEME_TINTS[theme]
+    low, high = DARK_CHROMA_RAMP
+    image = source.copy()
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            red, green, blue, alpha = pixels[x, y]
+            if alpha == 0:
+                continue
+            hue, _, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+            if BLUE_HUE_RANGE[0] < hue * 360 < BLUE_HUE_RANGE[1] and saturation > BLUE_MIN_SATURATION:
+                lightness, chroma, _ = to_oklch(red / 255, green / 255, blue / 255)
+                share = DARK_CHROMA + (1 - DARK_CHROMA) * min(1.0, max(0.0, (lightness - low) / (high - low)))
+                rgb = from_oklch(lightness * lightness_factor, chroma * chroma_factor * share, target)
+                pixels[x, y] = (*(round(c * 255) for c in rgb), alpha)
+    return image
 
 
 def convert_themed_art() -> None:
     """Hue-shift the blue pixels of THEMED_ART into each theme's colour."""
     for name in THEMED_ART:
         source = Image.open(RES_DIR / f"{name}.webp").convert("RGBA")
-        for theme, (target, factor) in THEME_TINTS.items():
-            image = source.copy()
-            pixels = image.load()
-            for y in range(image.height):
-                for x in range(image.width):
-                    red, green, blue, alpha = pixels[x, y]
-                    hue, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
-                    if BLUE_HUE_RANGE[0] < hue * 360 < BLUE_HUE_RANGE[1] and saturation > BLUE_MIN_SATURATION:
-                        hue = target / 360
-                        red, green, blue = (round(c * 255) for c in colorsys.hls_to_rgb(hue, lightness, saturation * factor))
-                        pixels[x, y] = (red, green, blue, alpha)
-            image.save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+        for theme in THEME_TINTS:
+            tinted(source, theme, TINT_OVERRIDES.get((name, theme))).save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    for name in FRAMES:
+        source = Image.open(RES_DIR / f"{name}.webp").convert("RGBA")
+        for theme in THEME_TINTS:
+            face_tinted(source, theme).save(RES_DIR / f"{name}_{theme}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+
+
+def fade_out(value: float, fade: tuple[float, float]) -> float:
+    """1 below fade's start, 0 above its end, linear between."""
+    return min(1.0, max(0.0, (fade[1] - value) / (fade[1] - fade[0])))
+
+
+def face_tinted(source: Image.Image, theme: str) -> Image.Image:
+    """The tile frame with its dark face, whatever its hue, in the theme's hue."""
+    target, _, lightness_factor = THEME_TINTS[theme]
+    image = source.copy()
+    pixels = image.load()
+    for y in range(image.height):
+        for x in range(image.width):
+            red, green, blue, alpha = pixels[x, y]
+            if alpha == 0:
+                continue
+            lightness, chroma, _ = to_oklch(red / 255, green / 255, blue / 255)
+            face = fade_out(lightness, FACE_LIGHTNESS_FADE) * fade_out(chroma, FACE_CHROMA_FADE)
+            if face > 0:
+                rgb = from_oklch(lightness * lightness_factor, FACE_CHROMA, target)
+                old = (red, green, blue)
+                pixels[x, y] = (*(round(o + (c * 255 - o) * face) for o, c in zip(old, rgb)), alpha)
+    return image
 
 
 def trimmed(source: Path) -> Image.Image:
@@ -157,6 +250,9 @@ def convert(source: Path, name: str, max_side: int) -> None:
     scale = min(1.0, max_side / max(image.size))
     if scale < 1.0:
         image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    if name in BACKGROUND_GRADES:
+        colour, brightness = BACKGROUND_GRADES[name]
+        image = ImageEnhance.Brightness(ImageEnhance.Color(image).enhance(colour)).enhance(brightness)
     image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
@@ -179,22 +275,24 @@ def convert_close_icon() -> None:
 
 
 def convert_card_rarities() -> None:
-    """One copy of the element card per rarity, with only its silver trim recoloured."""
+    """One copy of the element card per rarity and theme, with only its silver trim recoloured."""
     source = trimmed(ASSETS / CARD)
     source.thumbnail((512, 512), Image.LANCZOS)
-    for name, hue, saturation in CARD_RARITIES:
-        image = source.copy()
-        pixels = image.load()
-        for y in range(image.height):
-            for x in range(image.width):
-                red, green, blue, alpha = pixels[x, y]
-                if alpha == 0:
-                    continue
-                _, lightness, trim_saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
-                if trim_saturation < CARD_TRIM_MAX_SATURATION and lightness > CARD_TRIM_MIN_LIGHTNESS:
-                    r, g, b = colorsys.hls_to_rgb(hue, lightness * CARD_TRIM_LIGHTNESS, saturation)
-                    pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
-        image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
+    faces = {"": source} | {f"_{theme}": tinted(source, theme) for theme in THEME_TINTS}
+    for suffix, face in faces.items():
+        for name, hue, saturation in CARD_RARITIES:
+            image = face.copy()
+            pixels = image.load()
+            for y in range(image.height):
+                for x in range(image.width):
+                    red, green, blue, alpha = pixels[x, y]
+                    if alpha == 0:
+                        continue
+                    _, lightness, trim_saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
+                    if trim_saturation < CARD_TRIM_MAX_SATURATION and lightness > CARD_TRIM_MIN_LIGHTNESS:
+                        r, g, b = colorsys.hls_to_rgb(hue, lightness * CARD_TRIM_LIGHTNESS, saturation)
+                        pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
+            image.save(RES_DIR / f"{name}{suffix}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def convert_progress_bar() -> None:

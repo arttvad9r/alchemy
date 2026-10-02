@@ -92,6 +92,7 @@ import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.backgroundRes
 import com.artt.alchemy.ui.theme.homeDim
 import com.artt.alchemy.ui.theme.panel
+import com.artt.alchemy.ui.theme.themedArt
 
 // The home scene stays bright; list screens dim it so text keeps its contrast.
 private const val LIST_DIM = 0.7f
@@ -313,7 +314,7 @@ private fun RowScope.NavigationItem(tab: AppTab, selected: Boolean, labelStyle: 
             .testTag(tab.testTag)
     ) {
         Image(
-            painter = painterResource(tab.iconRes),
+            painter = painterResource(themedArt(tab.iconRes)),
             contentDescription = null,
             modifier = Modifier
                 .drawBehind {
