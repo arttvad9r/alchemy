@@ -350,8 +350,10 @@ fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
     val track = ImageBitmap.imageResource(themedArt(R.drawable.progress_track))
     val fill = ImageBitmap.imageResource(themedArt(R.drawable.progress_fill))
     val fraction = progress.coerceIn(0f, 1f)
-    // Starts empty so the fill grows to its value when the bar first appears, then follows changes.
-    var target by remember { mutableFloatStateOf(0f) }
+    // Starts empty so the fill grows to its value as its screen opens (see [LocalScreenOpening]); a bar scrolled into
+    // view later shows its value at once. Either way it then follows changes.
+    val opening = LocalScreenOpening.current
+    var target by remember { mutableFloatStateOf(if (opening.isOpening) 0f else fraction) }
     LaunchedEffect(fraction) { target = fraction }
     val shown by animateFloatAsState(target, motion(tween(PROGRESS_FILL_MILLIS)), label = "progressFill")
     Box(
