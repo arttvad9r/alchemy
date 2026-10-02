@@ -160,23 +160,31 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
             Text(stringResource(R.string.new_element_message, elementName(element.id)), textAlign = TextAlign.Center)
             FactText(elementFact(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AlchemyButton(
-                stringResource(R.string.share),
-                ButtonStyle.BLUE,
-                onClick = {
-                    scope.launch {
-                        captures++
-                        withFrameNanos { }
-                        shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
-                    }
-                },
-                modifier = Modifier.testTag("share_discovery")
-            )
+        val ok: @Composable (Modifier) -> Unit = { modifier ->
             AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
                 onClick()
                 onDismiss()
-            })
+            }, modifier = modifier)
+        }
+        // Only the big finds are worth showing off.
+        if (element.rarity >= ElementRarity.EPIC) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                AlchemyButton(
+                    stringResource(R.string.share),
+                    ButtonStyle.BLUE,
+                    onClick = {
+                        scope.launch {
+                            captures++
+                            withFrameNanos { }
+                            shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
+                        }
+                    },
+                    modifier = Modifier.weight(1f).testTag("share_discovery")
+                )
+                ok(Modifier.weight(1f))
+            }
+        } else {
+            ok(Modifier)
         }
     }
 }
