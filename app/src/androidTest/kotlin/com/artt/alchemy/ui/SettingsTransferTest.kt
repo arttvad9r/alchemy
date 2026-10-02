@@ -1,12 +1,14 @@
 package com.artt.alchemy.ui
 
 import android.net.Uri
+import android.os.SystemClock
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -18,6 +20,7 @@ import com.artt.alchemy.MainActivity
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.initialPlayerProgress
+import com.artt.alchemy.data.parsePlayerProgress
 import com.artt.alchemy.data.toJson
 import java.io.File
 import org.junit.After
@@ -125,6 +128,68 @@ class SettingsTransferTest {
         scenario.onActivity { activity ->
             ViewModelProvider(activity)[AlchemyViewModel::class.java].readImport(Uri.fromFile(file))
         }
-        composeRule.waitForIdle()
+        composeRule.waitUntil(5_000) {
+            composeRule.onAllNodesWithTag("import_dialog").fetchSemanticsNodes().isNotEmpty() ||
+                composeRule.onAllNodesWithTag("transfer_dialog").fetchSemanticsNodes().isNotEmpty()
+        }
     }
+
+    @Test
+    fun anOversizedSaveIsRejectedWithoutReplacingProgress() {
+        val text = initialPlayerProgress().toJson().dropLast(1) + ",\"padding\":\"" + "x".repeat(256 * 1024) + "\"}"
+
+        importFile(text)
+
+        composeRule.onNodeWithTag("import_dialog").assertDoesNotExist()
+        composeRule.onNodeWithTag("transfer_dialog").assertIsDisplayed()
+        scenario.onActivity { activity ->
+            assertEquals(TransferResult.IMPORT_INVALID, ViewModelProvider(activity)[AlchemyViewModel::class.java].state.transferResult)
+        }
+        assertEquals(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true), store.load())
+    }
+
+    @Test
+    fun slowImportLeavesTheMainThreadFreeAndResetDiscardsItsResult() {
+        val imported = initialPlayerProgress().copy(unlockedIds = initialPlayerProgress().unlockedIds + "steam")
+        val uri = delayedDocument("slow-import.json", imported.toJson())
+        val started = SystemClock.elapsedRealtime()
+        scenario.onActivity { activity -> ViewModelProvider(activity)[AlchemyViewModel::class.java].readImport(uri) }
+
+        assertTrue("The main thread waited for the document provider", SystemClock.elapsedRealtime() - started < 1_500)
+        scenario.onActivity { activity -> ViewModelProvider(activity)[AlchemyViewModel::class.java].confirmReset() }
+        // Give the provider time to finish even if cancelling its caller cannot interrupt openFile.
+        SystemClock.sleep(3_500)
+        scenario.onActivity { activity ->
+            val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
+            assertNull(state.pendingImport)
+            assertNull(state.transferResult)
+            assertEquals(initialPlayerProgress(), state.progress)
+        }
+    }
+
+    @Test
+    fun slowExportLeavesTheMainThreadFreeAndWritesTheRequestedSnapshot() {
+        val uri = delayedDocument("slow-export.json")
+        val started = SystemClock.elapsedRealtime()
+        scenario.onActivity { activity -> ViewModelProvider(activity)[AlchemyViewModel::class.java].exportProgress(uri) }
+
+        assertTrue("The main thread waited for the document provider", SystemClock.elapsedRealtime() - started < 1_500)
+        composeRule.onNodeWithTag("settings_sound").performScrollTo().performClick()
+        composeRule.waitUntil(5_000) { composeRule.onAllNodesWithTag("transfer_dialog").fetchSemanticsNodes().isNotEmpty() }
+        val immediateUri = uri.buildUpon().clearQuery().build()
+        val exported = context.contentResolver.openInputStream(immediateUri)!!.use { parsePlayerProgress(it.readBytes().decodeToString())!! }
+        assertTrue(exported.soundEnabled)
+        assertEquals(false, store.load().soundEnabled)
+        scenario.onActivity { activity ->
+            assertEquals(TransferResult.EXPORTED, ViewModelProvider(activity)[AlchemyViewModel::class.java].state.transferResult)
+        }
+    }
+
+    private fun delayedDocument(name: String, text: String? = null): Uri = Uri.Builder()
+        .scheme("content")
+        .authority("com.artt.alchemy.test.transfer")
+        .appendPath(name)
+        .appendQueryParameter("delayMillis", "3000")
+        .apply { text?.let { appendQueryParameter("text", it) } }
+        .build()
 }
