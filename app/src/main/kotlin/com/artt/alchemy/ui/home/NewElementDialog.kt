@@ -19,11 +19,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -46,7 +56,10 @@ import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.components.shineOnce
 import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.theme.LocalAppTheme
+import com.artt.alchemy.ui.theme.backgroundRes
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val ICON_DELAY_MILLIS = 80L
 private const val BADGE_DELAY_MILLIS = 320L
@@ -75,6 +88,13 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
     val reducedMotion = LocalReducedMotion.current
     val iconSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     val badgeSpec = motion(tween<Float>(BADGE_FADE_MILLIS))
+    val context = LocalContext.current
+    val theme = LocalAppTheme.current
+    val scope = rememberCoroutineScope()
+    // Holds what the card last drew, so it can be shared as a picture; a new capture redraws it first.
+    val cardLayer = rememberGraphicsLayer()
+    var captures by remember { mutableIntStateOf(0) }
+    val shareText = stringResource(R.string.share_discovery_text, elementName(element.id), storeLink(context))
     LaunchedEffect(Unit) { titleIn.animateTo(1f, iconSpec) }
     LaunchedEffect(Unit) {
         if (!reducedMotion) delay(ICON_DELAY_MILLIS)
@@ -86,7 +106,14 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
     }
     AlchemyDialog(onDismissRequest = onDismiss, panelRes = R.drawable.dialog_gold) {
         // Scrolls on small screens with large text; the button stays below it, always in reach.
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.weight(1f, fill = false).drawWithContent {
+                captures
+                cardLayer.record { this@drawWithContent.drawContent() }
+                drawLayer(cardLayer)
+            }.verticalScroll(rememberScrollState())
+        ) {
             Text(
                 stringResource(R.string.new_element_title),
                 style = MaterialTheme.typography.headlineSmall,
@@ -133,9 +160,31 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
             Text(stringResource(R.string.new_element_message, elementName(element.id)), textAlign = TextAlign.Center)
             FactText(elementFact(element.id), Modifier.padding(top = 8.dp, bottom = 16.dp))
         }
-        AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
-            onClick()
-            onDismiss()
-        })
+        val ok: @Composable (Modifier) -> Unit = { modifier ->
+            AlchemyButton(stringResource(R.string.ok), ButtonStyle.GOLD, onClick = {
+                onClick()
+                onDismiss()
+            }, modifier = modifier)
+        }
+        // Only the big finds are worth showing off.
+        if (element.rarity >= ElementRarity.EPIC) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                AlchemyButton(
+                    stringResource(R.string.share),
+                    ButtonStyle.BLUE,
+                    onClick = {
+                        scope.launch {
+                            captures++
+                            withFrameNanos { }
+                            shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
+                        }
+                    },
+                    modifier = Modifier.weight(1f).testTag("share_discovery")
+                )
+                ok(Modifier.weight(1f))
+            }
+        } else {
+            ok(Modifier)
+        }
     }
 }

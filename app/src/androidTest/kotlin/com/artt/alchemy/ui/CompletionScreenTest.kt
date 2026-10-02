@@ -58,6 +58,8 @@ class CompletionScreenTest {
         composeRule.onNodeWithTag("palette_${recipe.secondId}").dragIntoWorkspace()
         composeRule.waitUntilShown(hasText(OK))
         composeRule.onNodeWithTag("completion_dialog").assertDoesNotExist()
+        // The philosopher's stone is epic: a find worth sharing.
+        composeRule.onNodeWithTag("share_discovery").assertIsDisplayed()
 
         composeRule.onNodeWithText(OK).performClick()
         composeRule.waitUntilShown(hasTestTag("completion_dialog"))
@@ -72,6 +74,20 @@ class CompletionScreenTest {
         composeRule.onNodeWithTag("nav_achievements").performClick()
         composeRule.onNodeWithTag("achievement_completion").assertIsDisplayed().performClick()
         composeRule.waitUntilShown(hasTestTag("completion_dialog"))
+        composeRule.onNodeWithText(OK).performClick()
+    }
+
+    @Test
+    fun anOrdinaryDiscoveryOffersNoSharing() {
+        store.save(initialPlayerProgress().copy(onboardingSeen = true))
+        scenario = ActivityScenario.launch(MainActivity::class.java)
+        composeRule.waitForScene()
+
+        composeRule.onNodeWithTag("palette_fire").dragIntoWorkspace()
+        composeRule.onNodeWithTag("palette_water").dragIntoWorkspace()
+        composeRule.waitUntilShown(hasText(OK))
+
+        composeRule.onNodeWithTag("share_discovery").assertDoesNotExist()
         composeRule.onNodeWithText(OK).performClick()
     }
 

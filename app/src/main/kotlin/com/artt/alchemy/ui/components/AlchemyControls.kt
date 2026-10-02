@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.artt.alchemy.R
@@ -162,9 +163,13 @@ fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifie
             .clickable(interactionSource = interactionSource, indication = null, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge, color = style.textColor)
+        // One line: a narrow button shrinks its label instead of breaking a word.
+        val labelStyle = MaterialTheme.typography.labelLarge
+        Text(text = text, style = labelStyle, color = style.textColor, maxLines = 1, autoSize = WholeWordsAutoSize(min = BUTTON_LABEL_MIN_SIZE, max = labelStyle.fontSize))
     }
 }
+
+private val BUTTON_LABEL_MIN_SIZE = 12.sp
 
 @Composable
 fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {

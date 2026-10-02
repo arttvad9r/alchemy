@@ -82,6 +82,8 @@
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
     <string name="ok">Got it</string>
+    <string name="share">Share</string>
+    <string name="share_discovery_text">Discovered %1$s in Alchemy: %2$s</string>
     <string name="back">Back</string>
     <string name="tip_tap">Tap an element and it lands on the board</string>
     <string name="tip_combine">Drop one element onto another to make a new one</string>

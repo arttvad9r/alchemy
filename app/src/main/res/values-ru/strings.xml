@@ -82,6 +82,8 @@
     <string name="cancel">Отмена</string>
     <string name="close">Закрыть</string>
     <string name="ok">Понятно</string>
+    <string name="share">Поделиться</string>
+    <string name="share_discovery_text">Открыт элемент «%1$s» в игре «Алхимия»: %2$s</string>
     <string name="back">Назад</string>
     <string name="tip_tap">Нажмите на элемент, и он ляжет на рабочую область</string>
     <string name="tip_combine">Наложите один элемент на другой, чтобы получить новый</string>
