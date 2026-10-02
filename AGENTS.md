@@ -15,7 +15,7 @@ Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 
 
 ## Status
 - Feature plan `docs/superpowers/plans/2026-09-29-feature-roadmap.md`: stages 1–9 merged into `master` (themes last, 2026-10-01).
-- RuStore: 1.1.1 (versionCode 3) submitted and in moderation as the first publication (2026-10-02). `master` holds 1.2.0 (versionCode 4) — audit fixes, workspace and tip persistence, toolchain on API 37 — to ship as the first update once 1.1.1 is approved; its notes are «Не выпущено» in `CHANGELOG.md`.
+- RuStore: 1.1.1 (versionCode 3) submitted and in moderation as the first publication (2026-10-02). 1.2.0 (versionCode 4) is released on GitHub (tag `v1.2.0`, signed with the current key; 1.1.0 on GitHub used an older key, so it cannot be updated in place) and goes to RuStore as the first update once 1.1.1 is approved; its notes are the 1.2.0 section of `CHANGELOG.md`.
 - Themes: blue art has pre-tinted `*_ember`/`*_verdant` copies built by `tools/build_ui_assets.py` (`THEMED_ART`, OKLCH hue shift; `BACKGROUND_GRADES` tones down their backgrounds), picked via `themedArt()`. Keep `EmberColors`/`VerdantColors` in step with `THEME_TINTS`.
 - Studio intro: 2.5s ARTT Studio video supplied by the owner (used as is) follows a plain black system starting window (no game branding); no manual skip, background pauses playback, reduced motion shows a still. It dips to black, then lifts onto the game, which is laid out underneath from 0.7s (touch and semantics blocked; music waits for the end).
 - Branding notes and poster command: `ART_ASSETS.md`.
