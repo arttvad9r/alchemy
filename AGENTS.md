@@ -1,9 +1,9 @@
 # Alchemy-From-Scratch
 
-Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 elements, 176 recipes, local progress only — no network, accounts, ads, purchases or analytics.
+Offline Android element-mixing game (Kotlin/Compose, single module, no DI): 180 elements, 176 curated + 230 alternative recipes (406), local progress only — no network, accounts, ads, purchases or analytics.
 
 - Prefer the smallest sufficient change and existing Android/Compose platform capabilities; do not add frameworks or dependencies without a demonstrated need.
-- Don't change the catalog (180 elements, 176 recipes), the overlap rule or depth-based rarity. Not planned: levels, XP, scores, streaks, daily quests, cloud, accounts.
+- Don't change the 180 elements, the 176 curated recipes, the overlap rule or depth-based rarity. Alternative recipes may be added if they keep every element's rarity (checked at startup and in tests; `docs/adr/0001-alternative-recipes.md`). Not planned: levels, XP, scores, streaks, daily quests, cloud, accounts.
 - Before claiming an interaction fix complete, verify observable behavior on an emulator. Build success alone is not acceptance.
 - For workspace mechanics, verify real spawn, drag, overlap resolution, invalid-pair no-op, boundary deletion, tab round-trips, and persistence where relevant.
 - Run `./gradlew qualityCheck testDebugUnitTest assembleDebug` for deterministic verification and the focused Android instrumentation tests for affected UI flows (`docs/testing.md`).
