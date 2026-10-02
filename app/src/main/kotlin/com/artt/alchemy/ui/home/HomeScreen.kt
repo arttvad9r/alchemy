@@ -89,6 +89,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -100,6 +102,7 @@ import androidx.compose.ui.zIndex
 import com.artt.alchemy.R
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.game.ElementDefinition
+import com.artt.alchemy.game.ElementLinks
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.game.ElementSort
 import com.artt.alchemy.game.WorkspaceEvent
@@ -145,6 +148,9 @@ private const val GRAND_CARD_AFTER_EFFECT = 0.6f
 private const val TRANSITION_DURATION_MILLIS = 650L
 private const val WORKSPACE_PANEL_ALPHA = 0.88f
 private const val DRAGGED_TILE_ALPHA = 0.4f
+
+// Still playable, just quieter than the elements that can make something new.
+private const val EXHAUSTED_TILE_ALPHA = 0.55f
 private const val DRAGGED_TILE_FADE_MILLIS = 120
 
 // Keeps the frame border thin; unscaled corners would eat into the item area.
@@ -169,6 +175,7 @@ fun HomeScreen(
     val paletteSort = state.progress.paletteSort
     val discoveryOrder = state.progress.discoveryOrder
     val resources = LocalContext.current.resources
+    val exhaustedIds = remember(unlockedIds) { ElementLinks.exhaustedIds(unlockedIds) }
     val unlocked = remember(unlockedIds, discoveryOrder, paletteSort, resources) {
         sortElements(AlchemyCatalog.elements.filter { it.id in unlockedIds }, discoveryOrder, paletteSort, Locale.getDefault(), resources::elementName)
     }
@@ -313,6 +320,7 @@ fun HomeScreen(
                                 DraggablePaletteElement(
                                     element = element,
                                     dimmed = draggedElement?.id == element.id,
+                                    exhausted = element.id in exhaustedIds,
                                     fresh = element.id in state.freshElementIds,
                                     modifier = Modifier.fillMaxWidth().testTag("palette_${element.id}"),
                                     onDragPosition = { position ->
@@ -646,6 +654,7 @@ private fun PaletteScrollbar(state: LazyGridState, modifier: Modifier = Modifier
 private fun DraggablePaletteElement(
     element: ElementDefinition,
     dimmed: Boolean,
+    exhausted: Boolean,
     fresh: Boolean,
     modifier: Modifier,
     onDragPosition: (Offset?) -> Unit,
@@ -658,11 +667,22 @@ private fun DraggablePaletteElement(
     val currentOnDrop by rememberUpdatedState(onDrop)
     val currentOnPickUp by rememberUpdatedState(onPickUp)
 
-    val alpha by animateFloatAsState(if (dimmed) DRAGGED_TILE_ALPHA else 1f, motion(tween(DRAGGED_TILE_FADE_MILLIS)), label = "tileAlpha")
+    val alpha by animateFloatAsState(
+        when {
+            dimmed -> DRAGGED_TILE_ALPHA
+            exhausted -> EXHAUSTED_TILE_ALPHA
+            else -> 1f
+        },
+        motion(tween(DRAGGED_TILE_FADE_MILLIS)),
+        label = "tileAlpha"
+    )
+    val exhaustedState = stringResource(R.string.element_exhausted)
     ElementTile(
         element = element,
         // An element found this session glows until the catalog has shown it.
-        modifier = modifier.alpha(alpha).then(if (fresh) Modifier.freshGlow() else Modifier).onGloballyPositioned { coordinates = it }
+        modifier = modifier.alpha(alpha).then(if (fresh) Modifier.freshGlow() else Modifier)
+            .then(if (exhausted) Modifier.semantics { stateDescription = exhaustedState } else Modifier)
+            .onGloballyPositioned { coordinates = it }
             .pointerInput(element.id) {
                 var lastPosition: Offset? = null
                 detectDragGestures(

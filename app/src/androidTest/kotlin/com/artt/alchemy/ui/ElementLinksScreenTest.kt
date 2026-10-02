@@ -1,5 +1,7 @@
 package com.artt.alchemy.ui
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -72,6 +74,23 @@ class ElementLinksScreenTest {
 
         composeRule.onNodeWithTag("element_details").assertIsDisplayed()
         composeRule.onNode(hasTestTag("element_links_note") and hasText("Больше ни с чем не сочетается")).assertExists()
+    }
+
+    @Test
+    fun anElementThatCanMakeNothingNewIsUsedUpInThePaletteAndItsCard() {
+        launchWith(
+            initialPlayerProgress()
+                .recordAttempt(Combination("fire", "water", "steam"))
+                .recordAttempt(Combination("steam", "air", "cloud"))
+        )
+        val usedUp = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Исчерпан")
+
+        composeRule.onNode(hasTestTag("palette_steam") and usedUp).assertExists()
+        composeRule.onNode(hasTestTag("palette_fire") and usedUp).assertDoesNotExist()
+
+        composeRule.onNodeWithTag("nav_elements").performClick()
+        composeRule.onNodeWithTag("element_steam").performClick()
+        composeRule.onNode(hasTestTag("element_links_note") and hasText("Всё, что из него получается, уже открыто")).assertExists()
     }
 
     private fun fact(elementId: String): String = InstrumentationRegistry.getInstrumentation().targetContext.resources.elementFact(elementId)
