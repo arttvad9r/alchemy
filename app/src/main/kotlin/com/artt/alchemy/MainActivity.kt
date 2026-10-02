@@ -6,9 +6,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.ui.AlchemyApp
 import com.artt.alchemy.ui.StudioIntro
@@ -33,10 +39,12 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState != null) sceneReady.value = true
         window.decorView.postDelayed({ sceneReady.value = true }, SPLASH_FALLBACK_MILLIS)
         setContent {
-            if (introComplete) {
-                AlchemyApp(sceneReady = sceneReady.value)
-            } else {
-                StudioIntro(ready = sceneReady.value, reducedMotion = reducedMotion, onFinished = { introComplete = true })
+            ScaledUpOnLargeScreens {
+                if (introComplete) {
+                    AlchemyApp(sceneReady = sceneReady.value)
+                } else {
+                    StudioIntro(ready = sceneReady.value, reducedMotion = reducedMotion, onFinished = { introComplete = true })
+                }
             }
         }
     }
@@ -59,3 +67,18 @@ class MainActivity : ComponentActivity() {
         const val SPLASH_FALLBACK_MILLIS = 1500L
     }
 }
+
+/**
+ * A tablet shows the phone layout enlarged, as if its shorter side were [LAYOUT_MAX_SHORT_SIDE] wide, instead of
+ * phone-sized controls and text lost on a wide screen. Workspace positions are fractions, so nothing moves.
+ */
+@Composable
+private fun ScaledUpOnLargeScreens(content: @Composable () -> Unit) {
+    val density = LocalDensity.current
+    val windowSize = LocalWindowInfo.current.containerSize
+    val shortSide = with(density) { minOf(windowSize.width, windowSize.height).toDp() }
+    val scale = (shortSide / LAYOUT_MAX_SHORT_SIDE).coerceAtLeast(1f)
+    CompositionLocalProvider(LocalDensity provides Density(density.density * scale, density.fontScale), content = content)
+}
+
+private val LAYOUT_MAX_SHORT_SIDE = 600.dp
