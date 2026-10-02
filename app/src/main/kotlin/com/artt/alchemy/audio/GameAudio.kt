@@ -176,6 +176,10 @@ class BackgroundMusic(private val context: Context) {
 
     fun start() {
         wanted = true
+        if (!noisyReceiverRegistered) {
+            ContextCompat.registerReceiver(context, noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY), ContextCompat.RECEIVER_NOT_EXPORTED)
+            noisyReceiverRegistered = true
+        }
         handler.removeCallbacks(intro)
         if (!focus.request()) return
         // At launch the scene settles for a moment in silence, then the music comes in slowly.
@@ -184,6 +188,7 @@ class BackgroundMusic(private val context: Context) {
 
     fun pause() {
         wanted = false
+        unregisterNoisyReceiver()
         silence()
         focus.abandon()
     }
@@ -194,10 +199,6 @@ class BackgroundMusic(private val context: Context) {
             current = first
             chain(first)
         } ?: return
-        if (!noisyReceiverRegistered) {
-            ContextCompat.registerReceiver(context, noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY), ContextCompat.RECEIVER_NOT_EXPORTED)
-            noisyReceiverRegistered = true
-        }
         if (!playing.isPlaying) playing.start()
         audible = true
         handler.removeCallbacks(restore)
@@ -206,7 +207,6 @@ class BackgroundMusic(private val context: Context) {
 
     private fun silence() {
         audible = false
-        unregisterNoisyReceiver()
         handler.removeCallbacks(restore)
         handler.removeCallbacks(intro)
         if (current?.isPlaying != true) return
@@ -222,10 +222,7 @@ class BackgroundMusic(private val context: Context) {
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> silence()
 
-            AudioManager.AUDIOFOCUS_LOSS -> {
-                silence()
-                focus.abandon()
-            }
+            AudioManager.AUDIOFOCUS_LOSS -> pause()
         }
     }
 

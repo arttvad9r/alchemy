@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -77,6 +78,39 @@ class BackgroundMusicTest {
         }
         composeRule.waitUntil(timeoutMillis = 3000) { composeRule.runOnUiThread { current(music)?.isPlaying == false } }
         composeRule.runOnUiThread { assertFalse(current(music)!!.isPlaying) }
+    }
+
+    @Test
+    fun transientInterruptionKeepsHeadphoneMonitoringUntilPlaybackResumes() = withPlayingMusic { music ->
+        composeRule.runOnUiThread {
+            val focusChange = BackgroundMusic::class.java.getDeclaredMethod("onFocusChange", Int::class.javaPrimitiveType).apply { isAccessible = true }
+            focusChange.invoke(music, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT)
+            assertTrue("Headphone disconnect must still be monitored during a passing interruption", monitorsHeadphones(music))
+            val receiver = BackgroundMusic::class.java.declaredFields.first { BroadcastReceiver::class.java.isAssignableFrom(it.type) }.apply { isAccessible = true }
+            (receiver.get(music) as BroadcastReceiver).onReceive(composeRule.activity.applicationContext, Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
+            focusChange.invoke(music, AudioManager.AUDIOFOCUS_GAIN)
+        }
+        SystemClock.sleep(800)
+        composeRule.runOnUiThread { assertFalse(current(music)!!.isPlaying) }
+    }
+
+    @Test
+    fun headphoneMonitoringStartsBeforeTheDelayedIntro() {
+        composeRule.waitForScene()
+        composeRule.runOnUiThread {
+            val music = BackgroundMusic(composeRule.activity.applicationContext)
+            try {
+                music.start()
+                assertTrue("Headphone disconnect must be monitored before the first note", monitorsHeadphones(music))
+            } finally {
+                music.release()
+            }
+        }
+    }
+
+    private fun monitorsHeadphones(music: BackgroundMusic): Boolean = BackgroundMusic::class.java.getDeclaredField("noisyReceiverRegistered").let {
+        it.isAccessible = true
+        it.getBoolean(music)
     }
 
     private fun withPlayingMusic(test: (BackgroundMusic) -> Unit) {
