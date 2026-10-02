@@ -51,6 +51,19 @@ class WorkspaceAccessibilityTest {
     }
 
     @Test
+    fun partner_picker_mixes_the_named_target_in_a_chain_of_overlapping_items() {
+        show(listOf(
+            WorkspaceItem(1, "fire", 0.2f, 0.5f),
+            WorkspaceItem(2, "earth", 0.5f, 0.5f),
+            WorkspaceItem(3, "water", 0.6f, 0.5f),
+            WorkspaceItem(4, "steam", 0.7f, 0.5f)
+        ))
+        item("fire").performClick()
+        composeRule.onNodeWithTag("workspace_partner_3").performClick()
+        composeRule.runOnIdle { assertEquals(listOf("earth", "steam", "steam"), state.value.workspace.items.map { it.elementId }) }
+    }
+
+    @Test
     fun accessibility_remove_action_removes_only_selected_item() {
         show(listOf(WorkspaceItem(1, "fire", 0.3f, 0.5f), WorkspaceItem(2, "water", 0.7f, 0.5f)))
         val actions = item("fire").fetchSemanticsNode().config[SemanticsActions.CustomActions]
@@ -80,7 +93,7 @@ class WorkspaceAccessibilityTest {
     )
 
     private fun show(items: List<WorkspaceItem>) {
-        state.value = state.value.copy(workspace = WorkspaceState(items, 3))
+        state.value = state.value.copy(workspace = WorkspaceState(items, (items.maxOfOrNull { it.instanceId } ?: 0) + 1))
         composeRule.setContent {
             AlchemyTheme(state.value.progress.theme) {
                 CompositionLocalProvider(LocalReducedMotion provides true) {
