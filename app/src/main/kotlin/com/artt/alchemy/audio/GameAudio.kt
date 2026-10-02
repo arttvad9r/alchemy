@@ -3,7 +3,10 @@ package com.artt.alchemy.audio
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -20,6 +23,7 @@ import android.os.VibratorManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import androidx.annotation.RawRes
+import androidx.core.content.ContextCompat
 import com.artt.alchemy.R
 import kotlin.random.Random
 
@@ -144,6 +148,12 @@ class BackgroundMusic(private val context: Context) {
     private var fade: ValueAnimator? = null
     private var volume = 0f
     private var audible = false
+    private var noisyReceiverRegistered = false
+    private val noisyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) pause()
+        }
+    }
 
     // The game is on screen with music on; it may still be silent while another app holds the focus.
     private var wanted = false
@@ -184,6 +194,10 @@ class BackgroundMusic(private val context: Context) {
             current = first
             chain(first)
         } ?: return
+        if (!noisyReceiverRegistered) {
+            ContextCompat.registerReceiver(context, noisyReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY), ContextCompat.RECEIVER_NOT_EXPORTED)
+            noisyReceiverRegistered = true
+        }
         if (!playing.isPlaying) playing.start()
         audible = true
         handler.removeCallbacks(restore)
@@ -192,10 +206,12 @@ class BackgroundMusic(private val context: Context) {
 
     private fun silence() {
         audible = false
+        unregisterNoisyReceiver()
         handler.removeCallbacks(restore)
         handler.removeCallbacks(intro)
-        val playing = current?.takeIf { it.isPlaying } ?: return
-        fadeTo(0f, FADE_OUT_MILLIS) { playing.pause() }
+        if (current?.isPlaying != true) return
+        // The loop may replace and release the player during the fade. Pause its live successor.
+        fadeTo(0f, FADE_OUT_MILLIS) { current?.takeIf { it.isPlaying }?.pause() }
     }
 
     // A call or another player takes over: give way, and come back when a passing interruption ends. After a
@@ -222,6 +238,9 @@ class BackgroundMusic(private val context: Context) {
     }
 
     fun release() {
+        wanted = false
+        audible = false
+        unregisterNoisyReceiver()
         handler.removeCallbacks(restore)
         handler.removeCallbacks(intro)
         focus.abandon()
@@ -231,6 +250,12 @@ class BackgroundMusic(private val context: Context) {
         upcoming?.release()
         current = null
         upcoming = null
+    }
+
+    private fun unregisterNoisyReceiver() {
+        if (!noisyReceiverRegistered) return
+        context.unregisterReceiver(noisyReceiver)
+        noisyReceiverRegistered = false
     }
 
     // Looping a single MediaPlayer leaves an audible gap at the loop point. A second player, already
@@ -243,7 +268,11 @@ class BackgroundMusic(private val context: Context) {
             finished.release()
             current = upcoming
             upcoming = null
-            current?.let(::chain)
+            current?.let { nextPlayer ->
+                // setNextMediaPlayer starts this player automatically, even during a pending pause.
+                if (!audible && nextPlayer.isPlaying) nextPlayer.pause()
+                chain(nextPlayer)
+            }
         }
     }
 
