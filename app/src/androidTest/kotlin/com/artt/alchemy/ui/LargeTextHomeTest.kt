@@ -19,6 +19,7 @@ import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -57,6 +58,7 @@ class LargeTextHomeTest {
             composeRule.onNodeWithText(text, useUnmergedTree = true)
                 .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
             assertFalse("$text must fit at twice the system text size", layouts.single().hasVisualOverflow)
+            if (text != "Открытые элементы") assertEquals("A basic name must not break inside a word", 1, layouts.single().lineCount)
         }
     }
 }
