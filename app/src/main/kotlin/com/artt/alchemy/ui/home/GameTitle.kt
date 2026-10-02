@@ -8,15 +8,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.artt.alchemy.R
@@ -29,12 +32,24 @@ private const val TITLE_SHADOW_BLUR = 10f
 private val LOGO_SIZE = 64.dp
 private val TITLE_SIZE = 38.sp
 private val TAGLINE_SIZE = 13.sp
-private val TITLE_MIN_SIZE = 24.sp
+private val TITLE_MIN_SIZE = 10.sp
 private val TAGLINE_MIN_SIZE = 9.sp
 
-/** The game's name as on the concept: a golden serif wordmark beside the spell book, with a tagline under it. */
+/**
+ * The game's name as on the concept: a golden serif wordmark beside the spell book, with a tagline under it.
+ * Like the book, the wordmark ignores the system font scale, and it may shrink far: with a large font the Clear button
+ * grows and leaves the name little room, yet "Алхимия" must stay whole.
+ */
 @Composable
 fun GameTitle(modifier: Modifier = Modifier) {
+    val density = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
+        Wordmark(modifier)
+    }
+}
+
+@Composable
+private fun Wordmark(modifier: Modifier) {
     // A shadow in the theme's darkest colour keeps the gold readable on any background.
     val titleShadow = Shadow(color = MaterialTheme.colorScheme.background, offset = TitleShadowOffset, blurRadius = TITLE_SHADOW_BLUR)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
