@@ -105,7 +105,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         private set
 
     private var combinationEffectCount = 0L
-    private var transferJob: Job? = null
+    private var importJob: Job? = null
+    private var transferGeneration = 0L
 
     private val sounds = SoundEffects(application)
     private val haptics = Haptics(application)
@@ -278,13 +279,14 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     /** Writes the progress as JSON to the document the player picked. */
     fun exportProgress(uri: Uri) {
         val progress = state.progress
-        transferJob?.cancel()
+        importJob?.cancel()
+        val generation = ++transferGeneration
         state = state.copy(pendingImport = null, transferResult = null)
-        transferJob = viewModelScope.launch {
+        viewModelScope.launch {
             val written = try {
                 withContext(Dispatchers.IO) {
                     getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use {
-                        ensureActive()
+                        // Once the provider opens (and truncates) a file, finish writing the chosen snapshot.
                         it.write(progress.toJson().toByteArray())
                     } != null
                 }
@@ -293,15 +295,18 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             } catch (_: Exception) {
                 false
             }
-            state = state.copy(pendingImport = null, transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+            if (generation == transferGeneration) {
+                state = state.copy(pendingImport = null, transferResult = if (written) TransferResult.EXPORTED else TransferResult.EXPORT_FAILED)
+            }
         }
     }
 
     /** Reads a save from the picked document; a file that is not a save changes nothing, a good one waits for confirmation. */
     fun readImport(uri: Uri) {
-        transferJob?.cancel()
+        importJob?.cancel()
+        val generation = ++transferGeneration
         state = state.copy(pendingImport = null, transferResult = null)
-        transferJob = viewModelScope.launch {
+        importJob = viewModelScope.launch {
             val progress = try {
                 withContext(Dispatchers.IO) {
                     getApplication<Application>().contentResolver.openInputStream(uri)?.use { input ->
@@ -322,7 +327,9 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
             } catch (_: Exception) {
                 null
             }
-            state = state.copy(pendingImport = progress, transferResult = TransferResult.IMPORT_INVALID.takeIf { progress == null })
+            if (generation == transferGeneration) {
+                state = state.copy(pendingImport = progress, transferResult = TransferResult.IMPORT_INVALID.takeIf { progress == null })
+            }
         }
     }
 
@@ -343,7 +350,8 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun replaceProgress(progress: PlayerProgress) {
-        transferJob?.cancel()
+        importJob?.cancel()
+        transferGeneration++
         state = AlchemyUiState(progress = progress, selectedTab = AppTab.SETTINGS)
         applyVolumes()
         if (progress.musicEnabled) resumeMusic() else music.pause()
