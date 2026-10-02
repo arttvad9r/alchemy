@@ -582,9 +582,12 @@ private fun DrawScope.drawItem(item: WorkspaceItem, art: WorkspaceArt, labelPain
             alpha = alpha,
             filterQuality = FilterQuality.Medium
         )
-        val labelBaseline = center.y - radius * ICON_TOP_SHARE + iconSize - labelPaint.ascent()
+        val halfWidth = labelPaint.measureText(name) / 2f
+        val labelBounds = Rect(-halfWidth, labelPaint.ascent(), halfWidth, labelPaint.descent())
+        val iconBounds = Rect(center.x - iconSize / 2f, center.y - radius * ICON_TOP_SHARE, center.x + iconSize / 2f, center.y - radius * ICON_TOP_SHARE + iconSize)
+        val labelPosition = workspaceLabelPosition(iconBounds, labelBounds, size, scale, radius * LABEL_EDGE_GAP)
         labelPaint.alpha = (alpha * 255).roundToInt()
-        drawContext.canvas.nativeCanvas.drawText(name, center.x, labelBaseline, labelPaint)
+        drawContext.canvas.nativeCanvas.drawText(name, labelPosition.x, labelPosition.y, labelPaint)
         labelPaint.alpha = 255
     }
 }
@@ -758,6 +761,9 @@ internal fun workspaceIconSize(width: Float, height: Float): Float = minOf(width
 internal fun workspaceLabelSize(width: Float, height: Float, density: Density = Density(1f)): Float = with(density) {
     maxOf(12f, minOf(width, height) * LABEL_SIZE_FRACTION / density.density).sp.toPx()
 }
+
+/** Coordinates of a label baseline before the item's visual scale is applied. */
+internal fun workspaceLabelPosition(icon: Rect, label: Rect, board: Size, scale: Float = 1f, gap: Float = 0f): Offset = Offset(icon.center.x, icon.bottom - label.top)
 
 private fun distanceSquared(item: WorkspaceItem, position: Offset, width: Float, height: Float): Float {
     val dx = item.xFraction * width - position.x
