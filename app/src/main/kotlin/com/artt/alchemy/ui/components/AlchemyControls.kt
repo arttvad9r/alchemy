@@ -338,7 +338,7 @@ fun AlchemyIconButton(
     size: Dp = ICON_BUTTON_SIZE
 ) {
     Image(
-        painter = painterResource(icon),
+        painter = painterResource(themedArt(icon)),
         contentDescription = contentDescription,
         modifier = modifier.size(size).clip(CircleShape).clickable(role = Role.Button, onClick = onClick)
     )

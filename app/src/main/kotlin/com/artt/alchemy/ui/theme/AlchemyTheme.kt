@@ -78,50 +78,53 @@ private val AetherColors = darkColorScheme(
     onError = Color(0xFF2D0006)
 )
 
+// Ember and Verdant are Aether moved to another hue the way tools/build_ui_assets.py tints the art:
+// accents keep their brightness, and dark surfaces lose most of their colour so they read as
+// warm charcoal and deep pine rather than rust and emerald.
 private val EmberColors = AetherColors.copy(
-    primary = Color(0xFFFF8F5A),
-    onPrimary = Color(0xFF2E0F06),
-    primaryContainer = Color(0xFF8C2D1D),
-    onPrimaryContainer = Color(0xFFFFE1D6),
-    secondaryContainer = Color(0xFF5A2A1D),
-    onSecondaryContainer = Color(0xFFF6E7E2),
-    tertiary = Color(0xFFFFB454),
-    background = Color(0xFF1A0A07),
-    onBackground = Color(0xFFF6E7E2),
-    surface = Color(0xFF2B100C),
-    onSurface = Color(0xFFF6E7E2),
-    surfaceVariant = Color(0xFF3A1812),
-    onSurfaceVariant = Color(0xFFDDBBB0),
-    surfaceContainerLowest = Color(0xFF1A0A07),
-    surfaceContainerLow = Color(0xFF2B100C),
-    surfaceContainer = Color(0xFF331510),
-    surfaceContainerHigh = Color(0xFF3E1A14),
-    surfaceContainerHighest = Color(0xFF4A211A),
-    outline = Color(0xFFA05A46),
-    outlineVariant = Color(0xFF8F3B2A)
+    primary = Color(0xFFF0A070),
+    onPrimary = Color(0xFF2A1A10),
+    primaryContainer = Color(0xFF6B4029),
+    onPrimaryContainer = Color(0xFFFFE8DA),
+    secondaryContainer = Color(0xFF4A3428),
+    onSecondaryContainer = Color(0xFFF2E8E2),
+    tertiary = Color(0xFFF2B56B),
+    background = Color(0xFF140F0C),
+    onBackground = Color(0xFFF2E8E2),
+    surface = Color(0xFF221915),
+    onSurface = Color(0xFFF2E8E2),
+    surfaceVariant = Color(0xFF33271F),
+    onSurfaceVariant = Color(0xFFD9C5BA),
+    surfaceContainerLowest = Color(0xFF140F0C),
+    surfaceContainerLow = Color(0xFF221915),
+    surfaceContainer = Color(0xFF2A201A),
+    surfaceContainerHigh = Color(0xFF33261F),
+    surfaceContainerHighest = Color(0xFF3E2E25),
+    outline = Color(0xFF8F6650),
+    outlineVariant = Color(0xFF6E4E3C)
 )
 
 private val VerdantColors = AetherColors.copy(
-    primary = Color(0xFF5FD99A),
-    onPrimary = Color(0xFF032016),
-    primaryContainer = Color(0xFF1D6B45),
-    onPrimaryContainer = Color(0xFFD8F7E6),
-    secondaryContainer = Color(0xFF1E5A3F),
-    onSecondaryContainer = Color(0xFFE4F3EB),
-    tertiary = Color(0xFF7BD4E0),
-    background = Color(0xFF06160F),
-    onBackground = Color(0xFFE4F3EB),
-    surface = Color(0xFF0B2419),
-    onSurface = Color(0xFFE4F3EB),
-    surfaceVariant = Color(0xFF133323),
-    onSurfaceVariant = Color(0xFFB4D9C6),
-    surfaceContainerLowest = Color(0xFF06160F),
-    surfaceContainerLow = Color(0xFF0B2419),
-    surfaceContainer = Color(0xFF0F2D1F),
-    surfaceContainerHigh = Color(0xFF14392A),
-    surfaceContainerHighest = Color(0xFF1B4535),
-    outline = Color(0xFF4AA07A),
-    outlineVariant = Color(0xFF2F8F63)
+    primary = Color(0xFF45BCA6),
+    onPrimary = Color(0xFF06201B),
+    primaryContainer = Color(0xFF0F4F45),
+    onPrimaryContainer = Color(0xFFD5ECE6),
+    secondaryContainer = Color(0xFF1C3E38),
+    onSecondaryContainer = Color(0xFFDFEDE9),
+    tertiary = Color(0xFF7FC8D8),
+    background = Color(0xFF080F0D),
+    onBackground = Color(0xFFDFEDE9),
+    surface = Color(0xFF0E1A17),
+    onSurface = Color(0xFFDFEDE9),
+    surfaceVariant = Color(0xFF172825),
+    onSurfaceVariant = Color(0xFFA7C5BE),
+    surfaceContainerLowest = Color(0xFF080F0D),
+    surfaceContainerLow = Color(0xFF0E1A17),
+    surfaceContainer = Color(0xFF13201E),
+    surfaceContainerHigh = Color(0xFF172724),
+    surfaceContainerHighest = Color(0xFF1A302B),
+    outline = Color(0xFF3A7A6E),
+    outlineVariant = Color(0xFF25584F)
 )
 
 private fun AppTheme.colors() = when (this) {
@@ -135,7 +138,7 @@ val LocalAppTheme = staticCompositionLocalOf { AppTheme.AETHER }
 
 private fun themed(base: Int, ember: Int, verdant: Int) = base to mapOf(AppTheme.EMBER to ember, AppTheme.VERDANT to verdant)
 
-// Blue art with a recoloured copy per theme (see THEMED_ART in tools/build_ui_assets.py).
+// Blue art with a recoloured copy per theme (see THEMED_ART and convert_card_rarities in tools/build_ui_assets.py).
 private val ThemedArt = mapOf(
     themed(R.drawable.btn_blue, R.drawable.btn_blue_ember, R.drawable.btn_blue_verdant),
     themed(R.drawable.dialog_blue, R.drawable.dialog_blue_ember, R.drawable.dialog_blue_verdant),
@@ -152,6 +155,9 @@ private val ThemedArt = mapOf(
     themed(R.drawable.scene_magic_circle, R.drawable.scene_magic_circle_ember, R.drawable.scene_magic_circle_verdant),
     themed(R.drawable.radio_on, R.drawable.radio_on_ember, R.drawable.radio_on_verdant),
     themed(R.drawable.card_base, R.drawable.card_base_ember, R.drawable.card_base_verdant),
+    themed(R.drawable.ic_plus, R.drawable.ic_plus_ember, R.drawable.ic_plus_verdant),
+    themed(R.drawable.ic_forward, R.drawable.ic_forward_ember, R.drawable.ic_forward_verdant),
+    themed(R.drawable.ic_close, R.drawable.ic_close_ember, R.drawable.ic_close_verdant),
     themed(R.drawable.card_common, R.drawable.card_common_ember, R.drawable.card_common_verdant),
     themed(R.drawable.card_rare, R.drawable.card_rare_ember, R.drawable.card_rare_verdant),
     themed(R.drawable.card_epic, R.drawable.card_epic_ember, R.drawable.card_epic_verdant),
@@ -239,6 +245,6 @@ val AppTheme.backgroundRes: Int
 val AppTheme.homeDim: Float
     get() = when (this) {
         AppTheme.AETHER -> 0.2f
-        AppTheme.EMBER -> 0.3f
-        AppTheme.VERDANT -> 0.45f
+        AppTheme.EMBER -> 0.2f
+        AppTheme.VERDANT -> 0.25f
     }

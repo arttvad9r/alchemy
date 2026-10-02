@@ -31,6 +31,7 @@ import com.artt.alchemy.ui.components.FramedElementIcon
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
+import com.artt.alchemy.ui.theme.themedArt
 
 /** One row above the recipes: a button that asks for a hint, then the hint itself with what it has revealed so far. */
 @Composable
@@ -82,13 +83,13 @@ fun HintCard(progress: PlayerProgress, onRequestHint: () -> Unit, onPlaceHint: (
                 .semantics(mergeDescendants = true) { contentDescription = description }
         ) {
             FramedElementIcon(first, Modifier.size(HINT_ICON_SIZE))
-            Image(painterResource(R.drawable.ic_plus), contentDescription = null, modifier = Modifier.size(OPERATOR_SIZE))
+            Image(painterResource(themedArt(R.drawable.ic_plus)), contentDescription = null, modifier = Modifier.size(OPERATOR_SIZE))
             if (secondRevealed) {
                 FramedElementIcon(second, Modifier.size(HINT_ICON_SIZE))
             } else {
                 UnknownSlot()
             }
-            Image(painterResource(R.drawable.ic_forward), contentDescription = null, modifier = Modifier.size(OPERATOR_SIZE))
+            Image(painterResource(themedArt(R.drawable.ic_forward)), contentDescription = null, modifier = Modifier.size(OPERATOR_SIZE))
             FramedElementIcon(result, Modifier.size(HINT_ICON_SIZE), locked = true)
         }
         if (!secondRevealed) {
