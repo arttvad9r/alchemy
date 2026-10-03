@@ -73,7 +73,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.artt.alchemy.R
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.roundToInt
 
 private const val PRESS_MILLIS = 90
@@ -143,7 +142,7 @@ enum class ButtonStyle(@param:DrawableRes val res: Int, val textColor: Color) {
 
 @Composable
 fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(themedArt(style.res))
+    val art = ImageBitmap.imageResource(style.res)
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val press by animateFloatAsState(if (pressed) 1f else 0f, motion(tween(PRESS_MILLIS)), label = "buttonPress")
@@ -165,15 +164,24 @@ fun AlchemyButton(text: String, style: ButtonStyle, onClick: () -> Unit, modifie
     ) {
         // One line: a narrow button shrinks its label instead of breaking a word.
         val labelStyle = MaterialTheme.typography.labelLarge
-        Text(text = text, style = labelStyle, color = style.textColor, maxLines = 1, autoSize = WholeWordsAutoSize(min = BUTTON_LABEL_MIN_SIZE, max = labelStyle.fontSize))
+        // Laid out without wrapping, so a label too wide reads as overflow and shrinks rather than losing its last word.
+        Text(
+            text = text,
+            style = labelStyle,
+            color = style.textColor,
+            maxLines = 1,
+            softWrap = false,
+            autoSize = WholeWordsAutoSize(min = BUTTON_LABEL_MIN_SIZE, max = labelStyle.fontSize)
+        )
     }
 }
 
 private val BUTTON_LABEL_MIN_SIZE = 12.sp
+private val BANNER_TITLE_MIN_SIZE = 16.sp
 
 @Composable
 fun AlchemyTab(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(themedArt(if (selected) R.drawable.tab_active else R.drawable.tab_inactive))
+    val art = ImageBitmap.imageResource(if (selected) R.drawable.tab_active else R.drawable.tab_inactive)
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
@@ -200,7 +208,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
     ) {
         Crossfade(targetState = checked, animationSpec = motion(tween(PRESS_MILLIS * 2)), label = "toggle") { on ->
             Image(
-                painter = painterResource(themedArt(if (on) R.drawable.toggle_on else R.drawable.toggle_off)),
+                painter = painterResource(if (on) R.drawable.toggle_on else R.drawable.toggle_off),
                 contentDescription = null,
                 modifier = Modifier.size(width = 60.dp, height = 32.dp)
             )
@@ -211,7 +219,7 @@ fun AlchemyToggle(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier
 /** Single-line Material text field drawn over the search field art, which has the magnifier drawn in. */
 @Composable
 fun AlchemySearchField(value: String, onValueChange: (String) -> Unit, placeholder: String, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_search))
+    val art = ImageBitmap.imageResource(R.drawable.field_search)
     TextField(
         value = value,
         onValueChange = onValueChange,
@@ -240,7 +248,7 @@ fun <T : Enum<T>> AlchemyDropdown(
     modifier: Modifier = Modifier,
     @DrawableRes iconRes: Int? = null
 ) {
-    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_dropdown))
+    val art = ImageBitmap.imageResource(R.drawable.field_dropdown)
     var expanded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
         Row(
@@ -253,7 +261,7 @@ fun <T : Enum<T>> AlchemyDropdown(
                 .testTag(tag)
         ) {
             iconRes?.let {
-                Image(painterResource(themedArt(it)), contentDescription = null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
+                Image(painterResource(it), contentDescription = null, modifier = Modifier.size(20.dp).padding(end = 4.dp))
             }
             Text(label(selected), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
         }
@@ -290,7 +298,7 @@ fun AlchemyDialog(
 ) {
     // A set width instead of the platform's narrow default, so reading text gets long enough lines.
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = dismissOnClickOutside)) {
-        val art = ImageBitmap.imageResource(themedArt(panelRes))
+        val art = ImageBitmap.imageResource(panelRes)
         val entrance = remember { Animatable(0f) }
         // A quick pop with a touch of overshoot, like a card laid down with a flourish.
         val entranceSpec = motion(spring<Float>(dampingRatio = DIALOG_DAMPING, stiffness = Spring.StiffnessMediumLow))
@@ -346,7 +354,7 @@ fun AlchemyIconButton(
     size: Dp = ICON_BUTTON_SIZE
 ) {
     Image(
-        painter = painterResource(themedArt(icon)),
+        painter = painterResource(icon),
         contentDescription = contentDescription,
         modifier = modifier.size(size).clip(CircleShape).clickable(role = Role.Button, onClick = onClick)
     )
@@ -355,8 +363,8 @@ fun AlchemyIconButton(
 /** The bar art: an empty track with a glowing fill that grows with [progress] from 0 to 1. */
 @Composable
 fun AlchemyProgressBar(progress: Float, modifier: Modifier = Modifier) {
-    val track = ImageBitmap.imageResource(themedArt(R.drawable.progress_track))
-    val fill = ImageBitmap.imageResource(themedArt(R.drawable.progress_fill))
+    val track = ImageBitmap.imageResource(R.drawable.progress_track)
+    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
     val fraction = progress.coerceIn(0f, 1f)
     // Starts empty so the fill grows to its value as its screen opens (see [LocalScreenOpening]); a bar scrolled into
     // view later shows its value at once. Either way it then follows changes.
@@ -397,9 +405,9 @@ fun AlchemySlider(
     modifier: Modifier = Modifier,
     onValueChangeFinished: () -> Unit = {}
 ) {
-    val track = ImageBitmap.imageResource(themedArt(R.drawable.progress_track))
-    val fill = ImageBitmap.imageResource(themedArt(R.drawable.progress_fill))
-    val knob = ImageBitmap.imageResource(themedArt(R.drawable.slider_knob))
+    val track = ImageBitmap.imageResource(R.drawable.progress_track)
+    val fill = ImageBitmap.imageResource(R.drawable.progress_fill)
+    val knob = ImageBitmap.imageResource(R.drawable.slider_knob)
     val fraction = value.coerceIn(0f, 1f)
     val currentChange by rememberUpdatedState(onValueChange)
     val currentFinished by rememberUpdatedState(onValueChangeFinished)
@@ -466,7 +474,7 @@ private fun sliderValueAt(x: Float, width: Float, knobRadius: Float): Float {
 /** Screen title on the ribbon banner, centered at the top of a screen. */
 @Composable
 fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
-    val art = ImageBitmap.imageResource(themedArt(R.drawable.banner_wide))
+    val art = ImageBitmap.imageResource(R.drawable.banner_wide)
     Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxWidth()) {
         Box(
             contentAlignment = Alignment.Center,
@@ -477,7 +485,15 @@ fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
                 // Keeps the text on the ribbon body, clear of the tails and the lower fold.
                 .padding(start = 44.dp, top = 10.dp, end = 44.dp, bottom = 16.dp)
         ) {
-            Text(text = title, style = MaterialTheme.typography.titleLarge, color = Gold, maxLines = 1)
+            val titleStyle = MaterialTheme.typography.titleLarge
+            Text(
+                text = title,
+                style = titleStyle,
+                color = Gold,
+                maxLines = 1,
+                softWrap = false,
+                autoSize = WholeWordsAutoSize(min = BANNER_TITLE_MIN_SIZE, max = titleStyle.fontSize)
+            )
         }
     }
 }
@@ -485,7 +501,7 @@ fun ScreenBanner(title: String, modifier: Modifier = Modifier) {
 /** Panel art stretched to the modifier's bounds, keeping corners and edge ornaments intact. */
 @Composable
 fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale: Float = Float.MAX_VALUE): Modifier {
-    val art = ImageBitmap.imageResource(themedArt(res))
+    val art = ImageBitmap.imageResource(res)
     return drawBehind {
         drawSliced(art, PanelColumns, PanelRows, minOf(size.width / art.width, size.height / art.height, maxScale), alpha)
     }
@@ -494,7 +510,7 @@ fun Modifier.panelBackground(@DrawableRes res: Int, alpha: Float = 1f, maxScale:
 /** A speech bubble with its tail at the bottom centre; leave room for the tail below the content. */
 @Composable
 fun Modifier.tooltipBackground(): Modifier {
-    val art = ImageBitmap.imageResource(themedArt(R.drawable.tooltip_bubble))
+    val art = ImageBitmap.imageResource(R.drawable.tooltip_bubble)
     return drawBehind { drawSliced(art, BubbleColumns, BubbleRows, density / BUBBLE_ART_DENSITY) }
 }
 
@@ -508,7 +524,7 @@ fun Modifier.pillBadge(): Modifier {
 /** A single-line row panel: the art's height follows the row, so the trim keeps its thickness. */
 @Composable
 fun Modifier.rowPanel(): Modifier {
-    val art = ImageBitmap.imageResource(themedArt(R.drawable.field_row))
+    val art = ImageBitmap.imageResource(R.drawable.field_row)
     return drawBehind { drawSliced(art, RowSegments, WholeHeight, size.height / art.height) }
 }
 

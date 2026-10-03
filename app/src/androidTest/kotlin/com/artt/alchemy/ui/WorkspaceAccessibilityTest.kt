@@ -98,13 +98,13 @@ class WorkspaceAccessibilityTest {
     private fun show(items: List<WorkspaceItem>) {
         state.value = state.value.copy(workspace = WorkspaceState(items, (items.maxOfOrNull { it.instanceId } ?: 0) + 1))
         composeRule.setContent {
-            AlchemyTheme(state.value.progress.theme) {
+            AlchemyTheme {
                 CompositionLocalProvider(LocalReducedMotion provides true) {
                     HomeScreen(
                         state = state.value,
                         onEvent = { event -> state.value = state.value.copy(workspace = reduce(state.value.workspace, event, engine).workspace) },
                         onDismissNewElement = {}, onPickUp = {}, onClick = {}, onPaletteSort = {},
-                        onEffectConsumed = {}, onTransitionsConsumed = {}, onSkipTips = {}, onShowTips = {}
+                        onEffectConsumed = {}, onTransitionsConsumed = {}, onSkipTips = {}
                     )
                 }
             }

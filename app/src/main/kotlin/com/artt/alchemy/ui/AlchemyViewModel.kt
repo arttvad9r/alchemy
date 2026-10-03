@@ -15,7 +15,6 @@ import com.artt.alchemy.audio.Haptics
 import com.artt.alchemy.audio.Sound
 import com.artt.alchemy.audio.SoundEffects
 import com.artt.alchemy.audio.panAt
-import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.PlayerProgress
 import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.data.isComplete
@@ -35,7 +34,6 @@ import com.artt.alchemy.game.WorkspaceState
 import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.reduce
 import com.artt.alchemy.ui.achievements.newlyCompletedAchievements
-import com.artt.alchemy.ui.components.systemAnimationsOff
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -254,13 +252,6 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
         updateProgress { copy(onboardingSeen = true) }
     }
 
-    fun showTips() {
-        playSound(Sound.CLICK)
-        updateProgress { copy(onboardingSeen = false) }
-        state = state.copy(tipStep = 0)
-        store.saveTipStep(0)
-    }
-
     fun markElementsSeen() {
         if (state.freshElementIds.isNotEmpty()) state = state.copy(freshElementIds = emptySet())
     }
@@ -407,15 +398,6 @@ class AlchemyViewModel(application: Application) : AndroidViewModel(application)
     fun previewEffectsVolume() {
         store.save(state.progress)
         playSound(Sound.CLICK)
-    }
-
-    fun setTheme(theme: AppTheme) {
-        updateProgress { copy(theme = theme) }
-    }
-
-    /** A choice that matches the system's own animation setting goes back to following it. */
-    fun setReducedMotion(reduced: Boolean) {
-        updateProgress { copy(reducedMotion = reduced.takeUnless { it == systemAnimationsOff(getApplication()) }) }
     }
 
     fun setMusicEnabled(enabled: Boolean) {

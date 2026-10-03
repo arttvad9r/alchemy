@@ -33,7 +33,7 @@ class BackgroundMusicTest {
             // A workspace left by another test would lie on this one's board.
             store.saveWorkspace(WorkspaceState())
             store.saveTipStep(0)
-            store.save(store.load().copy(onboardingSeen = true, reducedMotion = true, musicEnabled = false))
+            store.save(store.load().copy(onboardingSeen = true, musicEnabled = false))
         }
     }).around(composeRule)
 

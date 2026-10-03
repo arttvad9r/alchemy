@@ -3,7 +3,6 @@ package com.artt.alchemy.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
@@ -90,10 +89,8 @@ import com.artt.alchemy.ui.recipes.RecipesScreen
 import com.artt.alchemy.ui.settings.SettingsScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.backgroundRes
-import com.artt.alchemy.ui.theme.homeDim
+import com.artt.alchemy.ui.theme.HOME_DIM
 import com.artt.alchemy.ui.theme.panel
-import com.artt.alchemy.ui.theme.themedArt
 
 // The home scene stays bright; list screens dim it so text keeps its contrast.
 private const val LIST_DIM = 0.7f
@@ -101,7 +98,6 @@ private const val TOP_SCRIM_HEIGHT = 0.22f
 private const val TOP_SCRIM_ALPHA = 0.75f
 private const val UNSELECTED_ICON_ALPHA = 0.55f
 private const val TAB_FADE_MILLIS = 180
-private const val THEME_FADE_MILLIS = 400
 
 // Screens drift a little towards the tab chosen. The new one starts fading in at once and the old one lingers at
 // first, so their fades overlap and some screen is always in view; the drift only hints at the direction.
@@ -126,25 +122,23 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel(), sceneReady: Boolean = 
         if (sceneReady) viewModel.resumeMusic()
         onPauseOrDispose { viewModel.pauseMusic() }
     }
-    val reducedMotion = state.progress.reducedMotion ?: systemAnimationsOff(LocalContext.current)
-    AlchemyTheme(state.progress.theme) {
+    val reducedMotion = systemAnimationsOff(LocalContext.current)
+    AlchemyTheme {
         CompositionLocalProvider(LocalReducedMotion provides reducedMotion) {
             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                Crossfade(targetState = state.progress.theme, animationSpec = motion(tween(THEME_FADE_MILLIS)), label = "themeBackground") { theme ->
-                    Image(
-                        painter = painterResource(theme.backgroundRes),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                Image(
+                    painter = painterResource(R.drawable.bg_aether),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
                 val dim by animateFloatAsState(
-                    targetValue = if (state.selectedTab == AppTab.HOME) state.progress.theme.homeDim else LIST_DIM,
+                    targetValue = if (state.selectedTab == AppTab.HOME) HOME_DIM else LIST_DIM,
                     animationSpec = motion(tween(TAB_FADE_MILLIS)),
                     label = "backgroundDim"
                 )
                 Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background.copy(alpha = dim)))
-                // The status bar and the gold headings sit on the top of the picture, which is bright in some themes.
+                // The status bar and the gold headings sit on the top of the picture, which can be bright.
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -189,7 +183,6 @@ private fun TabScreen(tab: AppTab, state: AlchemyUiState, viewModel: AlchemyView
             onEffectConsumed = viewModel::consumeCombinationEffect,
             onTransitionsConsumed = viewModel::consumeItemTransitions,
             onSkipTips = viewModel::skipTips,
-            onShowTips = viewModel::showTips,
             modifier = modifier
         )
 
@@ -223,8 +216,6 @@ private fun TabScreen(tab: AppTab, state: AlchemyUiState, viewModel: AlchemyView
             onMusicVolumeFinished = viewModel::saveMusicVolume,
             onEffectsVolumeChanged = viewModel::setEffectsVolume,
             onEffectsVolumeFinished = viewModel::previewEffectsVolume,
-            onThemeChanged = viewModel::setTheme,
-            onReducedMotionChanged = viewModel::setReducedMotion,
             onExport = viewModel::exportProgress,
             onImportPicked = viewModel::readImport,
             onConfirmImport = viewModel::confirmImport,
@@ -320,7 +311,7 @@ private fun RowScope.NavigationItem(tab: AppTab, selected: Boolean, labelStyle: 
             .testTag(tab.testTag)
     ) {
         Image(
-            painter = painterResource(themedArt(tab.iconRes)),
+            painter = painterResource(tab.iconRes),
             contentDescription = null,
             modifier = Modifier
                 .drawBehind {

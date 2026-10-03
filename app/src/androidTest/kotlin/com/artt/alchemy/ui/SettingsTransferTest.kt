@@ -5,8 +5,6 @@ import android.os.SystemClock
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsOff
-import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -48,7 +46,7 @@ class SettingsTransferTest {
         store.saveWorkspace(WorkspaceState())
         store.saveTipStep(0)
         original = store.load()
-        store.save(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true))
+        store.save(initialPlayerProgress().copy(onboardingSeen = true))
         scenario = ActivityScenario.launch(MainActivity::class.java)
         composeRule.waitForScene()
         composeRule.onNodeWithTag("nav_settings").performClick()
@@ -80,17 +78,6 @@ class SettingsTransferTest {
     }
 
     @Test
-    fun reducedMotionToggleIsRememberedAcrossRecreation() {
-        composeRule.onNodeWithTag("settings_reduced_motion").performScrollTo().assertIsOff().performClick()
-        composeRule.onNodeWithTag("settings_reduced_motion").assertIsOn()
-        assertEquals(true, store.load().reducedMotion)
-
-        scenario.recreate()
-        composeRule.onNodeWithTag("nav_settings").performClick()
-        composeRule.onNodeWithTag("settings_reduced_motion").performScrollTo().assertIsOn()
-    }
-
-    @Test
     fun aFileThatIsNotASaveChangesNothing() {
         store.save(store.load().copy(soundEnabled = false))
         scenario.recreate()
@@ -101,7 +88,7 @@ class SettingsTransferTest {
         composeRule.onNodeWithTag("transfer_dialog").assertIsDisplayed()
         composeRule.onNodeWithTag("import_dialog").assertDoesNotExist()
         composeRule.onNodeWithTag("transfer_ok").performClick()
-        assertEquals(initialPlayerProgress().copy(soundEnabled = false, reducedMotion = false, onboardingSeen = true), store.load())
+        assertEquals(initialPlayerProgress().copy(soundEnabled = false, onboardingSeen = true), store.load())
     }
 
     @Test
@@ -150,7 +137,7 @@ class SettingsTransferTest {
         scenario.onActivity { activity ->
             assertEquals(TransferResult.IMPORT_INVALID, ViewModelProvider(activity)[AlchemyViewModel::class.java].state.transferResult)
         }
-        assertEquals(initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true), store.load())
+        assertEquals(initialPlayerProgress().copy(onboardingSeen = true), store.load())
     }
 
     @Test
@@ -168,7 +155,7 @@ class SettingsTransferTest {
             val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
             assertNull(state.pendingImport)
             assertNull(state.transferResult)
-            assertEquals(initialPlayerProgress().copy(reducedMotion = false), state.progress)
+            assertEquals(initialPlayerProgress(), state.progress)
         }
     }
 
@@ -258,7 +245,7 @@ class SettingsTransferTest {
         val suffix = SystemClock.elapsedRealtime()
         val marker = "export-opened-$suffix"
         val uri = delayedDocument("export-before-reset-$suffix.json").buildUpon().appendQueryParameter("marker", marker).build()
-        val expected = initialPlayerProgress().copy(reducedMotion = false, onboardingSeen = true)
+        val expected = initialPlayerProgress().copy(onboardingSeen = true)
         scenario.onActivity { activity ->
             ViewModelProvider(activity)[AlchemyViewModel::class.java].exportProgress(uri)
         }
@@ -278,7 +265,7 @@ class SettingsTransferTest {
         assertEquals(expected, exported)
         scenario.onActivity { activity ->
             val state = ViewModelProvider(activity)[AlchemyViewModel::class.java].state
-            assertEquals(initialPlayerProgress().copy(reducedMotion = false), state.progress)
+            assertEquals(initialPlayerProgress(), state.progress)
             assertNull(state.pendingImport)
             assertNull(state.transferResult)
         }

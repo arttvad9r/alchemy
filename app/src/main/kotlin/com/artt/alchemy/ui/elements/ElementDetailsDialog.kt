@@ -43,7 +43,6 @@ import com.artt.alchemy.ui.components.elementFact
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.themedArt
 
 /** An open element up close: its fact, the recipe it came from and the known recipes it is part of. */
 @Composable
@@ -167,7 +166,7 @@ private fun LinkTile(elementId: String, onOpen: (ElementDefinition) -> Unit) {
 
 @Composable
 private fun OperatorIcon(res: Int) {
-    Image(painterResource(themedArt(res)), contentDescription = null, modifier = Modifier.size(18.dp))
+    Image(painterResource(res), contentDescription = null, modifier = Modifier.size(18.dp))
 }
 
 private val LINK_TILE_WIDTH = 60.dp

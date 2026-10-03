@@ -43,7 +43,6 @@ import com.artt.alchemy.game.ElementDefinition
 import com.artt.alchemy.game.ElementRarity
 import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.color
-import com.artt.alchemy.ui.theme.themedArt
 
 private val FinalMarkEdge = Color(0xFF3B2A06)
 
@@ -69,7 +68,7 @@ fun ElementIcon(element: ElementDefinition, modifier: Modifier = Modifier, silho
 fun ElementFrame(rarity: ElementRarity?, modifier: Modifier = Modifier, content: @Composable BoxScope.() -> Unit) {
     Box(contentAlignment = Alignment.Center, modifier = modifier.aspectRatio(1f)) {
         Image(
-            painter = painterResource(themedArt(rarity.frameRes)),
+            painter = painterResource(rarity.frameRes),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize().then(if (rarity == null) Modifier.alpha(0.7f) else Modifier)

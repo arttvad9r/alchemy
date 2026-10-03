@@ -1,6 +1,5 @@
 package com.artt.alchemy.game
 
-import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.reset
@@ -37,10 +36,10 @@ class ProgressRulesTest {
     @Test
     fun reset_restores_initial_progress_and_keeps_settings() {
         val changed = initialPlayerProgress().recordAttempt(Combination("fire", "water", "steam"))
-            .copy(theme = AppTheme.EMBER, musicVolume = 0.3f, soundEnabled = false, reducedMotion = true, onboardingSeen = true)
+            .copy(musicVolume = 0.3f, soundEnabled = false, onboardingSeen = true)
 
         assertEquals(
-            initialPlayerProgress().copy(theme = AppTheme.EMBER, musicVolume = 0.3f, soundEnabled = false, reducedMotion = true),
+            initialPlayerProgress().copy(musicVolume = 0.3f, soundEnabled = false),
             changed.reset()
         )
     }

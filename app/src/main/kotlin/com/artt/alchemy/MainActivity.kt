@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import com.artt.alchemy.data.ProgressStore
 import com.artt.alchemy.ui.AlchemyApp
 import com.artt.alchemy.ui.StudioIntro
 import com.artt.alchemy.ui.components.systemAnimationsOff
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         introComplete = savedInstanceState?.getBoolean(INTRO_COMPLETE_KEY) ?: false
-        val reducedMotion = ProgressStore(this).load().reducedMotion ?: systemAnimationsOff(this)
+        val reducedMotion = systemAnimationsOff(this)
         // The scene background is always dark, so system bar icons stay light.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),

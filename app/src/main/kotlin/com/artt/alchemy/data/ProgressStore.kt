@@ -11,12 +11,6 @@ import com.artt.alchemy.game.nextHintRecipe
 import com.artt.alchemy.game.recipeForKey
 import com.artt.alchemy.game.recipeKey
 
-enum class AppTheme {
-    AETHER,
-    EMBER,
-    VERDANT
-}
-
 /** A hint in progress: [step] 1 shows the result and one ingredient, 2 the second ingredient. */
 data class ActiveHint(
     val recipeKey: String,
@@ -35,9 +29,6 @@ data class PlayerProgress(
     val musicEnabled: Boolean,
     val musicVolume: Float = 1f,
     val effectsVolume: Float = 1f,
-    // Null follows the system animation scale.
-    val reducedMotion: Boolean? = null,
-    val theme: AppTheme = AppTheme.AETHER,
     val onboardingSeen: Boolean = false,
     val activeHint: ActiveHint? = null,
     val paletteSort: ElementSort = ElementSort.RECENT
@@ -124,8 +115,6 @@ fun withSettingsOf(settings: PlayerProgress, progress: PlayerProgress): PlayerPr
     musicEnabled = settings.musicEnabled,
     musicVolume = settings.musicVolume,
     effectsVolume = settings.effectsVolume,
-    reducedMotion = settings.reducedMotion,
-    theme = settings.theme,
     onboardingSeen = settings.onboardingSeen,
     paletteSort = settings.paletteSort
 )
@@ -149,8 +138,6 @@ class ProgressStore(context: Context) {
         musicEnabled = preferences.getBoolean(KEY_MUSIC_ENABLED, true),
         musicVolume = preferences.getFloat(KEY_MUSIC_VOLUME, 1f),
         effectsVolume = preferences.getFloat(KEY_EFFECTS_VOLUME, 1f),
-        reducedMotion = if (preferences.contains(KEY_REDUCED_MOTION)) preferences.getBoolean(KEY_REDUCED_MOTION, false) else null,
-        theme = AppTheme.entries.firstOrNull { it.name == preferences.getString(KEY_THEME, null) } ?: AppTheme.AETHER,
         onboardingSeen = preferences.getBoolean(KEY_ONBOARDING_SEEN, false),
         activeHint = preferences.getString(KEY_ACTIVE_HINT, null)?.let(::decodeHint),
         paletteSort = ElementSort.entries.firstOrNull { it.name == preferences.getString(KEY_PALETTE_SORT, null) } ?: ElementSort.RECENT
@@ -168,9 +155,7 @@ class ProgressStore(context: Context) {
             putBoolean(KEY_MUSIC_ENABLED, progress.musicEnabled)
             putFloat(KEY_MUSIC_VOLUME, progress.musicVolume)
             putFloat(KEY_EFFECTS_VOLUME, progress.effectsVolume)
-            progress.reducedMotion?.let { putBoolean(KEY_REDUCED_MOTION, it) } ?: remove(KEY_REDUCED_MOTION)
             progress.activeHint?.let { putString(KEY_ACTIVE_HINT, "${it.step}$SEPARATOR${it.recipeKey}") } ?: remove(KEY_ACTIVE_HINT)
-            putString(KEY_THEME, progress.theme.name)
             putBoolean(KEY_ONBOARDING_SEEN, progress.onboardingSeen)
             putString(KEY_PALETTE_SORT, progress.paletteSort.name)
         }
@@ -226,8 +211,6 @@ class ProgressStore(context: Context) {
         const val KEY_MUSIC_ENABLED = "music_enabled"
         const val KEY_MUSIC_VOLUME = "music_volume"
         const val KEY_EFFECTS_VOLUME = "effects_volume"
-        const val KEY_REDUCED_MOTION = "reduced_motion"
-        const val KEY_THEME = "theme"
         const val KEY_ONBOARDING_SEEN = "onboarding_seen"
         const val KEY_ACTIVE_HINT = "active_hint"
         const val KEY_PALETTE_SORT = "palette_sort"

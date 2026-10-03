@@ -22,7 +22,6 @@ import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.game.Combination
 import com.artt.alchemy.game.WorkspaceState
 import org.junit.After
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -73,7 +72,7 @@ class FirstRunTest {
     }
 
     @Test
-    fun aTapOnTheCrossSkipsTheTipsForGoodAndTheInfoButtonBringsThemBack() {
+    fun aTapOnTheCrossSkipsTheTipsForGood() {
         launchWith(initialPlayerProgress())
         composeRule.onNodeWithTag("tip_skip").performClick()
         composeRule.onNodeWithTag("first_run_tip").assertDoesNotExist()
@@ -81,10 +80,7 @@ class FirstRunTest {
         scenario?.recreate()
         composeRule.waitForIdle()
         composeRule.onNodeWithTag("first_run_tip").assertDoesNotExist()
-
-        composeRule.onNodeWithTag("show_tips").performClick()
-        composeRule.onNodeWithText(context.getString(R.string.tip_tap)).assertIsDisplayed()
-        assertFalse(store.load().onboardingSeen)
+        assertTrue(store.load().onboardingSeen)
     }
 
     @Test
