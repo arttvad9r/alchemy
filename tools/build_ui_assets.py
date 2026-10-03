@@ -42,7 +42,7 @@ ROOM_BACKGROUNDS = (
     ("backgrounds/bg_home.png", "bg_home"),
     ("backgrounds/bg_elements.png", "bg_elements"),
     ("backgrounds/bg_recipes.png", "bg_recipes"),
-    ("backgrounds/bg_aether.png", "bg_achievements"),
+    ("backgrounds/bg_achievements.png", "bg_achievements"),
     ("backgrounds/bg_aether.png", "bg_settings"),
 )
 

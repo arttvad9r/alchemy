@@ -96,7 +96,7 @@ import com.artt.alchemy.ui.theme.panel
 // Each room keeps enough contrast for its screen while still remaining visible behind translucent UI.
 private const val ELEMENTS_DIM = 0.50f
 private const val RECIPES_DIM = 0.50f
-private const val ACHIEVEMENTS_DIM = 0.62f
+private const val ACHIEVEMENTS_DIM = 0.50f
 private const val SETTINGS_DIM = 0.64f
 private const val TOP_SCRIM_HEIGHT = 0.22f
 private const val TOP_SCRIM_ALPHA = 0.75f
