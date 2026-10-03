@@ -10,7 +10,7 @@ Usage: python3 tools/build_ui_assets.py  (requires pillow)
 import colorsys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
@@ -46,7 +46,7 @@ ROOM_BACKGROUNDS = (
 )
 
 UI_ASSETS = {
-    "backgrounds/bg_aether.png": ("bg_aether", 1672),
+    "backgrounds/bg_home.png": ("bg_aether", 1672),
     "ui/icons/home.png": ("nav_home", 128),
     "ui/icons/elements_leaf.png": ("nav_elements", 128),
     "ui/icons/recipes_book.png": ("nav_recipes", 128),
@@ -99,28 +99,25 @@ UI_ASSETS = {
     "ui/buttons/radio_off.png": ("radio_off", 96),
     "ui/buttons/pill_badge_green.png": ("pill_badge", 256),
     "ui/buttons/tooltip_bubble.png": ("tooltip_bubble", 512),
+    "ui/buttons/progress_track.png": ("progress_track", 512),
+    "ui/buttons/progress_fill.png": ("progress_fill", 512),
+    "ui/buttons/slider_knob.png": ("slider_knob", 96),
+    "ui/icons/close.png": ("ic_close", 96),
     "ui/panels_states/discovery_burst_gold.png": ("fx_discovery_burst_gold", 256),
-    # Achievement symbols come from the same art set, so a badge never repeats an element icon. Leaf, combine
-    # flash and success burst are shared with the drawables above.
-    "props/alchemy_table.png": ("achievement_experiments", 128),
-    "effects/glow_blue_orb.png": ("achievement_discovered_50", 128),
-    "effects/glow_gold_orb.png": ("achievement_discovered_100", 128),
-    "props/crystals_large.png": ("achievement_first_epic", 128),
-    "ui/icons/favorite_star.png": ("achievement_first_legendary", 128),
-    "props/scroll_roll.png": ("achievement_all_final", 128),
-    "effects/lightning_arc.png": ("achievement_nature", 128),
-    "props/wooden_crate.png": ("achievement_material", 128),
-    "props/plants_small.png": ("achievement_life", 128),
-    "props/lantern.png": ("achievement_civilization", 128),
-    "effects/portal_swirl.png": ("achievement_cosmos", 128),
+    # Dedicated achievement symbols generated in the same visual language as the rest of the redesign.
+    "achievements/achievement_experiments.png": ("achievement_experiments", 128),
+    "achievements/achievement_discovered_50.png": ("achievement_discovered_50", 128),
+    "achievements/achievement_discovered_100.png": ("achievement_discovered_100", 128),
+    "achievements/achievement_first_epic.png": ("achievement_first_epic", 128),
+    "achievements/achievement_first_legendary.png": ("achievement_first_legendary", 128),
+    "achievements/achievement_all_final.png": ("achievement_all_final", 128),
+    "achievements/achievement_nature.png": ("achievement_nature", 128),
+    "achievements/achievement_material.png": ("achievement_material", 128),
+    "achievements/achievement_life.png": ("achievement_life", 128),
+    "achievements/achievement_civilization.png": ("achievement_civilization", 128),
+    "achievements/achievement_cosmos.png": ("achievement_cosmos", 128),
 }
 
-CLOSE_ICON = "ui/icons/close.png"
-# The close icon is drawn orange-red; the dialogs want the blue of the button art.
-CLOSE_HUE = 0.6
-# Strokes lighter than this (the cross itself) lose most of their colour and read as white.
-CLOSE_WHITE_LIGHTNESS = 0.6
-CLOSE_WHITE_SATURATION = 0.35
 
 CARD = "ui/panels_states/card_base.png"
 # The card's silver trim, recoloured per rarity: (drawable, hue, saturation).
@@ -135,19 +132,6 @@ CARD_TRIM_MAX_SATURATION = 0.35
 CARD_TRIM_MIN_LIGHTNESS = 0.35
 CARD_TRIM_LIGHTNESS = 0.9
 
-PROGRESS_BAR = "ui/buttons/progress_bar.png"
-# The bar art is drawn half full; its empty right end becomes both ends of the track.
-PROGRESS_TRACK_CAP = 60
-PROGRESS_TRACK_MIDDLE_COLUMN = 230
-# Bounds of the fill in the trimmed art, matched by PROGRESS_* insets in AlchemyControls.kt.
-PROGRESS_FILL_BOX = (6, 7, 155, 45)
-PROGRESS_FILL_RADIUS = 11
-
-SLIDER = "ui/buttons/slider.png"
-SLIDER_KNOB_CENTER = (173, 52)
-SLIDER_KNOB_RADIUS = 42
-SLIDER_KNOB_FEATHER = 6
-SLIDER_KNOB_SIZE = 96
 
 BLUE_HUE_RANGE = (190, 262)
 BLUE_MIN_SATURATION = 0.1
@@ -196,23 +180,6 @@ def convert(source: Path, name: str, max_side: int) -> None:
     image.save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
-def convert_close_icon() -> None:
-    """Recolour the close icon to the blue buttons: one blue hue throughout, the cross nearly white."""
-    image = trimmed(ASSETS / CLOSE_ICON)
-    pixels = image.load()
-    for y in range(image.height):
-        for x in range(image.width):
-            red, green, blue, alpha = pixels[x, y]
-            if alpha == 0:
-                continue
-            _, lightness, saturation = colorsys.rgb_to_hls(red / 255, green / 255, blue / 255)
-            if lightness > CLOSE_WHITE_LIGHTNESS:
-                saturation *= CLOSE_WHITE_SATURATION
-            r, g, b = colorsys.hls_to_rgb(CLOSE_HUE, lightness, saturation)
-            pixels[x, y] = (round(r * 255), round(g * 255), round(b * 255), alpha)
-    image.thumbnail((96, 96), Image.LANCZOS)
-    image.save(RES_DIR / "ic_close.webp", "WEBP", quality=WEBP_QUALITY, method=6)
-
 
 def convert_card_rarities() -> None:
     """One copy of the element card per rarity, with only its silver trim recoloured."""
@@ -233,38 +200,6 @@ def convert_card_rarities() -> None:
         restrained_ui_art(image, 0.65).save(RES_DIR / f"{name}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
-def convert_progress_bar() -> None:
-    """Split the half-filled bar art into an empty track and a pill-shaped fill."""
-    bar = trimmed(ASSETS / PROGRESS_BAR)
-    width, height = bar.size
-    cap = bar.crop((width - PROGRESS_TRACK_CAP, 0, width, height))
-    middle = bar.crop((PROGRESS_TRACK_MIDDLE_COLUMN, 0, PROGRESS_TRACK_MIDDLE_COLUMN + 1, height))
-    track = Image.new("RGBA", bar.size)
-    track.paste(cap.transpose(Image.FLIP_LEFT_RIGHT), (0, 0))
-    track.paste(middle.resize((width - 2 * PROGRESS_TRACK_CAP, height)), (PROGRESS_TRACK_CAP, 0))
-    track.paste(cap, (width - PROGRESS_TRACK_CAP, 0))
-    restrained_ui_art(track, 1.0).save(RES_DIR / "progress_track.webp", "WEBP", quality=WEBP_QUALITY, method=6)
-
-    fill = bar.crop(PROGRESS_FILL_BOX)
-    mask = Image.new("L", fill.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, fill.width - 1, fill.height - 1), radius=PROGRESS_FILL_RADIUS, fill=255)
-    fill.putalpha(ImageChops.multiply(fill.getchannel("A"), mask))
-    restrained_ui_art(fill, 0.8).save(RES_DIR / "progress_fill.webp", "WEBP", quality=WEBP_QUALITY, method=6)
-
-
-def convert_slider_knob() -> None:
-    """Cut the glowing knob out of the composite slider art with a softly feathered round edge."""
-    source = Image.open(ASSETS / SLIDER).convert("RGBA")
-    cx, cy = SLIDER_KNOB_CENTER
-    box = (cx - SLIDER_KNOB_RADIUS, cy - SLIDER_KNOB_RADIUS, cx + SLIDER_KNOB_RADIUS, cy + SLIDER_KNOB_RADIUS)
-    knob = source.crop(box)
-    mask = Image.new("L", knob.size, 0)
-    inset = SLIDER_KNOB_FEATHER
-    ImageDraw.Draw(mask).ellipse((inset, inset, knob.width - inset, knob.height - inset), fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(SLIDER_KNOB_FEATHER / 2))
-    knob.putalpha(ImageChops.multiply(knob.getchannel("A"), mask))
-    knob = knob.resize((SLIDER_KNOB_SIZE, SLIDER_KNOB_SIZE), Image.LANCZOS)
-    restrained_ui_art(knob, 1.0).save(RES_DIR / "slider_knob.webp", "WEBP", quality=WEBP_QUALITY, method=6)
 
 
 def main() -> None:
@@ -273,9 +208,6 @@ def main() -> None:
         convert(ASSETS / source, name, 1672)
     for source, (name, max_side) in UI_ASSETS.items():
         convert(ASSETS / source, name, max_side)
-    convert_progress_bar()
-    convert_slider_knob()
-    convert_close_icon()
     convert_card_rarities()
 
 

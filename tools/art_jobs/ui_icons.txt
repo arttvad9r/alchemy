@@ -1,0 +1,16 @@
+ui | compact navigation icon of an alchemist tower-home, dark sapphire enamel, antique brass outline, three tiny warm windows, no text | nav_home
+ui | compact navigation icon of two luminous teal alchemical leaves with a tiny brass stem, elegant symmetrical silhouette, no text | nav_elements
+ui | compact navigation icon of an OPEN ancient fantasy book seen from slight front angle, two clearly visible blank cream pages, deep sapphire leather cover, antique brass corner fittings, thin violet page glow, unmistakably a book, no writing, no text | nav_recipes
+ui | compact navigation icon of an antique gold trophy cup with subtle violet gem and small laurel leaves, no text | nav_achievements
+ui | compact navigation icon of an ornate brass gear around a small sapphire crystal core, no text | nav_settings
+ui | compact SPEAKER icon, small antique brass speaker horn with deep sapphire body, three clearly visible cyan sound-wave arcs radiating to the right, unmistakably audio volume symbol, no text | audio
+ui | small upright phone-shaped haptic icon in dark sapphire and brass with two violet vibration waves, no text | haptics
+ui | elegant paired musical-note icon made of violet crystal and antique brass with tiny cyan spark | music
+ui | small circular plus icon, thin antique brass ring, sapphire glass center, bright clean plus symbol | plus
+ui | small circular forward arrow icon, antique brass ring, sapphire glass center, bright cyan arrow | forward
+ui | small circular recent-history clock icon, antique brass rim, violet-blue glass center, simple clock hands | recent_clock
+ui | compact glowing idea bulb icon, warm gold glass bulb in antique brass cage, tiny violet spark | hint_bulb
+ui | small circular back arrow icon, antique brass ring, sapphire glass center, bright cyan arrow | back
+ui | small circular confirmation check icon, antique brass ring, sapphire glass center, bright pale check mark | check
+ui | small circular close icon, antique brass ring, sapphire glass center, bright pale diagonal cross | close
+ui | five-point antique gold star with sapphire-violet center glow, clean achievement symbol | favorite_star

@@ -1,0 +1,9 @@
+ui | rounded fantasy dialog panel, deep translucent midnight sapphire glass, thin antique blue-silver rim, restrained corner filigree, blank center, no text | dialog_panel_blue
+ui | rounded premium fantasy dialog panel, deep translucent navy glass, thin antique gold rim and restrained corner filigree, blank center, no text | dialog_panel_gold
+ui | compact tooltip speech bubble, deep midnight sapphire glass, thin violet-blue luminous rim, small downward pointer, blank center, no text | tooltip_bubble
+ui | compact active category tab, deep sapphire glass, brighter cyan-blue edge glow, rounded rectangle, blank center, no text | tab_active
+ui | compact inactive category tab, matte midnight-blue glass, thin antique silver-blue border, very subtle glow, blank center, no text | tab_inactive
+ui | compact fantasy toggle switch in ON state, rounded sapphire track with cyan inner glow and bright pearl-crystal knob on the right, no text | toggle_on
+ui | compact fantasy toggle switch in OFF state, rounded dark navy track with antique silver rim and dim pearl knob on the left, no text | toggle_off
+ui | small circular radio control in selected state, antique silver ring with glowing cyan-violet center gem | radio_on
+ui | small circular radio control in unselected state, antique silver ring with empty dark sapphire center | radio_off

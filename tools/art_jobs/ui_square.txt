@@ -1,0 +1,10 @@
+ui | tall collectible card plate, deep midnight sapphire interior, thin antique silver frame with restrained brass details and small corner gems, blank center, no text | card_base
+ui | square thin antique silver collectible-card frame only, transparent empty center, four restrained sapphire corner insets, no art, no text | frame_base_silver
+ui | circular antique gold laurel wreath badge surrounding transparent empty center, refined small leaves, no text | achievement_wreath_gold
+ui | circular selection ring made of thin cyan-blue arcane light and antique silver ticks, transparent center | selected_ring_blue
+ui | compact green enamel pill badge with antique brass edge, blank center, no text | pill_badge_green
+ui | square thin cool-blue silver collectible-card frame only, transparent empty center, restrained sapphire corner gems, no art, no text | frame_common_blue
+ui | square thin antique silver collectible-card frame only, transparent empty center, restrained emerald-green corner gems and leaf accents, no art, no text | frame_rare_green
+ui | square thin dark silver collectible-card frame only, transparent empty center, restrained violet crystal corner gems, no art, no text | frame_epic_purple
+ui | square thin ANTIQUE GOLD collectible-card FRAME ONLY, transparent completely empty center, narrow metal border, restrained amber corner gems, no panel, no glass, no fill, no artwork, no text | frame_legendary_gold
+ui | round slider knob, luminous cyan-blue crystal cabochon in a thin antique silver rim, centered, no text | slider_knob

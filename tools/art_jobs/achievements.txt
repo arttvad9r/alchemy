@@ -1,0 +1,11 @@
+item | compact alchemist experiment table with two flasks, mortar and tiny violet reaction glow, clean badge silhouette | achievement_experiments
+item | small cyan cosmic discovery orb with three thin orbit rings and tiny sparks | achievement_discovered_50
+item | small golden cosmic discovery orb with three thin orbit rings and bright star core | achievement_discovered_100
+item | cluster of rare faceted violet crystals on dark rock with intense inner glow | achievement_first_epic
+item | legendary antique gold five-point star with sapphire center gem and warm halo | achievement_first_legendary
+item | rolled completion scroll sealed with gold alchemical medallion, blank parchment, no text | achievement_all_final
+item | elegant green leaf crossed by a small golden lightning arc, nature mastery badge | achievement_nature
+item | compact dark wooden resource crate reinforced with antique brass corners, material mastery badge | achievement_material
+item | glowing emerald sprout growing around a tiny warm heart-shaped light, life mastery badge | achievement_life
+item | ornate warm lantern with sapphire-blue glass highlights, civilization mastery badge | achievement_civilization
+item | miniature violet-blue cosmic portal ring containing tiny stars and a crescent glow, cosmos mastery badge | achievement_cosmos

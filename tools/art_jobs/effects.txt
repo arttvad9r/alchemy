@@ -1,0 +1,13 @@
+asset | thin circular alchemical transmutation glyph drawn in faint antique gold and violet light, geometric rings and triangles, transparent center, no letters | magic_circle_glyph
+asset | compact explosive flash of white-gold alchemical light with violet edge rays and tiny sparks | combine_flash
+asset | celebratory burst of warm gold light, small star particles and thin radial rays | success_burst
+asset | loose cluster of tiny warm-gold magical sparkles with varied sizes and soft glow | sparkles_gold
+asset | loose cluster of tiny cyan-blue magical sparkles with varied sizes and soft glow | sparkles_blue
+asset | loose cluster of tiny violet magical sparkles with varied sizes and soft glow | sparkles_purple
+asset | thin circular cyan-violet arcane energy ring, broken luminous segments and tiny sparks, transparent center | energy_ring
+asset | expanding pale-blue shockwave ring, soft luminous edge and transparent center | shockwave_ring
+asset | compact soft blue-grey smoke puff with layered translucent curls | smoke_puff
+asset | small violet magical orb with bright white core and soft purple halo | glow_purple_orb
+asset | small warm golden magical orb with bright white core and soft amber halo | glow_gold_orb
+asset | scattered cluster of tiny four-point stars in pale blue, violet and white, transparent background | stars_cluster
+asset | radiant discovery burst in warm antique gold, circular rays and small star motes, transparent center | discovery_burst_gold

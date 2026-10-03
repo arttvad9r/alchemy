@@ -1,0 +1,181 @@
+# Alchemy local-model full icon redesign; one transparent icon per element
+item | tall twisting living flame, bright white-yellow core, orange and crimson edges, a few drifting embers | fire
+item | large sapphire-blue water droplet curling into a small wave, translucent liquid and tiny splashes | water
+item | rugged clod of dark earth and stone with moss, roots and two fresh green leaves | earth
+item | circular pale-cyan wind vortex of layered translucent air ribbons and wispy mist | air
+item | dense white-blue steam cloud with elegant curling vapor tendrils and soft inner glow | steam
+item | molten orange lava breaking through black basalt crust, glowing cracks and tiny sparks | lava
+item | wet dark-brown mud mound with glossy puddle sheen, pebbles and a small splash | mud
+item | swirling ochre dust cloud with fine sparkling grains and a compact spiral silhouette | dust
+item | cluster of healthy emerald leaves and small teal buds growing from dark soil | plant
+item | small ancient broadleaf tree with gnarled trunk, dense green crown and exposed roots | tree
+item | large striped seed splitting open with a tiny luminous green sprout and soil crumbs | seed
+item | single elegant violet-blue fantasy flower with gold pollen and fresh green leaves | flower
+item | rough angular dark-grey rock with cool blue facets and a few moss flecks | stone
+item | small dune of warm golden sand with wind-carved ridges and scattered glittering grains | sand
+item | three stacked forged steel ingots, dark polished surfaces, cool blue reflections and hammer marks | metal
+item | clear faceted glass shard and small crystal vessel, sharp highlights and subtle cyan refraction | glass
+item | jagged cluster of translucent blue ice crystals with frost and cold mist | ice
+item | compact mound of powdery white snow with icy blue shadows and sparkling flakes | snow
+item | soft layered blue-white cloud puff with rounded billows and faint luminous edges | cloud
+item | small dark cloud releasing a fan of bright blue raindrops, clean readable silhouette | rain
+item | dark thundercloud spiral with rain, violet lightning and wind-whipped vapor | storm
+item | jagged golden-white lightning bolt surrounded by branching cyan electric arcs | lightning
+item | dark charcoal smoke plume with layered curling wisps and subtle violet rim light | smoke
+item | small pile of pale grey ash with black embers and a few drifting flakes | ash
+item | bright cyan-violet energy sphere made of interlocking light ribbons and orbiting sparks | energy
+item | warm golden orb emitting clean radial rays, soft halo and tiny floating motes | light
+item | inky black-violet shadow wisp with crescent-shaped folds and smoky trailing edges | shadow
+item | glowing emerald heart-shaped leaf enclosing a tiny golden spark, roots and fresh shoots | life
+item | powerful dark-furred fantasy beast head with curved horns, amber eyes and rugged mane | beast
+item | small blue-and-gold songbird with spread wings and crisp feather silhouette | bird
+item | silver-blue river fish curved in motion with small water droplets and iridescent scales | fish
+item | lone cloaked human adventurer holding a small lantern, simple readable full-body silhouette | human
+item | crossed compact hand tools, worn steel wrench-like implement and small hammer with wooden handles | tool
+item | small cozy stone-and-timber cottage with blue roof, warm windows and tiny chimney smoke | house
+item | dramatic dark mountain peak with snow cap, mist around the base and cool moonlit ridges | mountain
+item | winding ribbon of clear blue river flowing between two miniature mossy banks | river
+item | deep blue ocean wave crest with foam, layered water curl and tiny spray | ocean
+item | murky green-blue marsh pool with reeds, twisted root, bubbles and faint ghostly mist | swamp
+item | antique brass clockwork ring around a glowing hourglass, subtle rotating gear details | time
+item | dense sphere of arcane cyan and violet ribbons with tiny gold sparks orbiting a dark core | magic
+item | cluster of faceted violet crystals with cyan inner glow and dark stone base | crystal
+item | translucent blue-white spirit flame with elegant humanoid suggestion and trailing wisps | spirit
+item | three sweeping pale-cyan wind ribbons curling around each other with leaves caught in motion | wind
+item | warm terracotta clay lump beside a simple small unfired pot, damp matte surface | clay
+item | miniature cluster of ancient dark pines and broadleaf trees rising from mossy ground | forest
+item | thick lush emerald moss cushion over dark stones with tiny dew drops | moss
+item | small luminous patch of deep blue starry sky framed by soft clouds and a crescent glow | sky
+item | radiant warm-gold sun disk with layered flame-like rays and white-hot center | sun
+item | silver-blue crescent moon with subtle crater texture and violet night halo | moon
+item | small mound of bright white salt crystals with angular grains and cool sparkling highlights | salt
+item | powerful curling sapphire wave with white foam crest and suspended droplets | wave
+item | flowing green aquatic algae fronds with tiny bubbles and wet translucent texture | algae
+item | split dark oak logs showing warm rings, bark texture and a few green leaves | wood
+item | miniature golden field of grain with a narrow path and dark green border | field
+item | small rustic farmstead with fenced field, barn, crop rows and warm lantern window | farm
+item | bundle of ripe golden wheat stalks tied with dark cord, detailed grain heads | wheat
+item | round rustic loaf of fresh bread with scored crust, warm golden highlights and crumbs | bread
+item | sturdy brown-and-white cow standing three-quarter view, small horns and simple silhouette | cattle
+item | small glass bottle and ceramic cup of fresh white milk with cool blue highlights | milk
+item | golden wedge of aged cheese with natural holes, wax rind and a few crumbs | cheese
+item | thick fresh red cut of meat with pale fat marbling on a small wooden board | meat
+item | rolled piece of rich brown leather with stitching, strap and worn textured edges | leather
+item | soft coiled bundle of cream wool beside a small wooden spindle, fluffy fibers | wool
+item | folded deep-blue woven cloth with gold thread edge and visible fabric texture | cloth
+item | tight coil of thick hemp rope with frayed end and warm natural fibers | rope
+item | stack of blank aged parchment sheets with curled corners, no writing or symbols | paper
+item | small dark glass ink bottle with brass neck and black-violet liquid beside a clean quill | ink
+item | closed ancient leather-bound book with brass corners and simple blank embossed cover, no text | book
+item | open book with blank pages illuminated by a small floating golden orb and subtle sparks | knowledge
+item | heavy wooden cart wheel with dark iron rim, worn spokes and brass hub cap | wheel
+item | small wooden merchant cart with iron wheels, canvas bundle and lantern, no lettering | cart
+item | miniature winding cobblestone road crossing mossy ground toward distant blue hills | road
+item | miniature cluster of stone-and-timber village houses with warm windows and narrow lanes | village
+item | small frontier settlement of cottages, palisade fence, central fire and storage crates | settlement
+item | miniature fortified fantasy city with clustered blue roofs, towers and warm windows | city
+item | arched stone bridge over a narrow blue stream, moss and small lanterns | bridge
+item | small wooden rowboat with two oars on a curl of dark blue water | boat
+item | rolled ivory sail and mast section with rope rigging, wind catching one clean fold | sail
+item | compact fantasy sailing ship with dark wooden hull, ivory sails and blue-gold trim on waves | ship
+item | miniature stone harbor with dock, crane, moored boat and warm lanterns | port
+item | coiled fishing net with cork floats, rope knots and a few water droplets | net
+item | rugged fisherman in dark coat holding a fishing net and lantern, full-body icon silhouette | fisherman
+item | single elegant silver-blue bird feather with iridescent violet edge and tiny floating down | feather
+item | large speckled cream egg in a small woven nest with soft straw | egg
+item | woven twig bird nest with moss lining and two small speckled eggs | nest
+item | large stylized honey bee with translucent wings, gold-black body and tiny pollen sparks | bee
+item | small glass honey jar without label, wooden dipper and glowing amber honey drip | honey
+item | cluster of red apple, dark grapes and golden pear with glossy leaves | fruit
+item | small basket cluster of carrot, cabbage and onion with fresh green leaves | vegetable
+item | bundle of medicinal sage, rosemary and mint tied with twine, tiny violet flowers | herbs
+item | small blue glass remedy bottle, clean cork, herbs and pale healing glow, no label | medicine
+item | dark green-black potion vial with angular stopper, toxic vapor and violet-green bubbles, no label | poison
+item | cluster of fantasy mushrooms with deep blue caps, pale spots and faint teal bioluminescence | mushroom
+item | weathered ivory animal bones, one long bone and small rib fragments on dark ground | bone
+item | weathered human skull with subtle blue shadow, one tiny violet crystal near the base | skull
+item | deep crimson liquid droplet with glossy surface and a small circular splash | blood
+item | old armored skeleton lying partially wrapped in torn dark cloak, non-gory compact silhouette | corpse
+item | translucent blue-violet ghost with glowing eyes and long curling spectral tail | ghost
+item | miniature moonlit graveyard with crooked stones, iron fence and pale mist | cemetery
+item | single weathered stone grave marker with small flowers and low blue mist, no writing | grave
+item | alert silver-black wolf in three-quarter pose, blue moonlit fur and amber eyes | wolf
+item | strong dark chestnut horse with simple tack, lifted foreleg and flowing mane | horse
+item | cloaked mounted rider on dark horse, lantern at saddle and wind-swept silhouette | rider
+item | neat spool of strong pale cord with loose curling end and small brass needle | string
+item | elegant dark yew longbow with leather grip, taut string and small brass fittings | bow
+item | hooded forest hunter with bow, quiver and green-brown cloak, readable full-body pose | hunter
+item | three steel-tipped arrows with dark wooden shafts and blue-black feather fletching | arrow
+item | long steel spearhead on dark ash shaft with leather wrap and small brass ring | spear
+item | single straight fantasy sword with polished steel blade, dark leather grip and brass guard | sword
+item | round dark steel shield with brass rim and simple raised central boss, no emblem | shield
+item | compact suit of dark steel plate armor with brass trim and blue cloth, no wearer | armor
+item | armored fantasy warrior holding sword and round shield, dark steel and blue cloak | warrior
+item | small bright campfire of stacked logs, orange flames, red embers and warm sparks | campfire
+item | compact dark-blue canvas travel tent with ropes, wooden stakes and warm lantern at entrance | tent
+item | miniature traveler camp with tent, small fire, bedroll and crate on dark ground | camp
+item | miniature stone-and-brick blacksmith forge with glowing furnace, chimney and stacked firewood | forge
+item | heavy blacksmith hammer with worn dark wood handle, forged steel head and faint orange heat | hammer
+item | old wooden-and-iron hand plow with dark metal blade and sturdy handles | plow
+item | miniature rocky mine entrance reinforced with timber beams, lantern rails and crystal glint | mine
+item | stack of rough gold nuggets and one small polished ingot, warm metallic glow | gold
+item | stack of bright silver ingots with cool blue reflections and lightly hammered surfaces | silver
+item | large faceted sapphire-violet gemstone with crisp reflections and tiny gold sparkle | gem
+item | ornate antique gold royal crown with dark blue velvet and sapphire gemstones | crown
+item | regal fantasy king in dark blue robe, antique gold crown and staff, full-body icon pose | king
+item | regal fantasy queen in deep violet-blue gown, antique gold crown and small crystal scepter | queen
+item | miniature dark stone fantasy castle with blue slate towers, warm windows and floating mist | castle
+item | tall narrow stone wizard tower with blue roof, brass observatory ring and warm windows | tower
+item | ancient stone temple with tall columns, blue banners, warm braziers and subtle sacred glow | temple
+item | classical pale stone alchemist statue holding a small vessel, ivy around the pedestal | statue
+item | miniature formal herb garden with stone paths, trimmed greenery, flowers and lantern | garden
+item | ornate small stone fountain with clear blue water arcs and brass accents | fountain
+item | miniature moonlit city park with tree, bench, stone path and warm lantern | park
+item | miniature fantasy market stall with blue canopy, crates, baskets and warm lantern, no signs | market
+item | single sturdy oak barrel with dark iron hoops, worn wood grain and small vine | barrel
+item | clear glass bottle and cup of ruby-red berry juice with fruit garnish, no label | juice
+item | dark glass wine bottle without label beside a small goblet of deep red wine and grapes | wine
+item | small wooden tankard and glass mug of amber beer with foam, no labels | beer
+item | miniature stone-and-timber tavern with warm windows, blue roof and hanging blank sign | tavern
+item | miniature cozy bakery with brick oven chimney, warm windows and bread basket, no signs | bakery
+item | small stone-and-timber watermill with wooden wheel, stream and warm window | mill
+item | weathered farmer holding a small hoe and wheat bundle, practical green-brown clothes | farmer
+item | fantasy village baker holding fresh bread tray, simple apron and warm friendly silhouette | baker
+item | strong blacksmith with leather apron, heavy hammer and faint forge glow | blacksmith
+item | sturdy miner with pickaxe, dark hood, brass lantern and small crystal pouch | miner
+item | traveling merchant in layered blue-brown coat holding scales and small goods satchel | merchant
+item | robed scholar carrying blank open book and quill, blue cloak and brass spectacles | scholar
+item | solemn fantasy priest in deep blue ceremonial robe holding small gold lantern, no religious text | priest
+item | weathered sailor with rope coil and short blue coat, wind-swept stance | sailor
+item | confident ship captain in dark navy coat with brass trim, telescope and tricorne hat | captain
+item | rugged fantasy pirate in dark coat with curved cutlass and rope belt, no skull emblem | pirate
+item | massive spiral storm vortex of dark blue clouds, bright eye and sweeping rain bands | hurricane
+item | violent swirl of icy snow, blue-white wind arcs and sharp ice particles | blizzard
+item | miniature erupting black volcano with orange lava rivers and towering ash plume | volcano
+item | miniature golden desert dunes with weathered dark rocks and hot shimmering horizon | desert
+item | small turquoise oasis pool surrounded by palms, reeds and golden sand | oasis
+item | dense miniature jungle cluster with broad emerald leaves, vines, mist and hidden violet flowers | jungle
+item | small rocky green island rising from dark blue water with one tree and tiny beach | island
+item | curved strip of pale sand with turquoise wave, shell and dark rock | beach
+item | branching coral cluster in violet, blue and warm orange with tiny bubbles | coral
+item | sleek grey-blue shark twisting through a splash of dark water, sharp fin silhouette | shark
+item | elegant fantasy mermaid with teal tail and dark flowing hair, small pearl glow, nonsexual icon pose | mermaid
+item | fierce coiled dragon with dark indigo scales, brass-gold horns and violet glow between scales | dragon
+item | majestic phoenix with spread wings made of orange-gold flame and violet ember tips | phoenix
+item | proud griffin with eagle head, bronze-gold wings and dark lion body, compact heraldic pose | griffin
+item | white moonlit unicorn with pale blue mane, spiral gold horn and subtle violet magic | unicorn
+item | massive mossy stone golem torso with glowing cyan rune crystal set in its chest | golem
+item | hooded alchemist-wizard in deep blue robes holding a violet orb and brass staff | wizard
+item | antique brass alchemical vessel surrounded by three orbiting colored essences and subtle sparks | alchemy
+item | single carved dark stone rune tablet with one simple glowing cyan geometric glyph, no letters | rune
+item | round glass potion bottle with brass stopper, swirling violet-blue liquid and tiny stars, no label | potion
+item | slender ornate crystal vial with warm golden liquid, cyan vapor and brass filigree, no label | elixir
+item | circular violet-blue magical portal ring with turbulent energy edge and starry dark center | portal
+item | ancient dark leather spellbook with brass corners, crystal clasp and subtle violet glow, no writing | spellbook
+item | golden-violet magical threads wrapping around a small dark crystal, sparkling transformation effect | enchantment
+item | antique brass clock face with exposed gears, dark blue enamel and no numbers or text | clock
+item | ornate brass hourglass with luminous blue-gold sand and dark glass frame | hourglass
+item | bright five-point celestial star made of warm gold light with blue-violet halo | star
+item | miniature stone observatory tower with brass dome slit, telescope and warm windows | observatory
+item | robed astronomer holding brass telescope and star globe, deep blue coat and moonlit silhouette | astronomer
+item | legendary faceted crimson philosopher stone in antique brass setting, intense red-gold inner glow and arcane sparks | philosopher_stone

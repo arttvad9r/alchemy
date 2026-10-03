@@ -1,0 +1,8 @@
+# Run each as `game-asset edit` against the selected clean bg_home source.
+# Preserve the exact room architecture, camera, pointed window, floor perspective, and overall palette from the source.
+# Keep the center physically empty: only the real window, wall, floor and atmosphere.
+# Absolutely no interface overlays, transparent panels, holograms, screens, menus, labels, writing, letters, numbers, floating boxes, HUD or symbols.
+edit | Change only the side furnishings into an elemental archive and herbarium: specimen cabinets, glass jars, minerals, crystals, hanging dried herbs and living teal plants placed on the existing left and right shelves and benches. | bg_elements | 9200
+edit | Change only the side furnishings into an alchemical library and scriptorium: tall bookcases, scroll shelves, blank parchment, ink bottles, candles and brass reading instruments placed on the existing left and right shelves and benches. | bg_recipes | 9201
+edit | Change only the side furnishings into a ceremonial relic gallery: trophy alcoves, antique gold cups, violet crystal reliquaries, small statues and plain deep-purple fabric banners placed along the left and right walls. | bg_achievements | 9202
+edit | Change only the side furnishings into a private observatory and precision study: brass telescope, armillary sphere, astrolabe, hourglass, gears and restrained writing desks along the left and right sides; keep the starry window clear. | bg_settings | 9203

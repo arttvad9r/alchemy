@@ -1,0 +1,10 @@
+ui | long rounded fantasy button plate, deep sapphire glass center, antique brass filigree corners, subtle cyan edge glow, empty center, no text | button_small_blue
+ui | long rounded premium fantasy button plate, dark navy center, antique gold filigree border, restrained warm glow, empty center, no text | button_small_gold
+ui | long rounded danger button plate, dark burgundy enamel center, aged brass-red metal border, restrained ember glow, empty center, no text | button_danger_red
+ui | long rounded secondary button plate, matte midnight-blue center, dark antique silver border, almost no glow, empty center, no text | button_secondary_dark
+ui | long rounded search field plate, matte midnight sapphire interior, thin cool-silver brass rim, large simple magnifying-glass icon built into the far left end with a thin vertical divider after it, rest of field empty, no text | search_field
+ui | long rounded input field plate, matte midnight sapphire interior, thin antique silver rim, empty center, no icon, no text | input_field
+ui | long rounded dropdown field plate, matte midnight sapphire interior, thin antique silver-brass rim, small downward chevron built into the far right end, rest of field empty, no text | dropdown_field
+ui | long thin empty fantasy progress track with rounded ends, dark navy inset channel, thin antique silver-blue rim, absolutely no fill, no knob, no text | progress_track
+ui | long thin luminous progress fill pill with rounded ends, saturated blue-violet core and restrained cyan highlight, no outer track, no knob, no text | progress_fill
+ui | wide ornate chapter banner, deep sapphire silk-enamel center, antique brass folded ends and thin gold trim, completely blank, no text | banner_wide
