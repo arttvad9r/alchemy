@@ -3,6 +3,7 @@ package com.artt.alchemy.ui
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
@@ -92,8 +93,11 @@ import com.artt.alchemy.ui.theme.Gold
 import com.artt.alchemy.ui.theme.HOME_DIM
 import com.artt.alchemy.ui.theme.panel
 
-// The home scene stays bright; list screens dim it so text keeps its contrast.
-private const val LIST_DIM = 0.7f
+// Each room keeps enough contrast for its screen while still remaining visible behind translucent UI.
+private const val ELEMENTS_DIM = 0.62f
+private const val RECIPES_DIM = 0.60f
+private const val ACHIEVEMENTS_DIM = 0.62f
+private const val SETTINGS_DIM = 0.64f
 private const val TOP_SCRIM_HEIGHT = 0.22f
 private const val TOP_SCRIM_ALPHA = 0.75f
 private const val UNSELECTED_ICON_ALPHA = 0.55f
@@ -126,14 +130,22 @@ fun AlchemyApp(viewModel: AlchemyViewModel = viewModel(), sceneReady: Boolean = 
     AlchemyTheme {
         CompositionLocalProvider(LocalReducedMotion provides reducedMotion) {
             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                Image(
-                    painter = painterResource(R.drawable.bg_aether),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
+                // Every tab owns a room background. The five resources intentionally start from the
+                // same artwork; they can now be replaced independently without touching screen code.
+                Crossfade(
+                    targetState = state.selectedTab,
+                    animationSpec = motion(tween(TAB_FADE_MILLIS)),
+                    label = "roomBackground"
+                ) { tab ->
+                    Image(
+                        painter = painterResource(tab.backgroundRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
                 val dim by animateFloatAsState(
-                    targetValue = if (state.selectedTab == AppTab.HOME) HOME_DIM else LIST_DIM,
+                    targetValue = state.selectedTab.backgroundDim,
                     animationSpec = motion(tween(TAB_FADE_MILLIS)),
                     label = "backgroundDim"
                 )
@@ -388,6 +400,24 @@ private val AppTab.iconRes: Int
         AppTab.RECIPES -> R.drawable.nav_recipes
         AppTab.ACHIEVEMENTS -> R.drawable.nav_achievements
         AppTab.SETTINGS -> R.drawable.nav_settings
+    }
+
+private val AppTab.backgroundRes: Int
+    get() = when (this) {
+        AppTab.HOME -> R.drawable.bg_home
+        AppTab.ELEMENTS -> R.drawable.bg_elements
+        AppTab.RECIPES -> R.drawable.bg_recipes
+        AppTab.ACHIEVEMENTS -> R.drawable.bg_achievements
+        AppTab.SETTINGS -> R.drawable.bg_settings
+    }
+
+private val AppTab.backgroundDim: Float
+    get() = when (this) {
+        AppTab.HOME -> HOME_DIM
+        AppTab.ELEMENTS -> ELEMENTS_DIM
+        AppTab.RECIPES -> RECIPES_DIM
+        AppTab.ACHIEVEMENTS -> ACHIEVEMENTS_DIM
+        AppTab.SETTINGS -> SETTINGS_DIM
     }
 
 private val AppTab.testTag: String
