@@ -40,7 +40,7 @@ RESTRAINED_UI_ART = {
 # Replace each source path as final room artwork lands; screen code does not need to change.
 ROOM_BACKGROUNDS = (
     ("backgrounds/bg_home.png", "bg_home"),
-    ("backgrounds/bg_aether.png", "bg_elements"),
+    ("backgrounds/bg_elements.png", "bg_elements"),
     ("backgrounds/bg_aether.png", "bg_recipes"),
     ("backgrounds/bg_aether.png", "bg_achievements"),
     ("backgrounds/bg_aether.png", "bg_settings"),
