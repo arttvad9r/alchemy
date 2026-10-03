@@ -36,14 +36,13 @@ RESTRAINED_UI_ART = {
     "banner_wide",
 }
 
-# Temporary room aliases: one source today, five independent drawable names for the app.
-# Replace each source path as final room artwork lands; screen code does not need to change.
+# Each tab has its own source room background; screen code only selects the matching drawable.
 ROOM_BACKGROUNDS = (
     ("backgrounds/bg_home.png", "bg_home"),
     ("backgrounds/bg_elements.png", "bg_elements"),
     ("backgrounds/bg_recipes.png", "bg_recipes"),
     ("backgrounds/bg_achievements.png", "bg_achievements"),
-    ("backgrounds/bg_aether.png", "bg_settings"),
+    ("backgrounds/bg_settings.png", "bg_settings"),
 )
 
 UI_ASSETS = {
