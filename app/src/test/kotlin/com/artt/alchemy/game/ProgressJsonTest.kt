@@ -6,6 +6,7 @@ import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.data.parsePlayerProgress
 import com.artt.alchemy.data.recordAttempt
 import com.artt.alchemy.data.toJson
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -18,7 +19,6 @@ class ProgressJsonTest {
             soundEnabled = false,
             musicVolume = 0.25f,
             effectsVolume = 0.5f,
-            reducedMotion = true,
             onboardingSeen = true,
             paletteSort = ElementSort.GROUP,
             activeHint = ActiveHint(recipeKey("earth", "water"), step = 2)
@@ -30,10 +30,10 @@ class ProgressJsonTest {
     }
 
     @Test
-    fun following_the_system_motion_setting_survives_a_round_trip() {
-        val system = played.copy(reducedMotion = null, activeHint = null)
+    fun saves_with_the_removed_theme_and_motion_settings_still_load() {
+        val old = JSONObject(played.toJson()).put("theme", "EMBER").put("reducedMotion", true).toString()
 
-        assertEquals(system, parsePlayerProgress(system.toJson()))
+        assertEquals(played, parsePlayerProgress(old))
     }
 
     @Test

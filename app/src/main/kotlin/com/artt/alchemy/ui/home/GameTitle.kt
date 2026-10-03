@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -36,7 +37,10 @@ import com.artt.alchemy.ui.components.shimmer
 private val TitleGradient = Brush.verticalGradient(listOf(Color(0xFFFFEFB8), Color(0xFFF3C35B), Color(0xFFD08A26)))
 private val TitleShadowOffset = Offset(0f, 3f)
 private const val TITLE_SHADOW_BLUR = 10f
-private val LOGO_SIZE = 64.dp
+private val LOGO_SIZE = 60.dp
+
+// The launcher foreground keeps the adaptive icon's safe margin: the book fills only half of it, so it is drawn larger.
+private const val LOGO_ART_SCALE = 1.9f
 private val TITLE_SIZE = 38.sp
 private val TAGLINE_SIZE = 13.sp
 private val TITLE_MIN_SIZE = 10.sp
@@ -52,10 +56,14 @@ private val TAGLINE_MIN_SIZE = 9.sp
 fun GameTitle(modifier: Modifier = Modifier, actions: @Composable RowScope.() -> Unit = {}) {
     val density = LocalDensity.current
     val unscaled = Density(density.density, fontScale = 1f)
-    // A shadow in the theme's darkest colour keeps the gold readable on any background.
+    // A shadow in the scene's darkest colour keeps the gold readable on any background.
     val titleShadow = Shadow(color = MaterialTheme.colorScheme.background, offset = TitleShadowOffset, blurRadius = TITLE_SHADOW_BLUR)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
-        Image(painter = painterResource(R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.size(LOGO_SIZE))
+        Image(
+            painter = painterResource(R.drawable.ic_launcher_foreground),
+            contentDescription = null,
+            modifier = Modifier.size(LOGO_SIZE).graphicsLayer(scaleX = LOGO_ART_SCALE, scaleY = LOGO_ART_SCALE)
+        )
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CompositionLocalProvider(LocalDensity provides unscaled) {

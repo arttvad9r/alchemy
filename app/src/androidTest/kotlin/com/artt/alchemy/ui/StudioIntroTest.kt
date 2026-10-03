@@ -32,9 +32,9 @@ class StudioIntroTest {
             // A workspace left by another test would lie on this one's board.
             store.saveWorkspace(WorkspaceState())
             store.saveTipStep(0)
-            store.save(store.load().copy(onboardingSeen = true, reducedMotion = description.methodName == "reducedMotionShowsStillThenEntersGame"))
+            store.save(store.load().copy(onboardingSeen = true))
         }
-    }).around(composeRule)
+    }).around(SystemAnimationsOffRule { it.methodName == "reducedMotionShowsStillThenEntersGame" }).around(composeRule)
 
     @Test
     fun videoCompletesAndEntersGame() {

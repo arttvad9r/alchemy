@@ -1,24 +1,43 @@
 package com.artt.alchemy.ui
 
+import android.app.LocaleManager
+import android.os.Build
+import android.os.LocaleList
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.test.platform.app.InstrumentationRegistry
 import com.artt.alchemy.MainActivity
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
+import org.junit.rules.TestRule
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 
 class SettingsScreenTest {
     private val composeRule = createAndroidComposeRule<MainActivity>()
 
+    // Russian comes back once the activity is closed: switching back inside the test would recreate it a second time,
+    // and the test rule can lose track of an activity recreated twice in a row.
     @get:Rule
-    val chain = skippingOnboarding(composeRule)
+    val chain: TestRule = RuleChain.outerRule(object : TestWatcher() {
+        override fun finished(description: Description) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val context = InstrumentationRegistry.getInstrumentation().targetContext
+                context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.forLanguageTags("ru")
+            }
+        }
+    }).around(skippingOnboarding(composeRule))
 
     @Test
     fun settings_toggles_and_confirmed_reset_update_visible_progress() {
@@ -57,20 +76,37 @@ class SettingsScreenTest {
     }
 
     @Test
-    fun chosenThemeSurvivesActivityRecreation() {
+    fun transferAndHelpOpenOnTheirOwnPagesAndBackLeadsToTheMainPage() {
         composeRule.onNodeWithTag("nav_settings").performClick()
-        // The theme is kept across tests and resets, so start from a known one.
-        composeRule.onNodeWithTag("settings_theme_aether").performScrollTo().performClick()
-        composeRule.onNodeWithTag("settings_theme_ember").performScrollTo().performClick()
-        composeRule.onNodeWithTag("settings_theme_ember").assertIsSelected()
-        composeRule.onNodeWithTag("settings_theme_aether").assertIsNotSelected()
 
-        composeRule.activityRule.scenario.recreate()
+        composeRule.onNodeWithTag("settings_help").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_page_help").assertIsDisplayed()
+        composeRule.onNodeWithText("Как играть").assertIsDisplayed()
+        composeRule.onNodeWithTag("settings_back").performClick()
+        composeRule.onNodeWithTag("screen_settings").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("settings_transfer").performScrollTo().performClick()
+        composeRule.onNodeWithTag("settings_export").assertIsDisplayed()
+        composeRule.onNodeWithTag("settings_import").assertIsDisplayed()
+        // The system back goes to the main page first, not out of the game.
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.onNodeWithTag("screen_settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun choosingALanguageSwitchesTheGameAndKeepsTheLanguagePageOpen() {
+        // The game's own language choice exists from Android 13.
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
         composeRule.onNodeWithTag("nav_settings").performClick()
-        composeRule.onNodeWithTag("settings_theme_ember").performScrollTo().assertIsSelected()
-
-        // Leave the default theme for the tests that follow.
-        composeRule.onNodeWithTag("settings_theme_aether").performClick()
-        composeRule.onNodeWithTag("settings_theme_aether").assertIsSelected()
+        composeRule.onNodeWithTag("settings_language").performScrollTo().performClick()
+        // The test runner sets Russian as the app's language.
+        composeRule.onNodeWithTag("language_ru").assertIsSelected()
+        composeRule.onNodeWithTag("language_en").assertIsNotSelected()
+        composeRule.onNodeWithTag("language_system").assertIsNotSelected()
+        composeRule.onNodeWithTag("language_en").performClick()
+        composeRule.waitUntil(5_000) { composeRule.onAllNodesWithText("Language").fetchSemanticsNodes().isNotEmpty() }
+        composeRule.onNodeWithTag("language_en").assertIsSelected()
+        // The activity is recreated in English and stays on the language page.
+        composeRule.onNodeWithTag("settings_page_language").assertIsDisplayed()
     }
 }

@@ -50,7 +50,6 @@ import com.artt.alchemy.ui.components.cascadeIn
 import com.artt.alchemy.ui.components.elementName
 import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rowPanel
-import com.artt.alchemy.ui.theme.themedArt
 import java.util.Locale
 
 @Composable
@@ -154,9 +153,9 @@ private fun RecipeRow(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = 
         val iconSize = ((maxWidth - OPERATOR_ICON_SIZE * 2 - ROW_GAP * 5 - NAMES_MIN_WIDTH) / 3).coerceIn(RECIPE_ICON_MIN_SIZE, RECIPE_ICON_SIZE)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(ROW_GAP)) {
             FramedElementIcon(first, Modifier.size(iconSize))
-            Image(painterResource(themedArt(R.drawable.ic_plus)), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
+            Image(painterResource(R.drawable.ic_plus), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
             FramedElementIcon(second, Modifier.size(iconSize))
-            Image(painterResource(themedArt(R.drawable.ic_forward)), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
+            Image(painterResource(R.drawable.ic_forward), contentDescription = null, modifier = Modifier.size(OPERATOR_ICON_SIZE))
             FramedElementIcon(result, Modifier.size(iconSize))
             Column(modifier = Modifier.weight(1f)) {
                 val nameStyle = MaterialTheme.typography.titleMedium

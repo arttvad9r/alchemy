@@ -1,41 +1,46 @@
 package com.artt.alchemy.ui.settings
 
-import android.content.ActivityNotFoundException
+import android.app.LocaleManager
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.Settings
+import android.os.LocaleList
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -44,9 +49,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.artt.alchemy.R
-import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.game.AlchemyCatalog
 import com.artt.alchemy.ui.AlchemyUiState
 import com.artt.alchemy.ui.TransferResult
@@ -59,13 +64,13 @@ import com.artt.alchemy.ui.components.ButtonStyle
 import com.artt.alchemy.ui.components.ScreenBanner
 import com.artt.alchemy.ui.components.ScreenPadding
 import com.artt.alchemy.ui.components.motion
-import com.artt.alchemy.ui.components.systemAnimationsOff
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.backgroundRes
 import com.artt.alchemy.ui.theme.panel
 import com.artt.alchemy.ui.theme.panelBorder
-import com.artt.alchemy.ui.theme.themedArt
 import kotlin.math.roundToInt
+
+/** The parts of the settings that open on a page of their own, so the main page holds only what is changed often. */
+private enum class SettingsPage { MAIN, LANGUAGE, TRANSFER, HELP }
 
 @Composable
 fun SettingsScreen(
@@ -80,8 +85,6 @@ fun SettingsScreen(
     onMusicVolumeFinished: () -> Unit,
     onEffectsVolumeChanged: (Float) -> Unit,
     onEffectsVolumeFinished: () -> Unit,
-    onThemeChanged: (AppTheme) -> Unit,
-    onReducedMotionChanged: (Boolean) -> Unit,
     onExport: (Uri) -> Unit,
     onImportPicked: (Uri) -> Unit,
     onConfirmImport: () -> Unit,
@@ -89,128 +92,49 @@ fun SettingsScreen(
     onDismissTransferResult: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(EXPORT_MIME_TYPE)) { uri ->
-        uri?.let(onExport)
-    }
-    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        uri?.let(onImportPicked)
-    }
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .testTag("screen_settings")
-            .padding(ScreenPadding)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        ScreenBanner(stringResource(R.string.settings))
-        SettingsPanel {
-            SettingToggle(
-                label = stringResource(R.string.sound),
-                iconRes = R.drawable.ic_audio,
-                enabled = state.progress.soundEnabled,
-                tag = "settings_sound",
-                onChanged = onSoundChanged
-            )
-            SettingToggle(
-                label = stringResource(R.string.vibration),
-                iconRes = R.drawable.ic_haptics,
-                enabled = state.progress.vibrationEnabled,
-                tag = "settings_vibration",
-                onChanged = onVibrationChanged
-            )
-            SettingToggle(
-                label = stringResource(R.string.music),
-                iconRes = R.drawable.ic_music,
-                enabled = state.progress.musicEnabled,
-                tag = "settings_music",
-                onChanged = onMusicChanged
-            )
-        }
-        SettingsPanel {
-            VolumeSlider(
-                label = stringResource(R.string.effects_volume),
-                iconRes = R.drawable.ic_audio,
-                value = state.progress.effectsVolume,
-                muted = !state.progress.soundEnabled,
-                tag = "settings_effects_volume",
-                onChange = onEffectsVolumeChanged,
-                onFinished = onEffectsVolumeFinished
-            )
-            VolumeSlider(
-                label = stringResource(R.string.music_volume),
-                iconRes = R.drawable.ic_music,
-                value = state.progress.musicVolume,
-                muted = !state.progress.musicEnabled,
-                tag = "settings_music_volume",
-                onChange = onMusicVolumeChanged,
-                onFinished = onMusicVolumeFinished
-            )
-        }
-        SettingsPanel {
-            Text(stringResource(R.string.theme), style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                AppTheme.entries.forEach { theme ->
-                    ThemeCard(theme, selected = theme == state.progress.theme, onSelect = { onThemeChanged(theme) }, modifier = Modifier.weight(1f))
+    var page by rememberSaveable { mutableStateOf(SettingsPage.MAIN) }
+    BackHandler(enabled = page != SettingsPage.MAIN) { page = SettingsPage.MAIN }
+    Crossfade(targetState = page, animationSpec = motion(tween(PAGE_FADE_MILLIS)), label = "settingsPage", modifier = modifier) { shown ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag(if (shown == SettingsPage.MAIN) "screen_settings" else "settings_page_${shown.name.lowercase()}")
+                .padding(ScreenPadding)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            when (shown) {
+                SettingsPage.MAIN -> MainPage(
+                    state = state,
+                    onSoundChanged = onSoundChanged,
+                    onVibrationChanged = onVibrationChanged,
+                    onMusicChanged = onMusicChanged,
+                    onMusicVolumeChanged = onMusicVolumeChanged,
+                    onMusicVolumeFinished = onMusicVolumeFinished,
+                    onEffectsVolumeChanged = onEffectsVolumeChanged,
+                    onEffectsVolumeFinished = onEffectsVolumeFinished,
+                    onOpen = { page = it },
+                    onRequestReset = onRequestReset
+                )
+
+                SettingsPage.LANGUAGE -> {
+                    PageHeader(stringResource(R.string.language), onBack = { page = SettingsPage.MAIN })
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) LanguagePage()
+                }
+
+                SettingsPage.TRANSFER -> {
+                    PageHeader(stringResource(R.string.progress_transfer_title), onBack = { page = SettingsPage.MAIN })
+                    TransferPage(onExport, onImportPicked)
+                }
+
+                SettingsPage.HELP -> {
+                    PageHeader(stringResource(R.string.help), onBack = { page = SettingsPage.MAIN })
+                    SettingsPanel {
+                        Text(stringResource(R.string.help_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
         }
-        SettingsPanel {
-            val reduced = state.progress.reducedMotion ?: systemAnimationsOff(LocalContext.current)
-            SettingToggle(
-                label = stringResource(R.string.reduced_motion),
-                iconRes = null,
-                enabled = reduced,
-                tag = "settings_reduced_motion",
-                onChanged = onReducedMotionChanged
-            )
-            Text(stringResource(R.string.reduced_motion_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        // Per-app language exists from Android 13; older systems follow the system language.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val context = LocalContext.current
-            SettingsPanel {
-                Text(stringResource(R.string.language), style = MaterialTheme.typography.titleMedium)
-                Text(stringResource(R.string.language_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                AlchemyButton(
-                    text = stringResource(R.string.language_open),
-                    style = ButtonStyle.BLUE,
-                    onClick = { openAppLanguageSettings(context) },
-                    modifier = Modifier.fillMaxWidth().testTag("settings_language")
-                )
-            }
-        }
-        SettingsPanel {
-            Text(stringResource(R.string.progress_transfer), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.progress_transfer_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                AlchemyButton(
-                    text = stringResource(R.string.export_progress),
-                    style = ButtonStyle.BLUE,
-                    onClick = { exportLauncher.launch(EXPORT_FILE_NAME) },
-                    modifier = Modifier.weight(1f).testTag("settings_export")
-                )
-                AlchemyButton(
-                    text = stringResource(R.string.import_progress),
-                    style = ButtonStyle.BLUE,
-                    onClick = { importLauncher.launch(IMPORT_MIME_TYPES) },
-                    modifier = Modifier.weight(1f).testTag("settings_import")
-                )
-            }
-        }
-        SettingsPanel {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Image(painterResource(themedArt(R.drawable.ic_help)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
-                Text(stringResource(R.string.help), style = MaterialTheme.typography.titleMedium)
-            }
-            Text(stringResource(R.string.help_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        AlchemyButton(
-            text = stringResource(R.string.reset_progress),
-            style = ButtonStyle.RED,
-            onClick = onRequestReset,
-            modifier = Modifier.fillMaxWidth().testTag("settings_reset")
-        )
     }
     if (state.isResetConfirmationVisible) {
         AlchemyDialog(onDismissRequest = onDismissReset, panelRes = R.drawable.dialog_blue) {
@@ -260,10 +184,191 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
+private fun MainPage(
+    state: AlchemyUiState,
+    onSoundChanged: (Boolean) -> Unit,
+    onVibrationChanged: (Boolean) -> Unit,
+    onMusicChanged: (Boolean) -> Unit,
+    onMusicVolumeChanged: (Float) -> Unit,
+    onMusicVolumeFinished: () -> Unit,
+    onEffectsVolumeChanged: (Float) -> Unit,
+    onEffectsVolumeFinished: () -> Unit,
+    onOpen: (SettingsPage) -> Unit,
+    onRequestReset: () -> Unit
+) {
+    ScreenBanner(stringResource(R.string.settings))
+    SettingsPanel {
+        SettingToggle(
+            label = stringResource(R.string.sound),
+            iconRes = R.drawable.ic_audio,
+            enabled = state.progress.soundEnabled,
+            tag = "settings_sound",
+            onChanged = onSoundChanged
+        )
+        SettingToggle(
+            label = stringResource(R.string.vibration),
+            iconRes = R.drawable.ic_haptics,
+            enabled = state.progress.vibrationEnabled,
+            tag = "settings_vibration",
+            onChanged = onVibrationChanged
+        )
+        SettingToggle(
+            label = stringResource(R.string.music),
+            iconRes = R.drawable.ic_music,
+            enabled = state.progress.musicEnabled,
+            tag = "settings_music",
+            onChanged = onMusicChanged
+        )
+    }
+    SettingsPanel {
+        VolumeSlider(
+            label = stringResource(R.string.effects_volume),
+            iconRes = R.drawable.ic_audio,
+            value = state.progress.effectsVolume,
+            muted = !state.progress.soundEnabled,
+            tag = "settings_effects_volume",
+            onChange = onEffectsVolumeChanged,
+            onFinished = onEffectsVolumeFinished
+        )
+        VolumeSlider(
+            label = stringResource(R.string.music_volume),
+            iconRes = R.drawable.ic_music,
+            value = state.progress.musicVolume,
+            muted = !state.progress.musicEnabled,
+            tag = "settings_music_volume",
+            onChange = onMusicVolumeChanged,
+            onFinished = onMusicVolumeFinished
+        )
+    }
+    // Each line is a full touch target, so the lines need no gaps between them.
+    SettingsPanel(spacing = 0.dp) {
+        // Per-app language exists from Android 13; older systems follow the system language.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val context = LocalContext.current
+            PageRow(stringResource(R.string.language), languageName(appLanguage(context)), "settings_language") { onOpen(SettingsPage.LANGUAGE) }
+        }
+        PageRow(stringResource(R.string.progress_transfer), null, "settings_transfer") { onOpen(SettingsPage.TRANSFER) }
+        PageRow(stringResource(R.string.help), null, "settings_help") { onOpen(SettingsPage.HELP) }
+    }
+    AlchemyButton(
+        text = stringResource(R.string.reset_progress),
+        style = ButtonStyle.RED,
+        onClick = onRequestReset,
+        modifier = Modifier.fillMaxWidth().testTag("settings_reset")
+    )
+}
+
+/** A line of the main page that opens one of the other pages; [value] shows what is chosen there. */
+@Composable
+private fun PageRow(label: String, value: String?, tag: String, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = NAV_ROW_MIN_HEIGHT)
+            .clickable(role = Role.Button, onClick = onClick)
+            .testTag(tag)
+    ) {
+        Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+        if (value != null) Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        Image(painterResource(R.drawable.ic_forward), contentDescription = null, modifier = Modifier.size(FORWARD_ICON_SIZE))
+    }
+}
+
+/** The page's title on the ribbon, with a way back to the main page. */
+@Composable
+private fun PageHeader(title: String, onBack: () -> Unit) {
+    Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxWidth()) {
+        // The ribbon keeps clear of the back button on both sides, so it stays centred.
+        ScreenBanner(title, Modifier.padding(horizontal = BACK_BUTTON_CLEARANCE))
+        AlchemyIconButton(R.drawable.ic_back, stringResource(R.string.back), onBack, Modifier.testTag("settings_back"))
+    }
+}
+
+/** The game's own language choice, kept by the system as the app's language (Android 13+). */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+private fun LanguagePage() {
+    val context = LocalContext.current
+    // Changing it recreates the activity, so the choice shown is read afresh each time.
+    val current = appLanguage(context)
+    SettingsPanel {
+        Column(modifier = Modifier.selectableGroup()) {
+            AppLanguages.forEach { tag ->
+                val selected = tag == current
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = NAV_ROW_MIN_HEIGHT)
+                        .selectable(selected = selected, role = Role.RadioButton) { if (!selected) setAppLanguage(context, tag) }
+                        .testTag("language_${tag ?: "system"}")
+                ) {
+                    Image(painterResource(if (selected) R.drawable.radio_on else R.drawable.radio_off), contentDescription = null, modifier = Modifier.size(RADIO_SIZE))
+                    Text(
+                        languageName(tag),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (selected) Gold else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransferPage(onExport: (Uri) -> Unit, onImportPicked: (Uri) -> Unit) {
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(EXPORT_MIME_TYPE)) { uri ->
+        uri?.let(onExport)
+    }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let(onImportPicked)
+    }
+    SettingsPanel {
+        Text(stringResource(R.string.progress_transfer_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            AlchemyButton(
+                text = stringResource(R.string.export_progress),
+                style = ButtonStyle.BLUE,
+                onClick = { exportLauncher.launch(EXPORT_FILE_NAME) },
+                modifier = Modifier.weight(1f).testTag("settings_export")
+            )
+            AlchemyButton(
+                text = stringResource(R.string.import_progress),
+                style = ButtonStyle.BLUE,
+                onClick = { importLauncher.launch(IMPORT_MIME_TYPES) },
+                modifier = Modifier.weight(1f).testTag("settings_import")
+            )
+        }
+    }
+}
+
+// Null follows the system language; the others are in res/xml/locales_config.xml.
+private val AppLanguages = listOf(null, "ru", "en")
+
+/** A language by its own name, the way people look for it; null is the system's. */
+@Composable
+private fun languageName(tag: String?): String = when (tag) {
+    null -> stringResource(R.string.language_system)
+    "ru" -> "Русский"
+    else -> "English"
+}
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun appLanguage(context: Context): String? = context.getSystemService(LocaleManager::class.java).applicationLocales.takeUnless { it.isEmpty }?.get(0)?.language
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun setAppLanguage(context: Context, tag: String?) {
+    context.getSystemService(LocaleManager::class.java).applicationLocales = tag?.let(LocaleList::forLanguageTags) ?: LocaleList.getEmptyLocaleList()
+}
+
+@Composable
+private fun SettingsPanel(spacing: Dp = 12.dp, content: @Composable ColumnScope.() -> Unit) {
     val shape = RoundedCornerShape(16.dp)
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(spacing),
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.panel, shape)
@@ -273,50 +378,14 @@ private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
     )
 }
 
-/** A preview of a theme's background with its name and a radio mark. */
 @Composable
-private fun ThemeCard(theme: AppTheme, selected: Boolean, onSelect: () -> Unit, modifier: Modifier = Modifier) {
-    val name = stringResource(theme.nameRes)
-    val shape = RoundedCornerShape(14.dp)
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = modifier
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
-            .testTag("settings_theme_${theme.name.lowercase()}")
-    ) {
-        Image(
-            painter = painterResource(theme.backgroundRes),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(THEME_PREVIEW_RATIO)
-                .clip(shape)
-                .border(if (selected) 2.dp else 1.dp, if (selected) Gold else MaterialTheme.colorScheme.panelBorder, shape)
-        )
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Image(painterResource(themedArt(if (selected) R.drawable.radio_on else R.drawable.radio_off)), contentDescription = null, modifier = Modifier.size(RADIO_SIZE))
-            Text(name, style = MaterialTheme.typography.labelMedium, maxLines = 1, color = if (selected) Gold else MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-private val AppTheme.nameRes: Int
-    get() = when (this) {
-        AppTheme.AETHER -> R.string.theme_aether
-        AppTheme.EMBER -> R.string.theme_ember
-        AppTheme.VERDANT -> R.string.theme_verdant
-    }
-
-@Composable
-private fun SettingToggle(label: String, iconRes: Int?, enabled: Boolean, tag: String, onChanged: (Boolean) -> Unit) {
+private fun SettingToggle(label: String, iconRes: Int, enabled: Boolean, tag: String, onChanged: (Boolean) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        if (iconRes != null) Image(painterResource(themedArt(iconRes)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
+        Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
         Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         AlchemyToggle(
             checked = enabled,
@@ -342,7 +411,7 @@ private fun VolumeSlider(
     val alpha by animateFloatAsState(if (muted) MUTED_ALPHA else 1f, motion(tween(MUTE_FADE_MILLIS)), label = "muted")
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.alpha(alpha)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Image(painterResource(themedArt(iconRes)), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
+            Image(painterResource(iconRes), contentDescription = null, modifier = Modifier.size(SETTING_ICON_SIZE))
             Text(label, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
             Text("${(value * 100).roundToInt()}%", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -363,19 +432,11 @@ private val TransferResult.messageRes: Int
         TransferResult.IMPORT_INVALID -> R.string.transfer_import_invalid
     }
 
-/** The system's language page for the game; a device without one gets the game's own settings page instead. */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private fun openAppLanguageSettings(context: Context) {
-    val app = Uri.fromParts("package", context.packageName, null)
-    try {
-        context.startActivity(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, app))
-    } catch (_: ActivityNotFoundException) {
-        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, app))
-    }
-}
-
-private const val THEME_PREVIEW_RATIO = 0.8f
 private val RADIO_SIZE = 20.dp
+private val FORWARD_ICON_SIZE = 20.dp
+private val BACK_BUTTON_CLEARANCE = 48.dp
+private val NAV_ROW_MIN_HEIGHT = 48.dp
+private const val PAGE_FADE_MILLIS = 180
 
 private const val EXPORT_FILE_NAME = "alchemy-progress.json"
 private const val EXPORT_MIME_TYPE = "application/json"

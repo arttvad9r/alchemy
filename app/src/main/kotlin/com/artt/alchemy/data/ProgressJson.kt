@@ -19,8 +19,6 @@ fun PlayerProgress.toJson(): String = JSONObject().apply {
     put("musicEnabled", musicEnabled)
     put("musicVolume", musicVolume.toDouble())
     put("effectsVolume", effectsVolume.toDouble())
-    reducedMotion?.let { put("reducedMotion", it) }
-    put("theme", theme.name)
     put("onboardingSeen", onboardingSeen)
     put("paletteSort", paletteSort.name)
     activeHint?.let { put("activeHint", JSONObject().put("recipeKey", it.recipeKey).put("step", it.step)) }
@@ -45,8 +43,6 @@ fun parsePlayerProgress(text: String): PlayerProgress? = try {
             musicEnabled = json.optBoolean("musicEnabled", defaults.musicEnabled),
             musicVolume = json.optDouble("musicVolume", 1.0).toFloat(),
             effectsVolume = json.optDouble("effectsVolume", 1.0).toFloat(),
-            reducedMotion = if (json.has("reducedMotion")) json.optBoolean("reducedMotion") else null,
-            theme = AppTheme.entries.firstOrNull { it.name == json.optString("theme") } ?: AppTheme.AETHER,
             onboardingSeen = json.optBoolean("onboardingSeen"),
             paletteSort = ElementSort.entries.firstOrNull { it.name == json.optString("paletteSort") } ?: defaults.paletteSort,
             activeHint = json.optJSONObject("activeHint")?.let {

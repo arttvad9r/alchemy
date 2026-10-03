@@ -1,5 +1,6 @@
 package com.artt.alchemy.ui
 
+import android.os.ParcelFileDescriptor
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -46,3 +47,22 @@ fun skippingOnboarding(rule: AndroidComposeTestRule<*, *>): TestRule = RuleChain
         override fun starting(description: Description) = rule.waitForScene()
     }
 )
+
+/** Switches the system animations off for the tests [applies] to, as the player can in the system settings, and back afterwards. */
+class SystemAnimationsOffRule(private val applies: (Description) -> Boolean = { true }) : TestWatcher() {
+    private val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+    private var original: String? = null
+
+    override fun starting(description: Description) {
+        if (!applies(description)) return
+        original = shell("settings get global animator_duration_scale").trim()
+        shell("settings put global animator_duration_scale 0")
+    }
+
+    override fun finished(description: Description) {
+        if (!applies(description)) return
+        shell(original?.takeIf { it != "null" }?.let { "settings put global animator_duration_scale $it" } ?: "settings delete global animator_duration_scale")
+    }
+
+    private fun shell(command: String): String = ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command)).bufferedReader().use { it.readText() }
+}

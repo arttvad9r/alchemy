@@ -15,7 +15,6 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
-import com.artt.alchemy.data.AppTheme
 import com.artt.alchemy.data.initialPlayerProgress
 import com.artt.alchemy.ui.home.HomeScreen
 import com.artt.alchemy.ui.theme.AlchemyTheme
@@ -32,7 +31,7 @@ class LargeTextHomeTest {
     fun largeSystemTextKeepsThePaletteHeadingAndBasicNamesReadable() {
         composeRule.setContent {
             CompositionLocalProvider(LocalDensity provides Density(2f, 2f)) {
-                AlchemyTheme(AppTheme.AETHER) {
+                AlchemyTheme {
                     Box(Modifier.size(360.dp, 600.dp)) {
                         HomeScreen(
                             state = AlchemyUiState(progress = initialPlayerProgress().copy(onboardingSeen = true)),
@@ -43,8 +42,8 @@ class LargeTextHomeTest {
                             onPaletteSort = {},
                             onEffectConsumed = {},
                             onTransitionsConsumed = {},
-                            onSkipTips = {},
-                            onShowTips = {}
+                            onSkipTips = {}
+
                         )
                     }
                 }

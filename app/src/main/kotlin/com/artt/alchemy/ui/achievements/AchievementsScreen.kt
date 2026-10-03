@@ -35,7 +35,6 @@ import com.artt.alchemy.ui.components.cascadeIn
 import com.artt.alchemy.ui.components.pressClickable
 import com.artt.alchemy.ui.components.rowPanel
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.themedArt
 
 @Composable
 fun AchievementsScreen(progress: PlayerProgress, onOpenCompletion: () -> Unit, modifier: Modifier = Modifier) {
@@ -117,7 +116,7 @@ private fun CompletionCard(onClick: () -> Unit) {
 fun AchievementBadge(iconRes: Int, completed: Boolean, modifier: Modifier = Modifier) {
     Box(contentAlignment = Alignment.Center, modifier = modifier.size(BADGE_SIZE)) {
         Image(
-            painter = painterResource(if (completed) R.drawable.achievement_wreath else themedArt(R.drawable.frame_base)),
+            painter = painterResource(if (completed) R.drawable.achievement_wreath else (R.drawable.frame_base)),
             contentDescription = null,
             modifier = Modifier.fillMaxSize().alpha(if (completed) 1f else 0.78f)
         )

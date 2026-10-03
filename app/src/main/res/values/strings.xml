@@ -56,19 +56,13 @@
     <string name="help_text">• Tap a discovered element to put it on the board, or drag it there.\n• Drop one element onto another to mix them.\n• A pair that does not mix stays as it was.\n• Drag an element past the edge of the board to remove it.</string>
     <string name="music_volume">Music volume</string>
     <string name="effects_volume">Effects volume</string>
-    <string name="theme">Theme</string>
-    <string name="theme_aether">Aether</string>
-    <string name="theme_ember">Ember</string>
-    <string name="theme_verdant">Verdant</string>
     <string name="language">Language</string>
-    <string name="language_hint">Russian or English. The choice opens in the app\'s system settings.</string>
-    <string name="language_open">Choose language</string>
-    <string name="reduced_motion">Reduce animations</string>
-    <string name="reduced_motion_hint">Removes transitions and flashes: everything changes instantly. Until you choose, the game follows the system setting.</string>
-    <string name="progress_transfer">Progress file</string>
+    <string name="language_system">System default</string>
+    <string name="progress_transfer">Progress backup</string>
+    <string name="progress_transfer_title">Backup</string>
     <string name="progress_transfer_hint">Save your progress to move it to another device or restore it after a reset.</string>
-    <string name="export_progress">Save to file</string>
-    <string name="import_progress">Load from file</string>
+    <string name="export_progress">Save</string>
+    <string name="import_progress">Load</string>
     <string name="import_confirmation_title">Replace progress?</string>
     <string name="import_confirmation_message">Elements discovered in the file: %1$d of %2$d. Your current progress will be replaced, and this cannot be undone.</string>
     <string name="import_confirm">Replace</string>
@@ -90,7 +84,6 @@
     <string name="tip_combine">Drop one element onto another to make a new one</string>
     <string name="tip_remove">Drag an element past the edge of the board to remove it</string>
     <string name="tips_skip">Skip tips</string>
-    <string name="tips_show">Show tips</string>
     <string name="element_new_badge">New</string>
     <string name="completion_title">Alchemy complete</string>
     <string name="completion_message" tools:ignore="PluralsCandidate">All %1$d elements discovered</string>

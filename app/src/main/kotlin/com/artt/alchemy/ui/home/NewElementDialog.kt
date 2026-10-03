@@ -57,8 +57,6 @@ import com.artt.alchemy.ui.components.motion
 import com.artt.alchemy.ui.components.rarity
 import com.artt.alchemy.ui.components.shineOnce
 import com.artt.alchemy.ui.theme.Gold
-import com.artt.alchemy.ui.theme.LocalAppTheme
-import com.artt.alchemy.ui.theme.backgroundRes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -90,7 +88,6 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
     val iconSpec = motion(spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
     val badgeSpec = motion(tween<Float>(BADGE_FADE_MILLIS))
     val context = LocalContext.current
-    val theme = LocalAppTheme.current
     val scope = rememberCoroutineScope()
     // Holds what the card last drew, so it can be shared as a picture; a new capture redraws it first.
     val cardLayer = rememberGraphicsLayer()
@@ -183,7 +180,7 @@ fun NewElementDialog(element: ElementDefinition, onDismiss: () -> Unit, onClick:
                                 try {
                                     captures++
                                     withFrameNanos { }
-                                    shareDiscovery(context, cardLayer.toImageBitmap(), theme.backgroundRes, shareText)
+                                    shareDiscovery(context, cardLayer.toImageBitmap(), R.drawable.bg_aether, shareText)
                                 } finally {
                                     sharing = false
                                 }
