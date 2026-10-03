@@ -39,7 +39,7 @@ RESTRAINED_UI_ART = {
 # Temporary room aliases: one source today, five independent drawable names for the app.
 # Replace each source path as final room artwork lands; screen code does not need to change.
 ROOM_BACKGROUNDS = (
-    ("backgrounds/bg_aether.png", "bg_home"),
+    ("backgrounds/bg_home.png", "bg_home"),
     ("backgrounds/bg_aether.png", "bg_elements"),
     ("backgrounds/bg_aether.png", "bg_recipes"),
     ("backgrounds/bg_aether.png", "bg_achievements"),
